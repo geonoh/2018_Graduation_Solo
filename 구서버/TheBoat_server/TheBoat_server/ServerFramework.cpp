@@ -787,7 +787,7 @@ void ServerFramework::WorkerThread() {
 					else {
 						clients[i].z += clients[i].look_vec.z * (WALK_SPEED * overlapped_buffer->elapsed_time) / METER_PER_PIXEL;
 						clients[i].x += clients[i].look_vec.x * (WALK_SPEED * overlapped_buffer->elapsed_time) / METER_PER_PIXEL;
-						printf("%f", clients[i].look_vec.x);
+						//printf("%f", clients[i].look_vec.x);
 					}
 				}
 				if (clients[i].is_move_backward) {
