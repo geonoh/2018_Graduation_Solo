@@ -120,12 +120,14 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Client.cpp" />
+    <ClCompile Include="HeightMap.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="SFW.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client.h" />
     <ClInclude Include="defines.h" />
+    <ClInclude Include="HeightMap.h" />
     <ClInclude Include="protocol.h" />
     <ClInclude Include="SFW.h" />
     <ClInclude Include="stdafx.h" />

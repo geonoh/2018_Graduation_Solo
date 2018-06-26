@@ -4,6 +4,16 @@
 
 Client::Client()
 {
+	x = 0;
+	y = 0;
+	z = 0;
+
+	in_use = false;
+	mv_foward = false;
+	mv_backward = false;
+	mv_left = false;
+	mv_right = false;
+
 }
 
 

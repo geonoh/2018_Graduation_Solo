@@ -10,6 +10,9 @@
     <Filter Include="02.client">
       <UniqueIdentifier>{c08ae2e2-12ec-4127-b299-af0689bfb641}</UniqueIdentifier>
     </Filter>
+    <Filter Include="03.heightmap">
+      <UniqueIdentifier>{b290df78-368f-4b74-973c-3265a253c2a3}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -20,6 +23,9 @@
     </ClCompile>
     <ClCompile Include="Client.cpp">
       <Filter>02.client</Filter>
+    </ClCompile>
+    <ClCompile Include="HeightMap.cpp">
+      <Filter>03.heightmap</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -37,6 +43,9 @@
     </ClInclude>
     <ClInclude Include="protocol.h">
       <Filter>00.main</Filter>
+    </ClInclude>
+    <ClInclude Include="HeightMap.h">
+      <Filter>03.heightmap</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
