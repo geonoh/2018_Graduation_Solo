@@ -75,16 +75,7 @@ void ServerFramework::InitServer() {
 
 	// OOBB 셋
 	for (int i = 0; i < MAXIMUM_PLAYER; ++i) {
-		//clients[i].SetOOBB(XMFLOAT3(0, 0, 0), XMFLOAT3(10.f, 10.f, 10.f), XMFLOAT4(0, 0, 0, 1));
 		clients[i].SetOOBB(XMFLOAT3(clients[i].x, clients[i].y, clients[i].z), XMFLOAT3(OBB_SCALE_PLAYER_X, OBB_SCALE_PLAYER_Y, OBB_SCALE_PLAYER_Z), XMFLOAT4(0, 0, 0, 1));
-		//printf("[%d]플레이어의 OBB : [%f, %f, %f], Extents [%f, %f, %f] \n", i,
-		//	clients[i].bounding_box.Center.x,
-		//	clients[i].bounding_box.Center.y,
-		//	clients[i].bounding_box.Center.z,
-		//	clients[i].bounding_box.Extents.x,
-		//	clients[i].bounding_box.Extents.y,
-		//	clients[i].bounding_box.Extents.z
-		//	);
 		clients[i].bounding_box.Center;
 	}
 
@@ -97,8 +88,8 @@ void ServerFramework::InitServer() {
 		}
 	}
 
-	XMFLOAT3 input_buffer[10];
-	XMFLOAT3 input_extents[10];
+	XMFLOAT3 input_buffer[OBJECT_BUILDING];
+	XMFLOAT3 input_extents[OBJECT_BUILDING];
 
 	input_buffer[0] = XMFLOAT3{ 594.f,height_map->GetHeight(594.f,556.f) ,556.f };
 	input_buffer[1] = XMFLOAT3{ 922.f,height_map->GetHeight(922.f,519.f) ,519.f };
@@ -129,19 +120,6 @@ void ServerFramework::InitServer() {
 		building[i] = new Building;
 		building[i]->SetPosition(input_buffer[i], input_extents[i]);
 	}
-
-	//for (int i = 0; i < OBJECT_BUILDING; ++i) {
-	//	building[i] = new Building;
-	//	XMFLOAT3 input_buffer = XMFLOAT3{ static_cast<float>(rand() % 4000), 0.f, static_cast<float>(rand() % 4000) };
-	//	XMFLOAT3 input_extents = XMFLOAT3{ static_cast<float>(rand() % 50 + 10),static_cast<float>(rand() % 30 + 200), static_cast<float>(rand() % 50 + 10) };
-	//	input_buffer.y = height_map->GetHeight(input_buffer.x, input_buffer.z);
-	//	building[i]->SetPosition(input_buffer, input_extents);
-	//	//building[i]->SetObbExtents(i)
-	//	//printf("[%d]건물 위치 [%f, %f, %f] \n", i,
-	//	//	building[i]->GetPosition().x,
-	//	//	building[i]->GetPosition().y,
-	//	//	building[i]->GetPosition().z);
-	//}
 }
 
 void ServerFramework::AcceptPlayer() {
@@ -172,6 +150,7 @@ void ServerFramework::AcceptPlayer() {
 	client_lock.unlock();
 	if (client_id == -1) {
 		printf("최대 유저 초과\n");
+		return;
 	}
 	printf("[%d] 플레이어 입장\n", client_id);
 	client_lock.lock();

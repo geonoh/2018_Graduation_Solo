@@ -30,7 +30,8 @@ void InitInstance() {
 	sfw.Init();
 }
 void AcceptPlayer() {
-	sfw.AcceptPlayer();
+	while (true)
+		sfw.AcceptPlayer();
 }
 void WorkerThread() {
 	sfw.WorkerThread();

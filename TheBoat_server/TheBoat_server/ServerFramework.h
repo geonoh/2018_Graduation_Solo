@@ -24,8 +24,6 @@ class ServerFramework
 	SOCKET listen_socket;
 	SOCKADDR_IN server_addr;
 
-	BOOL mode_selector;	// 
-
 	Client clients[MAXIMUM_PLAYER];
 	bool player_entered[4] = { 0 };
 	bool player_ready[4] = { 0 };		// Player_Ready 패킷 도착하면 해당 
