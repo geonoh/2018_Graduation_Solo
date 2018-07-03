@@ -345,19 +345,7 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 		m_pCamera = m_pPlayer[my_client_id]->ChangeCamera(FIRST_PERSON_CAMERA, m_GameTimer.GetTimeElapsed());	// 마우스 우클시 카메라 변환
 		break;
 	case WM_MOUSEMOVE:
-		//printf("마우스 벡터 x : %f, y : %f, z : %f \n", 
-		//	m_pPlayer[my_client_id]->GetLook().x, m_pPlayer[my_client_id]->GetLook().y, m_pPlayer[my_client_id]->GetLook().z);
-		//if (mouse_moving_counter > 100) {
-		//	printf("마우스 벡터 x : %f, y : %f, z : %f \n", 
-		//		m_pPlayer[my_client_id]->GetLook().x, m_pPlayer[my_client_id]->GetLook().y, m_pPlayer[my_client_id]->GetLook().z);
-
-		//	//server_mgr.SendPacket(CS_MOUSE_MOVE, m_pPlayer[my_client_id]->GetLook());
-		//	mouse_moving_counter = 0;
-		//}
 		server_mgr.SendPacket(CS_MOUSE_MOVE, m_pPlayer[my_client_id]->GetLook());
-
-		//mouse_moving_counter++;
-
 		//원래는 이거만 있어씀
 		//server_mgr.SendPacket(CS_MOUSE_MOVE, m_pPlayer[my_client_id]->GetLook());
 		break;
@@ -613,8 +601,7 @@ LRESULT CALLBACK CGameFramework::OnProcessingWindowMessage(HWND hWnd, UINT nMess
 			// 첫번째 읽을때 아이디 저장
 			XMFLOAT3 read_buf;
 			server_mgr.ReadPacket();
-			if (first_recv) {
-				printf("드루와\n"); 
+			if (first_recv) { 
 				first_recv = false;
 				my_client_id = server_mgr.ReturnCameraID();
 				m_pCamera = m_pPlayer[my_client_id]->GetCamera();
@@ -622,18 +609,6 @@ LRESULT CALLBACK CGameFramework::OnProcessingWindowMessage(HWND hWnd, UINT nMess
 				server_mgr.ReturnBuildingPosition(building_pos);
 				server_mgr.ReturnBuildingExtents(buliding_extents);
 				for (int i = 0; i < OBJECT_BUILDING; ++i) {
-					//printf("[%d]번 빌딩 [%f, %f, %f] \n", i, building_pos[i].x,
-					//	building_pos[i].y,
-					//	building_pos[i].z);
-
-					//printf("[%d] 빌딩 [%f, %f, %f] 크기 : [%f, %f, %f] \n", i,
-					//	building_pos[i].x,
-					//	building_pos[i].y,
-					//	building_pos[i].z,
-					//	buliding_extents[i].x,
-					//	buliding_extents[i].y,
-					//	buliding_extents[i].z);
-
 					buildingPos[i] = XMFLOAT3(building_pos[i].x, building_pos[i].y, building_pos[i].z);
 				}
 
@@ -949,8 +924,8 @@ void CGameFramework::FrameAdvance()
 	for (int i = 0; i < 4; ++i) {
 		if(itemUI[i] == true)
 			m_pScene->m_ppUIShaders[i + 4]->Render(m_pd3dCommandList, m_pCamera);
-		if(itemUI[3] == true)
-			m_pScene->m_ppUIShaders[8]->Render(m_pd3dCommandList, m_pCamera);
+		//if(itemUI[3] == true)
+		//	m_pScene->m_ppUIShaders[8]->Render(m_pd3dCommandList, m_pCamera);
 	}
 	d3dResourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
 	d3dResourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;

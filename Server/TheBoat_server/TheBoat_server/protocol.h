@@ -19,14 +19,10 @@
 // Object °¹¼ö Á¤¸® 
 #define OBJECT_BUILDING			10
 
-
-
-
 // Server To Client
 #define SC_ENTER_PLAYER			1
 #define SC_POS					2
 #define SC_REMOVE_PLAYER		3
-#define SC_PLAYER_MOVE			4
 #define SC_PLAYER_LOOKVEC		5
 #define SC_BULLET_POS			6	// Bullet Position
 #define SC_COLLSION_PB			7	// Collsion Player to Bullet
@@ -37,13 +33,12 @@
 #define SC_BUILDING_GEN			11
 
 // Server To Server
-#define SS_COLLISION			12
-#define SS_PLAYER_POS_UPDATE	13
-#define SS_BULLET_GENERATE		14
-#define SS_BULLET_UPDATE		15
-#define SS_PLAYER_READY			16
-#define SS_PLAYER_MOVE			17
-#define SS_ITEM_GEN				18	// Event
+#define EVT_COLLISION			12
+#define EVT_PLAYER_POS_SEND		4
+#define EVT_BULLET_GENERATE		14
+#define EVT_BULLET_UPDATE		15
+#define EVT_ITEM_GEN			18
+#define EVT_PACKET_RECV			19
 
 
 // Client To Server
