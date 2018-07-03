@@ -1,0 +1,10 @@
+diff a/Client/교수님 프레임워크/LabProject08-8/GameFramework.cpp b/Client/교수님 프레임워크/LabProject08-8/GameFramework.cpp	(rejected hunks)
+@@ -48,7 +48,7 @@
+ bool CGameFramework::OnCreate(HINSTANCE hInstance, HWND hMainWnd)
+ {
+ 	// 이거 주석치고 아이피 부분 확인
+-	//server_mgr.IPInput();
++	server_mgr.IPInput();
+ 	m_hInstance = hInstance;
+ 	m_hWnd = hMainWnd;
+ 
