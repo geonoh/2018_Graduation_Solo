@@ -45,6 +45,9 @@ class ServerMgr
 	XMFLOAT3 building_pos[OBJECT_BUILDING];
 	XMFLOAT3 building_extents[OBJECT_BUILDING];
 
+	int ammo_counter = 0;
+
+
 	bool s_is_collide = false;
 public:
 	void IPInput();
@@ -55,6 +58,8 @@ public:
 	void SendPacket(int type, XMFLOAT3& xmvector);
 	void ProcessPacket(char* ptr);
 	void ErrorDisplay(const char* msg, int err_no);
+	int GetAmmo();
+	void DecreaseAmmo();
 	int GetClientID();
 	int ReturnCameraID();
 	Bullet GetBullet();

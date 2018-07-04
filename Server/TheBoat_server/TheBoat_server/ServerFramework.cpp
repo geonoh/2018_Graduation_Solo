@@ -12,10 +12,9 @@ void ErrorDisplay(const char* msg, int err_no) {
 		NULL, err_no,
 		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
 		(LPTSTR)&lpMsgBuf, 0, NULL);
-	printf("%s", msg);
-	wprintf(L"에러%s\n", lpMsgBuf);
+	cout << msg;
+	wcout << L"에러 " << lpMsgBuf << endl;
 	LocalFree(lpMsgBuf);
-
 }
 
 ServerFramework::ServerFramework()
@@ -31,6 +30,8 @@ ServerFramework::~ServerFramework()
 }
 
 void ServerFramework::InitServer() {
+	wcout.imbue(locale("korean"));
+
 	srand(unsigned(time(NULL)));
 	int retval = 0;
 	if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0)
@@ -286,15 +287,30 @@ void ServerFramework::ProcessPacket(int cl_id, char* packet) {
 	case CS_RIGHT_BUTTON_UP:
 		clients[cl_id].is_right_click = false;
 		break;
+	case CS_RELOAD:
+		bullet_counter[cl_id] = 0;
+		printf("장전 완료\n");
+		SC_PACKET_AMMO_O packets;
+		packets.size = sizeof(SC_PACKET_AMMO_O);
+		packets.type = SC_FULLY_AMMO;
+		SendPacket(cl_id, &packets);
 
+		break;
 	case CS_LEFT_BUTTON_DOWN:
-		//printf("[%d] 플레이어 좌클릭\n", cl_id);
-		clients[cl_id].is_left_click = true;
-		ol_ex[6].evt_type = EVT_BULLET_GENERATE;
-		ol_ex[6].shooter_player_id = cl_id;
-		//ol_ex[6].elapsed_time = elapsed_time.count();
-		PostQueuedCompletionStatus(iocp_handle, 0, 6, reinterpret_cast<WSAOVERLAPPED*>(&ol_ex[6]));
-
+		if (bullet_counter[cl_id] == MAX_BULLET_SIZE) {
+			printf("총알 장전 필요\n");
+			SC_PACKET_AMMO_O packets;
+			packets.size = sizeof(SC_PACKET_AMMO_O);
+			packets.type = SC_OUT_OF_AMMO;
+			SendPacket(cl_id, &packets);
+		}
+		else {
+			clients[cl_id].is_left_click = true;
+			ol_ex[6].evt_type = EVT_BULLET_GENERATE;
+			ol_ex[6].shooter_player_id = cl_id;
+			//ol_ex[6].elapsed_time = elapsed_time.count();
+			PostQueuedCompletionStatus(iocp_handle, 0, 6, reinterpret_cast<WSAOVERLAPPED*>(&ol_ex[6]));
+		}
 		break;
 	case CS_LEFT_BUTTON_UP:
 		clients[cl_id].is_left_click = false;
@@ -361,17 +377,36 @@ void ServerFramework::ProcessPacket(int cl_id, char* packet) {
 }
 
 void ServerFramework::GameStart() {
-	// Timer은 
 	printf("게임 시작\n");
 
 	// 플레이어  위치 섞기
 	for (int i = 0; i < MAXIMUM_PLAYER; ++i) {
-		clients[i].x = rand() % 4000;
-		clients[i].z = rand() % 4000;
+		char dice = rand() % 4;
+		switch (dice) {
+		case MAP_AREA_1:
+			printf("[%d] 플레이어 Area 1\n", i);
+			clients[i].x = rand() % 1500;
+			clients[i].z = rand() % 800 + 3000;
+			break;
+		case MAP_AREA_2:
+			printf("[%d] 플레이어 Area 2\n", i);
+			clients[i].x = rand() % 800 + 2000;
+			clients[i].z = rand() % 1000 + 2200;
+			break;
+		case MAP_AREA_3:
+			printf("[%d] 플레이어 Area 3\n", i);
+			clients[i].x = rand() % 1500 + 1500;
+			clients[i].z = rand() % 1500 + 400;
+			break;
+		case MAP_AREA_4:
+			printf("[%d] 플레이어 Area 4\n", i);
+			clients[i].x = rand() % 1500 + 100;
+			clients[i].z = rand() % 1500 + 400;
+			break;
+		}
 		clients[i].y = height_map->GetHeight(clients[i].x, clients[i].z);
 		clients[i].hp = 100.f;
 	}
-	client_lock.unlock();
 
 	// OOBB 셋
 	for (int i = 0; i < MAXIMUM_PLAYER; ++i) {
@@ -391,6 +426,17 @@ void ServerFramework::GameStart() {
 		ol_ex[i].evt_type = EVT_PLAYER_POS_SEND;
 		PostQueuedCompletionStatus(iocp_handle, 0, i, reinterpret_cast<WSAOVERLAPPED*>(&ol_ex[i]));
 	}
+
+	//SC_PACKET_START packets;
+	//packets.size = sizeof(SC_PACKET_START);
+	//packets.type = SC_ITEM_GEN;
+	//for (int i = 0; i < MAXIMUM_PLAYER; ++i) {
+	//	if (clients[i].in_use == true) {
+	//		SendPacket(i, &packets);
+	//	}
+	//}
+
+
 	is_item_gen = true;
 }
 
@@ -758,13 +804,11 @@ void ServerFramework::WorkerThread() {
 		//}
 		else if (overlapped_buffer->evt_type == EVT_BULLET_GENERATE) {
 			int shooter_id = overlapped_buffer->shooter_player_id;
-			if (bullet_counter[shooter_id] > MAX_BULLET_SIZE - 2) {
+			printf("발사한 총알 : %d\n", bullet_counter[shooter_id]);
+			if (bullet_counter[shooter_id] == MAX_BULLET_SIZE - 1 ) {
 				for (int d = 0; d < MAX_BULLET_SIZE; ++d) {
 					bullets[shooter_id][d].in_use = false;
 				}
-				bullet_counter[shooter_id] = 0;
-				printf("총알 초기화\n");
-				//break;
 			}
 			bullets[shooter_id][bullet_counter[shooter_id]].x = clients[shooter_id].x;
 			bullets[shooter_id][bullet_counter[shooter_id]].y = clients[shooter_id].y;

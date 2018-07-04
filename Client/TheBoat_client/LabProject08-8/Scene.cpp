@@ -250,7 +250,7 @@ void CScene::ReleaseObjects()
 		}
 		delete[] m_ppShaders;
 	}
-
+	 
 	if (m_ppObjects)
 	{
 		for (int i = 0; i < m_nObjects; i++) delete m_ppObjects[i];

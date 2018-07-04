@@ -313,19 +313,21 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 	switch (nMessageID)
 	{
 	case WM_LBUTTONDOWN:
-		::SetCapture(hWnd);
-		::GetCursorPos(&m_ptOldCursorPos);
+		if (server_mgr.GetAmmo() > 0) {
+			::SetCapture(hWnd);
+			::GetCursorPos(&m_ptOldCursorPos);
+			//if (CShader::shootBullet == 0) {
+			//	CShader::shootBullet = 1;
+			//	sndPlaySound(L"../Assets/Sounds/RifleSound.wav", SND_ASYNC);	// 사운드
+			//	m_pPlayer[my_client_id]->ActiveShot();
+			//}
+			//else
+			//	CShader::shootBullet = 0;
 
-		if (CShader::shootBullet == 0) {
-			CShader::shootBullet = 1;
-			sndPlaySound(L"../Assets/Sounds/RifleSound.wav", SND_ASYNC);	// 사운드
-			m_pPlayer[my_client_id]->ActiveShot();
+			server_mgr.DecreaseAmmo();
+			printf("Ammo : %d\n", server_mgr.GetAmmo());
+			server_mgr.SendPacket(CS_LEFT_BUTTON_DOWN, m_pPlayer[my_client_id]->GetLook());
 		}
-		else
-			CShader::shootBullet = 0;
-
-		//server_mgr.SendPacket(CS_MOUSE_MOVE, m_pPlayer[my_client_id]->GetLook());
-		server_mgr.SendPacket(CS_LEFT_BUTTON_DOWN, m_pPlayer[my_client_id]->GetLook());
 		break;
 	case WM_RBUTTONDOWN:
 		//::SetCapture(hWnd);
@@ -390,6 +392,19 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 
 		// char 형 key들 입력 처리 
 		switch (key_buffer) {
+		case 'r':
+		case 'R':
+			printf("재장전 버튼\n");
+			server_mgr.SendPacket(CS_RELOAD);
+			break;
+			// 디버그 버튼 
+#ifdef _DEBUG
+		case 'q':
+		case 'Q':
+			printf("[%d] Player Position : %lf, %lf, %lf\n", my_client_id, m_pPlayer[my_client_id]->GetPosition().x, m_pPlayer[my_client_id]->GetPosition().y, m_pPlayer[my_client_id]->GetPosition().z);
+
+			break;
+#endif
 		case 'w':
 		case 'W':
 			if (is_pushed[CS_KEY_PRESS_UP] == false) {
@@ -626,8 +641,8 @@ LRESULT CALLBACK CGameFramework::OnProcessingWindowMessage(HWND hWnd, UINT nMess
 				//printf("AA %d\n", server_mgr.ReturnPlayerPosStatus(server_mgr.GetClientID()).player_status);
 			}
 			
-			m_pScene->m_ppShaders[2]->SetPosition(server_mgr.GetBullet().id,
-				XMFLOAT3(server_mgr.GetBullet().x, server_mgr.GetBullet().y, server_mgr.GetBullet().z));
+			//m_pScene->m_ppShaders[2]->SetPosition(server_mgr.GetBullet().id,
+				//XMFLOAT3(server_mgr.GetBullet().x, server_mgr.GetBullet().y, server_mgr.GetBullet().z));
 
 
 			// 아이템생성

@@ -543,7 +543,9 @@ void UpdateMD5Model(Model3D & MD5Model, float deltaTime, int animation, CMesh*& 
 				XMStoreFloat3(&rotatedPoint, XMQuaternionMultiply(XMQuaternionMultiply(tempJointOrientation, tempWeightPos), tempJointOrientationConjugate)); // Now move the verices position from joint space (0,0,0) to the joints position in world space, taking the weights bias into account
 				tempVert.pos.x += (tempJoint.pos.x + rotatedPoint.x) * tempWeight.bias;
 				tempVert.pos.y += (tempJoint.pos.y + rotatedPoint.y) * tempWeight.bias;
+				//tempVert.pos.z += (tempJoint.pos.z + rotatedPoint.z) * 1.f;// tempWeight.bias; // Compute the normals for this frames skeleton using the weight normals from before // We can comput the normals the same way we compute the vertices position, only we don't have to translate them (just rotate) 
 				tempVert.pos.z += (tempJoint.pos.z + rotatedPoint.z) * tempWeight.bias; // Compute the normals for this frames skeleton using the weight normals from before // We can comput the normals the same way we compute the vertices position, only we don't have to translate them (just rotate) 
+
 				XMVECTOR tempWeightNormal = XMVectorSet(tempWeight.normal.x, tempWeight.normal.y, tempWeight.normal.z, 0.0f); // Rotate the normal 
 				XMStoreFloat3(&rotatedPoint, XMQuaternionMultiply(XMQuaternionMultiply(tempJointOrientation, tempWeightNormal), tempJointOrientationConjugate)); // Add to vertices normal and ake weight bias into account 
 				tempVert.normal.x -= rotatedPoint.x * tempWeight.bias;

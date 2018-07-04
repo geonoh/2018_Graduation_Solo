@@ -51,6 +51,17 @@ void ServerMgr::Initialize(HWND& hwnd) {
 	recv_wsabuf.buf = recv_buffer;
 	recv_wsabuf.len = CLIENT_BUF_SIZE;
 	printf("server_mgr ÃÊ±âÈ­\n");
+
+	// ÃÑ¾Ë °¹¼ö ÃÊ±âÈ­ 
+	ammo_counter = 30;
+}
+
+int ServerMgr::GetAmmo() {
+	return ammo_counter;
+}
+
+void ServerMgr::DecreaseAmmo() {
+	ammo_counter -= 1;
 }
 
 void ServerMgr::ReadPacket() {
@@ -191,6 +202,16 @@ void ServerMgr::ProcessPacket(char* ptr) {
 		is_item_gen = true;
 		break;
 	}
+	case SC_FULLY_AMMO: {
+		ammo_counter = MAX_BULLET_SIZE;
+		printf("ÀçÀåÀü ¿Ï·á\n");
+		break;
+	}
+	case SC_OUT_OF_AMMO: {
+		printf("ÃÑ¾Ë ´Ù¾¸\n");
+		break;
+	}
+
 	}
 }
 float ServerMgr::GetPlayerHP(int p_n) {
@@ -334,6 +355,10 @@ void ServerMgr::SendPacket(int type) {
 		break;
 	case CS_PLAYER_READY_CANCLE:
 		packet_buffer->type = CS_PLAYER_READY_CANCLE;
+		retval = WSASend(sock, &send_wsabuf, 1, &iobytes, 0, NULL, NULL);
+		break;
+	case CS_RELOAD:
+		packet_buffer->type = CS_RELOAD;
 		retval = WSASend(sock, &send_wsabuf, 1, &iobytes, 0, NULL, NULL);
 		break;
 	}
