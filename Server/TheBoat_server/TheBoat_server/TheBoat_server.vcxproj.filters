@@ -28,6 +28,9 @@
     <Filter Include="03. HeightMapImage">
       <UniqueIdentifier>{56ed8f75-cd54-481e-911c-0d332ca60e4d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="04. Item">
+      <UniqueIdentifier>{863fdaf6-c210-4246-92d5-ec58025163f9}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="targetver.h">
@@ -51,6 +54,9 @@
     <ClInclude Include="Building.h">
       <Filter>02. Building</Filter>
     </ClInclude>
+    <ClInclude Include="Item.h">
+      <Filter>04. Item</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="TheBoat_server.cpp">
@@ -70,6 +76,9 @@
     </ClCompile>
     <ClCompile Include="Building.cpp">
       <Filter>02. Building</Filter>
+    </ClCompile>
+    <ClCompile Include="Item.cpp">
+      <Filter>04. Item</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

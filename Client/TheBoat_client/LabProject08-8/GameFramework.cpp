@@ -50,7 +50,11 @@ CGameFramework::~CGameFramework()
 bool CGameFramework::OnCreate(HINSTANCE hInstance, HWND hMainWnd)
 {
 	// 이거 주석치고 아이피 부분 확인
+#ifdef _IP
 	server_mgr.IPInput();
+#else
+	server_mgr.IPInput("127.0.0.1");
+#endif
 	m_hInstance = hInstance;
 	m_hWnd = hMainWnd;
 
@@ -313,9 +317,9 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 	switch (nMessageID)
 	{
 	case WM_LBUTTONDOWN:
+		::SetCapture(hWnd);
+		::GetCursorPos(&m_ptOldCursorPos);
 		if (server_mgr.GetAmmo() > 0) {
-			::SetCapture(hWnd);
-			::GetCursorPos(&m_ptOldCursorPos);
 			//if (CShader::shootBullet == 0) {
 			//	CShader::shootBullet = 1;
 			//	sndPlaySound(L"../Assets/Sounds/RifleSound.wav", SND_ASYNC);	// 사운드
@@ -398,13 +402,11 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 			server_mgr.SendPacket(CS_RELOAD);
 			break;
 			// 디버그 버튼 
-#ifdef _DEBUG
 		case 'q':
 		case 'Q':
 			printf("[%d] Player Position : %lf, %lf, %lf\n", my_client_id, m_pPlayer[my_client_id]->GetPosition().x, m_pPlayer[my_client_id]->GetPosition().y, m_pPlayer[my_client_id]->GetPosition().z);
 
 			break;
-#endif
 		case 'w':
 		case 'W':
 			if (is_pushed[CS_KEY_PRESS_UP] == false) {

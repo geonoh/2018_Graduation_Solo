@@ -6,13 +6,16 @@ protected:
 	XMFLOAT3 position;
 	XMFLOAT3 obb_extents;	// Object OBB Size
 
-	void SetOBB(XMFLOAT3 xmCenter, XMFLOAT3 xmExtents, XMFLOAT4 xmOrientation);
+	// 받아온 인자를 활용해 OBB고정
+	void FixOBB();
 public:
 	BoundingOrientedBox bounding_box;
-	void SetPosition(XMFLOAT3& input_pos, XMFLOAT3& extents);
-
-	virtual XMFLOAT3 GetPosition();
-	virtual XMFLOAT3 GetExtents();
+	void SetOBB(XMFLOAT3& input_pos, XMFLOAT3& extents);
+	//void SetOBB(float pos_x, float pos_y, float pos_z, XMFLOAT3& extents);
+	//void SetPosition(XMFLOAT3& input_pos, XMFLOAT3& extents);
+	void SetPosition(float pos_x, float pos_y, float pos_z);
+	XMFLOAT3 GetPosition();
+	XMFLOAT3 GetExtents();
 	Object();
 	~Object();
 };

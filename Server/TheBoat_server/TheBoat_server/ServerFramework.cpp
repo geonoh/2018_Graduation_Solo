@@ -3,6 +3,7 @@
 #include "CHeightMapImage.h"
 #include "Building.h"
 #include "Object.h"
+#include "Item.h"
 
 void ErrorDisplay(const char* msg, int err_no) {
 	WCHAR *lpMsgBuf;
@@ -25,6 +26,9 @@ ServerFramework::~ServerFramework()
 {
 	for (int i = 0; i < OBJECT_BUILDING; ++i) {
 		delete building[i];
+	}
+	for (int i = 0; i < MAX_ITEM; ++i) {
+		delete items[i];
 	}
 	delete height_map;
 }
@@ -71,6 +75,9 @@ void ServerFramework::InitServer() {
 		clients[i].z = 800.f;
 		clients[i].y = height_map->GetHeight(clients[i].x, clients[i].z);
 		clients[i].hp = 100.f;
+		for (int j = 0; j < 4; ++j) {
+			clients[i].boat_parts[j] = false;
+		}
 	}
 	client_lock.unlock();
 
@@ -80,7 +87,7 @@ void ServerFramework::InitServer() {
 	}
 
 	for (int j = 0; j < MAXIMUM_PLAYER; ++j) {
-		for (int i = 0; i < MAX_BULLET_SIZE; ++i) {
+		for (int i = 0; i < MAX_AMMO_SIZE; ++i) {
 			bullets[j][i].SetOOBB(XMFLOAT3(bullets[j][i].x, bullets[j][i].y, bullets[j][i].z),
 				XMFLOAT3(OBB_SCALE_BULLET_X, OBB_SCALE_BULLET_Y, OBB_SCALE_BULLET_Z),
 				XMFLOAT4(0, 0, 0, 1)); 
@@ -117,7 +124,16 @@ void ServerFramework::InitServer() {
 	for (int i = 0; i < OBJECT_BUILDING; ++i) {
 		input_extents[0] = XMFLOAT3{ 100,100,100 };
 		building[i] = new Building;
-		building[i]->SetPosition(input_buffer[i], input_extents[i]);
+		building[i]->SetOBB(input_buffer[i], input_extents[i]);
+	}
+
+	// 이건 됨
+	XMFLOAT3 items_extents = XMFLOAT3{ 10.f,10.f,10.f };
+	XMFLOAT3 init_item_pos = XMFLOAT3{ 0.f,0.f,0.f };
+	for (int i = 0; i < MAX_ITEM; ++i) {
+		items[i] = new Item;
+		items[i]->in_use = false;
+		items[i]->SetOBB(init_item_pos, items_extents);
 	}
 
 }
@@ -151,8 +167,8 @@ void ServerFramework::AcceptPlayer() {
 	}
 	printf("[%d] 플레이어 입장\n", client_id);
 	clients[client_id].s = client_socket;
-	clients[client_id].ar_mag = 0;
-	clients[client_id].sub_mag = 0;
+	clients[client_id].ar_ammo = 30;
+	clients[client_id].sub_ammo = 30;
 	clients[client_id].ar_weapons = ARWeapons::NON_AR;
 	clients[client_id].sub_weapons = SubWeapons::NON_SUB;
 	clients[client_id].is_ready = false;
@@ -248,9 +264,11 @@ void ServerFramework::ProcessPacket(int cl_id, char* packet) {
 
 	case CS_KEY_PRESS_1:
 		printf("[ProcessPacket] :: AR 무기 선택\n");
+		clients[cl_id].equipted_weapon = 0;
 		break;
 	case CS_KEY_PRESS_2:
 		printf("[ProcessPacket] :: 권총 무기 선택\n");
+		clients[cl_id].equipted_weapon = 1;
 		break;
 
 	case CS_KEY_PRESS_SHIFT:
@@ -288,29 +306,119 @@ void ServerFramework::ProcessPacket(int cl_id, char* packet) {
 		clients[cl_id].is_right_click = false;
 		break;
 	case CS_RELOAD:
-		bullet_counter[cl_id] = 0;
-		printf("장전 완료\n");
-		SC_PACKET_AMMO_O packets;
-		packets.size = sizeof(SC_PACKET_AMMO_O);
-		packets.type = SC_FULLY_AMMO;
-		SendPacket(cl_id, &packets);
+		// AR 장착중인경우
+		if (clients[cl_id].equipted_weapon == 0) {
+			// 장전하려고 보니 결과가 0 이상
+			if (clients[cl_id].ar_ammo - bullet_counter[cl_id] > 0) {
+				clients[cl_id].ar_ammo -= bullet_counter[cl_id];
+				bullet_counter[cl_id] = 0;
+				printf("장전 완료, 남은 탄창 %d \n", clients[cl_id].ar_ammo);
+				SC_PACKET_AMMO_O packets;
+				packets.size = sizeof(SC_PACKET_AMMO_O);
+				packets.type = SC_FULLY_AMMO;
+				packets.ammo = bullet_counter[cl_id];
+				SendPacket(cl_id, &packets);
+			}
+			// 장전하려고 보니 결과가 0 미만
+			else {
+				bullet_counter[cl_id] -= clients[cl_id].ar_ammo;
+				clients[cl_id].ar_ammo = 0;
+				printf("장전 완료, 남은 탄창 %d \n", clients[cl_id].ar_ammo);
+				SC_PACKET_AMMO_O packets;
+				packets.size = sizeof(SC_PACKET_AMMO_O);
+				packets.type = SC_FULLY_AMMO;
+				packets.ammo = bullet_counter[cl_id];
+				SendPacket(cl_id, &packets);
 
+			}
+			//// 탄창에 30발 미만인경우 다 옮기고 ar_ammo를 0으로 만들어야 한다. 
+			//if (clients[cl_id].ar_ammo <= MAX_AMMO_SIZE) {
+			//	//bullet_counter[cl_id] -= clients[cl_id].ar_ammo;
+			//	clients[cl_id].ar_ammo -= bullet_counter[cl_id];
+			//	clients[cl_id].ar_ammo = 0;
+			//	printf("장전 완료, 남은 탄창 %d \n", clients[cl_id].ar_ammo);
+			//	SC_PACKET_AMMO_O packets;
+			//	packets.size = sizeof(SC_PACKET_AMMO_O);
+			//	packets.type = SC_FULLY_AMMO;
+			//	packets.ammo = bullet_counter[cl_id];
+			//	SendPacket(cl_id, &packets);
+			//}
+			//// 탄창에 30발 이상 남은경우
+			//else {
+			//	clients[cl_id].ar_ammo -= bullet_counter[cl_id];
+			//	bullet_counter[cl_id] = 0;
+			//	printf("장전 완료, 남은 탄창 %d \n", clients[cl_id].ar_ammo);
+			//	SC_PACKET_AMMO_O packets;
+			//	packets.size = sizeof(SC_PACKET_AMMO_O);
+			//	packets.type = SC_FULLY_AMMO;
+			//	packets.ammo = bullet_counter[cl_id];
+			//	SendPacket(cl_id, &packets);
+			//}
+		}
+		// SUB 장착중인경우
+		else {
+			// 장전하려고 보니 결과가 0 이상
+			if (clients[cl_id].sub_ammo - bullet_counter[cl_id] > 0) {
+				clients[cl_id].sub_ammo -= bullet_counter[cl_id];
+				bullet_counter[cl_id] = 0;
+				printf("장전 완료, 남은 탄창 %d \n", clients[cl_id].sub_ammo);
+				SC_PACKET_AMMO_O packets;
+				packets.size = sizeof(SC_PACKET_AMMO_O);
+				packets.type = SC_FULLY_AMMO;
+				packets.ammo = bullet_counter[cl_id];
+				SendPacket(cl_id, &packets);
+			}
+			// 장전하려고 보니 결과가 0 미만
+			else {
+				bullet_counter[cl_id] -= clients[cl_id].sub_ammo;
+				clients[cl_id].sub_ammo = 0;
+				printf("장전 완료, 남은 탄창 %d \n", clients[cl_id].sub_ammo);
+				SC_PACKET_AMMO_O packets;
+				packets.size = sizeof(SC_PACKET_AMMO_O);
+				packets.type = SC_FULLY_AMMO;
+				packets.ammo = bullet_counter[cl_id];
+				SendPacket(cl_id, &packets);
+
+			}
+
+		}
 		break;
 	case CS_LEFT_BUTTON_DOWN:
-		if (bullet_counter[cl_id] == MAX_BULLET_SIZE) {
-			printf("총알 장전 필요\n");
-			SC_PACKET_AMMO_O packets;
-			packets.size = sizeof(SC_PACKET_AMMO_O);
-			packets.type = SC_OUT_OF_AMMO;
-			SendPacket(cl_id, &packets);
+		// 주무기
+		if (clients[cl_id].equipted_weapon == 0) {
+			if (bullet_counter[cl_id] == MAX_AMMO_SIZE) {
+				printf("총알 장전 필요\n");
+				SC_PACKET_AMMO_O packets;
+				packets.size = sizeof(SC_PACKET_AMMO_O);
+				packets.type = SC_OUT_OF_AMMO;
+				SendPacket(cl_id, &packets);
+			}
+			else {
+				clients[cl_id].is_left_click = true;
+				ol_ex[6].evt_type = EVT_BULLET_GENERATE;
+				ol_ex[6].shooter_player_id = cl_id;
+				//ol_ex[6].elapsed_time = elapsed_time.count();
+				PostQueuedCompletionStatus(iocp_handle, 0, 6, reinterpret_cast<WSAOVERLAPPED*>(&ol_ex[6]));
+			}
 		}
-		else {
-			clients[cl_id].is_left_click = true;
-			ol_ex[6].evt_type = EVT_BULLET_GENERATE;
-			ol_ex[6].shooter_player_id = cl_id;
-			//ol_ex[6].elapsed_time = elapsed_time.count();
-			PostQueuedCompletionStatus(iocp_handle, 0, 6, reinterpret_cast<WSAOVERLAPPED*>(&ol_ex[6]));
+		// 보조무기
+		else if (clients[cl_id].equipted_weapon == 1) {
+			if (bullet_counter[cl_id] == MAX_AMMO_SIZE) {
+				printf("총알 장전 필요\n");
+				SC_PACKET_AMMO_O packets;
+				packets.size = sizeof(SC_PACKET_AMMO_O);
+				packets.type = SC_OUT_OF_AMMO;
+				SendPacket(cl_id, &packets);
+			}
+			else {
+				clients[cl_id].is_left_click = true;
+				ol_ex[6].evt_type = EVT_BULLET_GENERATE;
+				ol_ex[6].shooter_player_id = cl_id;
+				//ol_ex[6].elapsed_time = elapsed_time.count();
+				PostQueuedCompletionStatus(iocp_handle, 0, 6, reinterpret_cast<WSAOVERLAPPED*>(&ol_ex[6]));
+			}
 		}
+
 		break;
 	case CS_LEFT_BUTTON_UP:
 		clients[cl_id].is_left_click = false;
@@ -381,7 +489,7 @@ void ServerFramework::GameStart() {
 
 	// 플레이어  위치 섞기
 	for (int i = 0; i < MAXIMUM_PLAYER; ++i) {
-		char dice = rand() % 4;
+		int dice = rand() % 4;
 		switch (dice) {
 		case MAP_AREA_1:
 			printf("[%d] 플레이어 Area 1\n", i);
@@ -416,7 +524,7 @@ void ServerFramework::GameStart() {
 
 	// Bullet의 OBB
 	for (int j = 0; j < MAXIMUM_PLAYER; ++j) {
-		for (int i = 0; i < MAX_BULLET_SIZE; ++i) {
+		for (int i = 0; i < MAX_AMMO_SIZE; ++i) {
 			bullets[j][i].SetOOBB(XMFLOAT3(bullets[j][i].x, bullets[j][i].y, bullets[j][i].z),
 				XMFLOAT3(OBB_SCALE_BULLET_X, OBB_SCALE_BULLET_Y, OBB_SCALE_BULLET_Z),
 				XMFLOAT4(0, 0, 0, 1));
@@ -495,22 +603,100 @@ void ServerFramework::WorkerThread() {
 			}
 
 		}
-		// TimerThread에서 호출
-		// 1/20 마다 모든 플레이어에게 정보 전송
 		else if (overlapped_buffer->evt_type == EVT_ITEM_GEN) {
-			printf("아이템 생성띠\n");
-			SC_PACKET_ITEM_GEN packets;
-			packets.size = sizeof(SC_PACKET_ITEM_GEN);
-			packets.type = SC_ITEM_GEN;
-			packets.x = rand() % 4000;
-			packets.z = rand() % 4000;
-			packets.y = height_map->GetHeight(packets.x, packets.z);
-			for (int i = 0; i < MAXIMUM_PLAYER; ++i) {
-				if (clients[i].in_use == true) {
-					SendPacket(i, &packets);
+			int boat_item_gen = 0;
+			for (int i = 0; i < MAX_BOAT_ITEM; ++i) {
+				if (items[i]->in_use) {
+					boat_item_gen++;
 				}
 			}
+			if (boat_item_gen < MAX_BOAT_ITEM) {
+				SC_PACKET_ITEM_GEN packets;
+				packets.size = sizeof(SC_PACKET_ITEM_GEN);
+				packets.type = SC_ITEM_GEN;
+
+				int dice;
+				while (true) {
+					dice = rand() % MAX_BOAT_ITEM;
+					if (items[dice]->in_use)
+						continue;
+					else
+						break;
+				}
+				items[dice]->in_use = true;
+				items[dice]->SetItemType(dice);
+				packets.x = rand() % 4000;
+				packets.z = rand() % 4000;
+				packets.y = height_map->GetHeight(packets.x, packets.z);
+				packets.item_type = dice;
+
+				items[dice]->SetPosition(packets.x, packets.y, packets.z);
+
+				// 부품의 타입도 정해야한다. 
+				printf("[아이템 생성 : Type %d] : %f %f %f \n", items[dice]->GetItemType(), packets.x, packets.y, packets.z);
+				for (int i = 0; i < MAXIMUM_PLAYER; ++i) {
+					if (clients[i].in_use == true) {
+						SendPacket(i, &packets);
+					}
+				}
+
+				is_item_gen = true;
+			}
+
+			int ammo_item_gen = 0;
+			for (int i = MAX_BOAT_ITEM; i < MAX_ITEM; ++i) {
+				if (items[i]->in_use) {
+					ammo_item_gen++;
+				}
+			}
+			if (ammo_item_gen < MAX_ITEM - MAX_BOAT_ITEM) {
+				SC_PACKET_ITEM_GEN packets;
+				packets.size = sizeof(SC_PACKET_ITEM_GEN);
+				packets.type = SC_ITEM_GEN;
+
+				int dice;
+				while (true) {
+					dice = rand() % (MAX_ITEM - MAX_BOAT_ITEM) + MAX_BOAT_ITEM;
+					if (items[dice]->in_use)
+						continue;
+					else
+						break;
+				}
+				items[dice]->in_use = true;
+
+				// dice가 짝수면 주무기
+				// dice가 홀수면 보조무기
+				// 참고로 Type은 0~3까지는 보트 부품
+				// type 4 -> 주무기
+				// type 5 -> 보조무기
+				if (dice % 2 == 0) {
+					items[dice]->SetItemType(4);
+				}
+				else {
+					items[dice]->SetItemType(5);
+				}
+				packets.x = rand() % 4000;
+				packets.z = rand() % 4000;
+				packets.y = height_map->GetHeight(packets.x, packets.z);
+				packets.item_type = dice;
+
+				items[dice]->SetPosition(packets.x, packets.y, packets.z);
+
+				// 부품의 타입도 정해야한다. 
+				printf("[아이템 생성 : Type %d] : %f %f %f \n", items[dice]->GetItemType(), packets.x, packets.y, packets.z);
+				for (int i = 0; i < MAXIMUM_PLAYER; ++i) {
+					if (clients[i].in_use == true) {
+						SendPacket(i, &packets);
+					}
+				}
+
+
+				is_item_gen = true;
+
+			}
 		}
+		// TimerThread에서 호출
+		// 1/20 마다 모든 플레이어에게 정보 전송
 		else if (overlapped_buffer->evt_type == EVT_PLAYER_POS_SEND) {
 			for (int i = 0; i < MAXIMUM_PLAYER; ++i) {
 				//client_lock.lock();
@@ -593,9 +779,41 @@ void ServerFramework::WorkerThread() {
 			}
 		}
 		else if (overlapped_buffer->evt_type == EVT_COLLISION) {
+			for (int i = 0; i < MAXIMUM_PLAYER; ++i) {
+				for (int j = 0; j < MAX_BOAT_ITEM; ++j) {
+					if (clients[i].in_use&&items[j]->in_use) {
+						ContainmentType contain_type = clients[i].bounding_box.Contains(items[j]->bounding_box);
+						//printf("items[%d]->bounding_box.center = [%lf, %lf, %lf] \n", j, items[j]->bounding_box.Center.x, items[j]->bounding_box.Center.y, items[j]->bounding_box.Center.z);
+						switch (contain_type) {
+						case INTERSECTS: {
+							printf("얏 박앗당\n");
+							clients[i].boat_parts[j] = true;
+							int num_item_have = 0;
+							for (int k = 0; k < 4; ++k) {
+								if (clients[i].boat_parts[k]) {
+									num_item_have++;
+								}
+							}
+							if (num_item_have == 4) {
+								printf("%d 플레이어의 승리\n", i);
+							}
+							break;
+						}
+						case CONTAINS:
+							printf("얏 포함됫당\n");
+							clients[i].boat_parts[j] = true;
+							break;
+						}
+					}
+				}
+				for (int j = MAX_BOAT_ITEM; j < MAX_ITEM; ++j) {
+					// 탄창 아이템 습득 
+				}
+			}
+
 			// OBB 충돌체크 
 			//for (int i = 0; i < OBJECT_BUILDING; ++i) {
-			//	for (int j = 0; j < MAX_BULLET_SIZE; ++j) {
+			//	for (int j = 0; j < MAX_AMMO_SIZE; ++j) {
 			//		for (int k = 0; (k < MAXIMUM_PLAYER); ++k) {
 			//			if (bullets[k][j].in_use) {
 			//				ContainmentType contain_type = building[i]->bounding_box.Contains(bullets[k][j].bounding_box);
@@ -697,7 +915,7 @@ void ServerFramework::WorkerThread() {
 				//	}
 				//}
 				// 
-				for (int i = 0; i < MAX_BULLET_SIZE; ++i) {
+				for (int i = 0; i < MAX_AMMO_SIZE; ++i) {
 					if (bullets[j + 1][i].in_use && clients[j].in_use) {
 						ContainmentType containType = clients[j].bounding_box.Contains(bullets[j + 1][i].bounding_box);
 						switch (containType)
@@ -804,25 +1022,30 @@ void ServerFramework::WorkerThread() {
 		//}
 		else if (overlapped_buffer->evt_type == EVT_BULLET_GENERATE) {
 			int shooter_id = overlapped_buffer->shooter_player_id;
-			printf("발사한 총알 : %d\n", bullet_counter[shooter_id]);
-			if (bullet_counter[shooter_id] == MAX_BULLET_SIZE - 1 ) {
-				for (int d = 0; d < MAX_BULLET_SIZE; ++d) {
-					bullets[shooter_id][d].in_use = false;
+			if (clients[shooter_id].equipted_weapon == 0) {
+				printf("발사한 총알 : %d\n", bullet_counter[shooter_id]);
+				if (bullet_counter[shooter_id] == MAX_AMMO_SIZE - 1) {
+					for (int d = 0; d < MAX_AMMO_SIZE; ++d) {
+						bullets[shooter_id][d].in_use = false;
+					}
 				}
+				bullets[shooter_id][bullet_counter[shooter_id]].x = clients[shooter_id].x;
+				bullets[shooter_id][bullet_counter[shooter_id]].y = clients[shooter_id].y;
+				bullets[shooter_id][bullet_counter[shooter_id]].z = clients[shooter_id].z;
+				bullets[shooter_id][bullet_counter[shooter_id]].look_vec = clients[shooter_id].look_vec;
+				bullets[shooter_id][bullet_counter[shooter_id]].in_use = true;
+				bullet_counter[shooter_id]++;
+				bullet_times[shooter_id] = 0;
 			}
-			bullets[shooter_id][bullet_counter[shooter_id]].x = clients[shooter_id].x;
-			bullets[shooter_id][bullet_counter[shooter_id]].y = clients[shooter_id].y;
-			bullets[shooter_id][bullet_counter[shooter_id]].z = clients[shooter_id].z;
-			bullets[shooter_id][bullet_counter[shooter_id]].look_vec = clients[shooter_id].look_vec;
-			bullets[shooter_id][bullet_counter[shooter_id]].in_use = true;
-			bullet_counter[shooter_id]++;
-			bullet_times[shooter_id] = 0;
+			else {
+
+			}
 		}
 		else if (overlapped_buffer->evt_type == EVT_BULLET_UPDATE) {
 			// i 가 플레이어
 			// j 가 플레이어가 발사한 총알
 			for (int i = 0; i < MAXIMUM_PLAYER; ++i) {
-				for (int j = 0; j < MAX_BULLET_SIZE; ++j) {
+				for (int j = 0; j < MAX_AMMO_SIZE; ++j) {
 					if (bullets[i][j].in_use) {
 						bullets[i][j].x += METER_PER_PIXEL * bullets[i][j].look_vec.x * (AR_SPEED * overlapped_buffer->elapsed_time);
 						bullets[i][j].y += METER_PER_PIXEL * bullets[i][j].look_vec.y * (AR_SPEED * overlapped_buffer->elapsed_time);
@@ -910,7 +1133,6 @@ void ServerFramework::DisconnectPlayer(int cl_id) {
 }
 
 void ServerFramework::Update(duration<float>& elapsed_time) {
-	sender_time += elapsed_time.count();
 
 	//ol_ex[4].evt_type = EVT_PLAYER_POS_UPDATE;
 	//ol_ex[4].elapsed_time = elapsed_time.count();
@@ -924,6 +1146,7 @@ void ServerFramework::Update(duration<float>& elapsed_time) {
 	PostQueuedCompletionStatus(iocp_handle, 0, 7, reinterpret_cast<WSAOVERLAPPED*>(&ol_ex[7]));
 
 
+	sender_time += elapsed_time.count();
 	if (sender_time >= UPDATE_TIME) {   // 1/60 초마다 데이터 송신
 		for (int i = 0; i < MAXIMUM_PLAYER; ++i) {
 			if (clients[i].is_move_backward || clients[i].is_move_foward || clients[i].is_move_left || clients[i].is_move_right) {

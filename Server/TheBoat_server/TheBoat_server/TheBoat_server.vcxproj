@@ -149,6 +149,7 @@
   <ItemGroup>
     <ClInclude Include="Building.h" />
     <ClInclude Include="CHeightMapImage.h" />
+    <ClInclude Include="Item.h" />
     <ClInclude Include="Object.h" />
     <ClInclude Include="protocol.h" />
     <ClInclude Include="ServerFramework.h" />
@@ -158,6 +159,7 @@
   <ItemGroup>
     <ClCompile Include="Building.cpp" />
     <ClCompile Include="CHeightMapImage.cpp" />
+    <ClCompile Include="Item.cpp" />
     <ClCompile Include="Object.cpp" />
     <ClCompile Include="ServerFramework.cpp" />
     <ClCompile Include="stdafx.cpp">

@@ -7,7 +7,12 @@
 #define MAXIMUM_PLAYER		2
 #define	WM_SOCKET			WM_USER + 1
 #define CLIENT_BUF_SIZE		1024
-#define MAX_BULLET_SIZE			30
+#define MAX_AMMO_SIZE			30
+
+// 보트 부품
+#define MAX_BOAT_ITEM			4
+#define MAX_ITEM				12
+
 
 // 본인 클라이언트 및 서버에서 사용
 //#define RUN_SPEED				2.78f
@@ -165,6 +170,7 @@ struct SC_PACKET_COLLISION {
 struct SC_PACKET_ITEM_GEN {
 	BYTE size;
 	BYTE type;
+	char item_type;
 	float x, y, z;
 };
 
@@ -192,7 +198,14 @@ struct SC_PACKET_START {
 struct SC_PACKET_AMMO_O {
 	BYTE size;
 	BYTE type;
+	char ammo;
 };
+
+struct SC_PACKET_TIME {
+	BYTE size;
+	BYTE type;
+};
+
 
 // 클라->서버
 struct CS_PACKET_BIGGEST {

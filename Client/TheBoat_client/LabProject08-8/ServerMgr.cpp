@@ -21,6 +21,10 @@ void ServerMgr::IPInput() {
 		break;
 	}
 }
+void ServerMgr::IPInput(string i_server_ip) {
+	server_ip = i_server_ip;
+}
+
 void ServerMgr::Initialize(HWND& hwnd) {
 	WSADATA	wsadata;
 	WSAStartup(MAKEWORD(2, 2), &wsadata);
@@ -53,7 +57,7 @@ void ServerMgr::Initialize(HWND& hwnd) {
 	printf("server_mgr 초기화\n");
 
 	// 총알 갯수 초기화 
-	ammo_counter = 30;
+	ammo_counter = MAX_AMMO_SIZE;
 }
 
 int ServerMgr::GetAmmo() {
@@ -203,7 +207,11 @@ void ServerMgr::ProcessPacket(char* ptr) {
 		break;
 	}
 	case SC_FULLY_AMMO: {
-		ammo_counter = MAX_BULLET_SIZE;
+		
+		SC_PACKET_AMMO_O* packets = reinterpret_cast<SC_PACKET_AMMO_O*>(ptr);
+		ammo_counter = MAX_AMMO_SIZE - packets->ammo;
+		//ammo_counter = MAX_AMMO_SIZE;
+
 		printf("재장전 완료\n");
 		break;
 	}

@@ -2,6 +2,7 @@
 
 class CHeightMapImage;
 class Building;
+class Item;
 
 struct Event {
 	int id;
@@ -45,7 +46,7 @@ class ServerFramework
 	// 7은 총알 업데이트
 	OverlappedExtensionSet ol_ex[20];
 
-	Bullet bullets[4][MAX_BULLET_SIZE] = { 0 };
+	Bullet bullets[4][MAX_AMMO_SIZE] = { 0 };
 	mutex bullet_lock;
 	// 플레이어별 몇 번째 총알까지 발사했는지 저장하는 변수
 	int bullet_counter[4] = { 0 };
@@ -57,7 +58,7 @@ class ServerFramework
 	// Building obejct는 총 10개
 	//Object* object_mother;
 	Building* building[OBJECT_BUILDING];
-
+	Item* items[12];
 public:
 	void InitServer();
 	void AcceptPlayer();

@@ -11,19 +11,24 @@ Object::Object()
 	bounding_box.Center.y = 0.f;
 	bounding_box.Center.z = 0.f;
 }
-void Object::SetOBB(XMFLOAT3 xmCenter, XMFLOAT3 xmExtents, XMFLOAT4 xmOrientation) {
-	bounding_box = BoundingOrientedBox(xmCenter, xmExtents, xmOrientation);
+void Object::FixOBB() {
+	XMFLOAT4 ori = XMFLOAT4{ 0,0,0,1 };
+	bounding_box = BoundingOrientedBox(position, obb_extents, ori);
 	//printf("오브젝트의 OBB : [%f, %f, %f] \n", xmExtents.x, xmExtents.y, xmExtents.z);
 }
 
-
-void Object::SetPosition(XMFLOAT3& input_pos, XMFLOAT3& extents) {
-	SetOBB(input_pos, extents, XMFLOAT4(0, 0, 0, 1));
-	position.x = input_pos.x;
-	position.y = input_pos.y + 100;
-	position.z = input_pos.z;
-
+void Object::SetOBB(XMFLOAT3& input_pos, XMFLOAT3& extents) {
+	position = input_pos;
+	obb_extents = extents;
 }
+
+void Object::SetPosition(float pos_x, float pos_y, float pos_z) {
+	position.x = pos_x;
+	position.y = pos_y;
+	position.z = pos_z;
+	FixOBB();
+}
+
 
 XMFLOAT3 Object::GetExtents() {
 	return bounding_box.Extents;

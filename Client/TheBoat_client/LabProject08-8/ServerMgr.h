@@ -17,7 +17,7 @@ class ServerMgr
 	WSABUF recv_wsabuf;
 	int clients_id = 0;
 
-	Bullet bullets[MAX_BULLET_SIZE] = { 0 };
+	Bullet bullets[MAX_AMMO_SIZE] = { 0 };
 	int recvd_bullet_id = 0;
 
 	bool first_set_id = true;
@@ -51,6 +51,8 @@ class ServerMgr
 	bool s_is_collide = false;
 public:
 	void IPInput();
+	void IPInput(string);
+
 	void Initialize(HWND& hwnd);
 	void ClientError();
 	void ReadPacket();
