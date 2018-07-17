@@ -24,6 +24,8 @@
 // Object 갯수 정리 
 #define OBJECT_BUILDING			10
 
+// "시간" 보내는 시간
+#define TIME_SEND_TIME			1
 
 ///////////////////////////////////////////////////
 // Server To Client
@@ -40,6 +42,7 @@
 #define SC_GAME_START			11
 #define SC_OUT_OF_AMMO			18
 #define SC_FULLY_AMMO			19
+#define SC_WORLD_TIME			20
 ///////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////
@@ -48,8 +51,10 @@
 #define EVT_PLAYER_POS_SEND		13
 #define EVT_BULLET_GENERATE		14
 #define EVT_BULLET_UPDATE		15
-#define EVT_ITEM_GEN			16
+#define EVT_BOAT_ITEM_GEN		16
 #define EVT_PACKET_RECV			17
+#define EVT_SEND_TIME			21
+#define EVT_AMMO_ITEM_GEN		22
 ///////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////
@@ -204,6 +209,8 @@ struct SC_PACKET_AMMO_O {
 struct SC_PACKET_TIME {
 	BYTE size;
 	BYTE type;
+	//std::chrono::time_point<std::chrono::system_clock> world_time;
+	float world_time;
 };
 
 

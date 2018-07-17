@@ -31,7 +31,9 @@
 
 #include <fstream>
 #include <vector>
+#include <chrono>
 using namespace std;
+using namespace chrono;
 
 #include <d3d12.h>
 #include <dxgi1_4.h>

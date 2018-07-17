@@ -49,6 +49,10 @@ class ServerMgr
 
 
 	bool s_is_collide = false;
+
+	// ½Ã°£
+	//time_point<system_clock> world_time;
+	float world_time;
 public:
 	void IPInput();
 	void IPInput(string);
