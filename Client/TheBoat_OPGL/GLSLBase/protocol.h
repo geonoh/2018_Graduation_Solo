@@ -122,6 +122,12 @@
 #define MAP_POINT8_Z	3076.07
 ///////////////////////////////////////////////////
 
+struct Vector3 {
+	float x, y, z;
+};
+
+
+
 enum GameMode {
 	TEAM_MODE, MELEE
 };
@@ -150,7 +156,9 @@ struct SC_PACKET_LOOCVEC {
 	BYTE size;
 	BYTE type;
 	WORD id;
-	DirectX::XMFLOAT3 look_vec;
+	//glm::vec3 look_vec;
+	//DirectX::XMFLOAT3 look_vec;
+	Vector3 look_vec;
 	int player_status;
 };
 
@@ -188,7 +196,9 @@ struct SC_PACKET_BULLET {
 	BYTE type;
 	WORD id;
 	WORD bullet_id;
-	DirectX::XMFLOAT3 pos;
+	//DirectX::XMFLOAT3 pos;
+	//glm::vec3 pos;
+	Vector3 pos;
 	float x, y, z;
 };
 
@@ -222,7 +232,9 @@ struct CS_PACKET_BIGGEST {
 struct CS_PACKET_KEYUP {
 	BYTE size;
 	BYTE type;
-	DirectX::XMFLOAT3 look_vec;
+	//DirectX::XMFLOAT3 look_vec;
+	//glm::vec3 look_vec;
+	Vector3 look_vec;
 };
 struct CS_PACKET_KEYDOWN {
 	BYTE size;
@@ -281,6 +293,8 @@ struct CS_PACKET_TEAM_SELECT {
 struct CS_PACKET_LOOK_VECTOR {
 	BYTE size;
 	BYTE type;
-	DirectX::XMVECTOR look_vector;
+	//DirectX::XMVECTOR look_vector;
+	//glm::vec3 look_vector;
+	Vector3 look_vector;
 };
 

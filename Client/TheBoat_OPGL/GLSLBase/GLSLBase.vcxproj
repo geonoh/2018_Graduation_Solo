@@ -157,7 +157,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="LoadPng.h" />
+    <ClInclude Include="protocol.h" />
     <ClInclude Include="Renderer.h" />
+    <ClInclude Include="ServerMgr.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
@@ -165,6 +167,7 @@
     <ClCompile Include="LoadPng.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="GLSLBase.cpp" />
+    <ClCompile Include="ServerMgr.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>

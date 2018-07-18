@@ -9,11 +9,10 @@ but WITHOUT ANY WARRANTY.
 */
 
 #include "stdafx.h"
-#include <iostream>
-#include "Dependencies\glew.h"
-#include "Dependencies\freeglut.h"
-
 #include "Renderer.h"
+#include "ServerMgr.h"
+
+#define Dev_
 
 using namespace std;
 
@@ -35,7 +34,11 @@ float camera_look_x = 0.f;
 float camera_look_y = 0.f;
 float camera_look_z = 0.f;
 
+// ServerManager
+ServerMgr server_mgr;
 
+
+void InitSocket();
 void RenderScene(void)
 { 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -59,7 +62,7 @@ void RenderScene(void)
 	g_Renderer->Cube();
 	//g_Renderer->Test1();
 
-	gTime += 0.005;
+	gTime += 0.005f;
 
 	glutSwapBuffers();
 }
@@ -76,14 +79,14 @@ void MouseInput(int button, int state, int x, int y)
 	if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN)
 	{
 		g_LBState = GLUT_DOWN;
-		g_prevX = x;
-		g_prevY = y;
+		g_prevX = (float)x;
+		g_prevY = (float)y;
 	}
 	if (button == GLUT_LEFT_BUTTON && state == GLUT_UP)
 	{
 		g_LBState = GLUT_UP;
-		g_prevX = x;
-		g_prevY = y;
+		g_prevX = (float)x;
+		g_prevY = (float)y;
 	}
 	RenderScene();
 }
@@ -94,8 +97,8 @@ void MouseMove(int x, int y)
 	{
 		g_accX += (x - g_prevX) / 50.f;
 		g_accY += (y - g_prevY) / 50.f;
-		g_prevX = x;
-		g_prevY = y;
+		g_prevX = (float)x;
+		g_prevY = (float)y;
 	}
 	RenderScene();
 }
@@ -139,6 +142,8 @@ void SpecialKeyInput(int key, int x, int y)
 
 int main(int argc, char **argv)
 {
+	// Ελ½Ε
+	InitSocket();
 	// Initialize GL things
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
@@ -155,6 +160,7 @@ int main(int argc, char **argv)
 	{
 		std::cout << "GLEW 3.0 not supported\n ";
 	}
+
 
 	// Initialize Renderer
 	g_Renderer = new Renderer(1000, 1000);
@@ -177,3 +183,10 @@ int main(int argc, char **argv)
     return 0;
 }
 
+void InitSocket() {
+#ifdef _Dev
+#else
+	server_mgr.IPInput("127.0.0.1");
+#endif
+	//server_mgr.Initialize();
+}
