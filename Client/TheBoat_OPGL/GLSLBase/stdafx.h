@@ -11,6 +11,7 @@
 #include <iostream>
 #include <string>
 #include <thread>
+#include <mutex>
 //#include "../../../Server/TheBoat_server/TheBoat_server/protocol.h"
 #include "protocol.h"
 #include "Dependencies\glew.h"

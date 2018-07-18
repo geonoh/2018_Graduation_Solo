@@ -80,7 +80,7 @@ Renderer::~Renderer()
 }
 
 void Renderer::SetCameraLook(float x, float y, float z) {
-	m_v3Camera_Lookat = glm::vec3(0.f, 0.f, 0.f);
+	m_v3Camera_Lookat = glm::vec3(x, y, z);
 	m_m4View = glm::lookAt(
 		m_v3Camera_Position,
 		m_v3Camera_Lookat,
@@ -107,23 +107,6 @@ void Renderer::Initialize(int windowSizeX, int windowSizeY)
 	m_WindowSizeX = windowSizeX;
 	m_WindowSizeY = windowSizeY;
 
-	//Load shaders
-	m_SolidRectShader = CompileShaders("./Shaders/SolidRect.vs", "./Shaders/SolidRect.fs");
-	m_STParticleShader = CompileShaders("./Shaders/STParticle.vs", "./Shaders/STParticle.fs");
-	m_TestShader = CompileShaders("./Shaders/Test.vs", "./Shaders/Test.fs");
-	m_RadarShader = CompileShaders("./Shaders/Radar.vs", "./Shaders/Radar.fs");
-	m_FillAllShader = CompileShaders("./Shaders/FillAll.vs", "./Shaders/FillAll.fs");
-	m_TextureShader = CompileShaders("./Shaders/Texture.vs", "./Shaders/Texture.fs");
-	m_Shader_Q1 = CompileShaders("./Shaders/q1.vs", "./Shaders/q1.fs");
-	m_Shader_Q2 = CompileShaders("./Shaders/q2.vs", "./Shaders/q2.fs");
-	m_Shader_TextureApp = CompileShaders("./Shaders/Texture_App.vs", "./Shaders/Texture_App.fs");
-	m_TextureAnimShader = CompileShaders("./Shaders/Texture_Anim.vs", "./Shaders/Texture_Anim.fs");
-	m_Shader_ProxyGeo = CompileShaders("./Shaders/ProxyGeo.vs", "./Shaders/ProxyGeo.fs");
-	m_Shader_Particle = CompileShaders("./Shaders/Particle.vs", "./Shaders/Particle.fs");
-	m_Shader_Proj = CompileShaders("./Shaders/Proj.vs", "./Shaders/Proj.fs");
-	m_Shader_Test1 = CompileShaders("./Shaders/Test1.vs", "./Shaders/Test1.fs");
-	m_Shader_Bloom_P2 = CompileShaders("./Shaders/BloomP2.vs", "./Shaders/BloomP2.fs");
-	m_Shader_Bloom_P3 = CompileShaders("./Shaders/BloomP3.vs", "./Shaders/BloomP3.fs");
 
 	GenFBOs();
 
@@ -149,8 +132,8 @@ void Renderer::Initialize(int windowSizeX, int windowSizeY)
 	CreateParticle();
 
 	//Initialize camera settings
-	m_v3Camera_Position = glm::vec3(0.f, 0.5f, 3.f);
-	m_v3Camera_Lookat = glm::vec3(0.f, 0.f, 0.f);
+	m_v3Camera_Position = glm::vec3(0.f, 30.f, 0.f);
+	m_v3Camera_Lookat = glm::vec3(0.f, 30.f, 1.f);
 	m_v3Camera_Up = glm::vec3(0.f, 1.f, 0.f);
 	m_m4View = glm::lookAt(
 		m_v3Camera_Position,
@@ -160,8 +143,8 @@ void Renderer::Initialize(int windowSizeX, int windowSizeY)
 
 	//Initialize projection matrix
 	m_m4OrthoProj = glm::ortho(-1.f, 1.f, -1.f, 1.f, 0.f, 2.f);
-	m_m4PersProj = glm::perspectiveRH((float)VIEW_ANGLE, 1.f, 1.f, 4.f);
-	
+	m_m4PersProj = glm::perspectiveRH(45.f, 1.f, 1.f, 1000.f);
+
 	//Initialize projection-view matrix
 	//m_m4ProjView = m_m4OrthoProj * m_m4View;
 	m_m4ProjView = m_m4PersProj * m_m4View;
@@ -180,15 +163,16 @@ void Renderer::Initialize(int windowSizeX, int windowSizeY)
 		=
 		glm::scale(glm::mat4(1.f), m_v3ModelScaling);
 	m_m4Model
-		= m_m4ModelTranslation*m_m4ModelRotation*m_m4ModelScaling;
+		= m_m4ModelTranslation * m_m4ModelRotation*m_m4ModelScaling;
 
 
 	m_Tex_Particle = CreatePngTexture("./Textures/particle.png");
 
-	if (m_SolidRectShader > 0 && m_VBORect > 0)
-	{
-		m_Initialized = true;
-	}
+	//Height Map Initialization
+	InitializeHeightMap();
+
+	//SkyBox Initialization
+	InitializeSkyBox();
 }
 
 bool Renderer::IsInitialized()
@@ -1538,10 +1522,10 @@ void Renderer::Bogang()
 	DrawParticle();
 	BloomPass2(m_Tex_P1_Emissive);
 	BloomPass3(m_Tex_P1_Color, m_Tex_P2_Bloom);
-	Texture(m_Tex_P1_Color, 0, 0, 100, 100);
-	Texture(m_Tex_P1_Emissive, 100, 0, 100, 100);
-	Texture(m_Tex_P1_Depth, 200, 0, 100, 100);
-	Texture(m_Tex_P2_Bloom, 300, 0, 100, 100);
+	DrawTexture(m_Tex_P1_Color, 0, 0, 100, 100);
+	DrawTexture(m_Tex_P1_Emissive, 100, 0, 100, 100);
+	DrawTexture(m_Tex_P1_Depth, 200, 0, 100, 100);
+	DrawTexture(m_Tex_P2_Bloom, 300, 0, 100, 100);
 }
 
 void Renderer::BloomPass1()
@@ -1682,7 +1666,7 @@ void Renderer::BloomPass3(GLuint baseTex, GLuint bloomTex)
 	glDisableVertexAttribArray(attribTexPos);
 }
 
-void Renderer::Texture(GLuint texID, GLuint x, GLuint y, GLuint width, GLuint height)
+void Renderer::DrawTexture(GLuint texID, GLuint x, GLuint y, GLuint width, GLuint height)
 {
 	glDisable(GL_CULL_FACE);
 	glDisable(GL_DEPTH_TEST);
@@ -1714,4 +1698,333 @@ void Renderer::Texture(GLuint texID, GLuint x, GLuint y, GLuint width, GLuint he
 	glDisableVertexAttribArray(attribTexPos);
 
 	glViewport(0, 0, m_WindowSizeX, m_WindowSizeY);
+}
+
+void Renderer::DrawHeightMap()
+{
+	GLuint shader = m_Shader_HeightMap;
+
+	glUseProgram(shader);
+
+	glEnable(GL_CULL_FACE);
+
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LEQUAL);
+
+	GLuint projView = glGetUniformLocation(shader, "u_ProjView");
+	GLuint model = glGetUniformLocation(shader, "u_Model");
+	GLuint rotation = glGetUniformLocation(shader, "u_Rotation");
+	GLuint light = glGetUniformLocation(shader, "u_LightPos");
+	GLuint camera = glGetUniformLocation(shader, "u_CameraPos");
+	GLuint baseTex = glGetUniformLocation(shader, "u_TextureBase");
+	GLuint detailTex = glGetUniformLocation(shader, "u_TextureDetail");
+
+	glUniformMatrix4fv(projView, 1, GL_FALSE, &m_m4ProjView[0][0]);
+	glUniformMatrix4fv(model, 1, GL_FALSE, &m_m4Model[0][0]);
+	glUniformMatrix4fv(rotation, 1, GL_FALSE, &m_m4ModelRotation[0][0]);
+	glUniform3f(light, 2, 0, 0);
+	glUniform3f(camera, m_v3Camera_Position.x, m_v3Camera_Position.y, m_v3Camera_Position.z);
+	glUniform1i(baseTex, 0);
+	glUniform1i(detailTex, 1);
+
+	int attribPosition = glGetAttribLocation(shader, "a_Position");
+	int attribNormal = glGetAttribLocation(shader, "a_Normal");
+	int attribTex = glGetAttribLocation(shader, "a_Tex");
+
+	glEnableVertexAttribArray(attribPosition);
+	glEnableVertexAttribArray(attribNormal);
+	glEnableVertexAttribArray(attribTex);
+
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBO_HeightMapVertices);
+
+	glVertexAttribPointer(attribPosition, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 8, 0);
+	glVertexAttribPointer(attribNormal, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 8, (GLvoid*)(sizeof(float) * 3));
+	glVertexAttribPointer(attribTex, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 8, (GLvoid*)(sizeof(float) * 6));
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_VBO_HeightMapIndices);
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, m_Tex_HeightMap);
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, m_Tex_HeightMapDetail);
+
+	glLineWidth(1.f);
+	//glDrawElements(GL_LINE_STRIP, m_Count_HeightMapIndices, GL_UNSIGNED_INT, 0);
+	glDrawElements(GL_TRIANGLE_STRIP, m_Count_HeightMapIndices, GL_UNSIGNED_INT, 0);
+
+	glDisableVertexAttribArray(attribPosition);
+	glDisableVertexAttribArray(attribNormal);
+	glDisableVertexAttribArray(attribTex);
+}
+
+void Renderer::DrawSkyBox()
+{
+	GLuint shader = m_Shader_SkyBox;
+	
+	glDepthMask(GL_FALSE);
+	glDisable(GL_CULL_FACE);
+
+	glUseProgram(shader);
+	
+	GLuint pvm = glGetUniformLocation(shader, "u_PVM");
+
+	glm::mat4 mat4PVM = m_m4ProjView*m_m4Model;
+
+	glUniformMatrix4fv(pvm, 1, GL_FALSE, &mat4PVM[0][0]);
+
+	int attribPosition = glGetAttribLocation(shader, "a_Position");
+
+	glEnableVertexAttribArray(attribPosition);
+
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBO_SkyBox);
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, m_Tex_Cube_SkyBox);
+
+	glVertexAttribPointer(attribPosition, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+	glDrawArrays(GL_TRIANGLES, 0, 36);
+
+	glDisableVertexAttribArray(attribPosition);
+	glDepthMask(GL_TRUE);
+}
+
+void Renderer::LoadHeightMapImage(char* pFileName, int nWidth, int nHeight)
+{
+	BYTE *pHeightMapPixels = new BYTE[nWidth * nHeight];
+	m_HeightMapImageWidth = nWidth;
+	m_HeightMapImageHeight = nHeight;
+
+	FILE* file;
+	size_t readsize;
+	fopen_s(&file, pFileName, "rb");
+
+	if (!file)
+	{
+		std::cout << "height map raw file not exist. \n";
+		return;
+	}
+
+	readsize = fread(pHeightMapPixels, 1, nWidth * nHeight * sizeof(BYTE), file);
+	fclose(file);
+
+	m_pHeightMapImage = new BYTE[nWidth * nHeight];
+	for (int y = 0; y < nHeight; y++)
+	{
+		for (int x = 0; x < nWidth; x++)
+		{
+			m_pHeightMapImage[x + ((nHeight - 1 - y)*nWidth)] = pHeightMapPixels[x + (y*nWidth)];
+		}
+	}
+
+	if (pHeightMapPixels) delete[] pHeightMapPixels;
+}
+
+glm::vec3 Renderer::GetHeightMapNormal(int x, int y)
+{
+	if ((x < 0.0f) || (y < 0.0f) || (x >= m_HeightMapImageWidth) || (y >= m_HeightMapImageHeight))
+	{
+		return glm::vec3(0, 0, 0);
+	}
+
+	int nHeightMapIndex = x + (y * m_HeightMapImageWidth);
+	int xHeightMapAdd = (x < (m_HeightMapImageWidth - 1)) ? 1 : -1;
+	int zHeightMapAdd = (y < (m_HeightMapImageHeight - 1)) ? m_HeightMapImageWidth : -m_HeightMapImageWidth;
+	float y1 = (float)m_pHeightMapImage[nHeightMapIndex];
+	float y2 = (float)m_pHeightMapImage[nHeightMapIndex + xHeightMapAdd];
+	float y3 = (float)m_pHeightMapImage[nHeightMapIndex + zHeightMapAdd];
+
+	glm::vec3 edge1 = glm::vec3(0.0f, y3 - y1, 1.f);
+	glm::vec3 edge2 = glm::vec3(1.f, y2 - y1, 0.0f);
+	glm::vec3 normal = glm::cross(edge1, edge2);
+
+	return(normal);
+}
+
+void Renderer::InitializeHeightMapGridMesh(int nWidth, int nHeight)
+{
+	int nVertices = (m_HeightMapImageWidth) * (m_HeightMapImageHeight);
+	int nStride = 3 + 3 + 2;
+	int nFloats = nVertices * nStride;
+
+	float* pVertices = new float[nFloats];
+	
+	float fHeight = 0.0f, fMinHeight = +FLT_MAX, fMaxHeight = -FLT_MAX;
+
+	for (int i = 0, y = 0; y < nHeight; y++)
+	{
+		for (int x = 0; x < nWidth; x++, i++)
+		{
+			fHeight = m_pHeightMapImage[x + (y*nWidth)];
+
+			pVertices[i*nStride + 0] = (float)x - (float)nWidth/2.f;
+			pVertices[i*nStride + 1] = fHeight;
+			pVertices[i*nStride + 2] = (float)y - (float)nHeight / 2.f;
+
+			glm::vec3 nor = GetHeightMapNormal(x, y);
+			pVertices[i*nStride + 3] = nor.x;
+			pVertices[i*nStride + 4] = nor.y;
+			pVertices[i*nStride + 5] = nor.z;
+
+			pVertices[i*nStride + 6] = float(x) / float(m_HeightMapImageWidth - 1);
+			pVertices[i*nStride + 7] = float(m_HeightMapImageHeight - 1 - y) / float(m_HeightMapImageHeight - 1);
+		}
+	}
+	
+	glGenBuffers(1, &m_VBO_HeightMapVertices);
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBO_HeightMapVertices);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float)*nFloats, pVertices, GL_STATIC_DRAW);
+
+	delete[] pVertices;
+
+	int nIndices = ((nWidth * 2)*(nHeight - 1)) + ((nHeight - 1) - 1);
+	m_Count_HeightMapIndices = nIndices;
+	UINT *pIndices = new UINT[nIndices];
+
+	for (int j = 0, z = 0; z < nHeight - 1; z++)
+	{
+		if ((z % 2) == 0)
+		{
+			for (int x = 0; x < nWidth; x++)
+			{
+				if ((x == 0) && (z > 0)) pIndices[j++] = (UINT)(x + (z * nWidth));
+				pIndices[j++] = (UINT)(x + (z * nWidth));
+				pIndices[j++] = (UINT)((x + (z * nWidth)) + nWidth);
+			}
+		}
+		else
+		{
+			for (int x = nWidth - 1; x >= 0; x--)
+			{
+				if (x == (nWidth - 1)) pIndices[j++] = (UINT)(x + (z * nWidth));
+				pIndices[j++] = (UINT)(x + (z * nWidth));
+				pIndices[j++] = (UINT)((x + (z * nWidth)) + nWidth);
+			}
+		}
+	}
+
+	glGenBuffers(1, &m_VBO_HeightMapIndices);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_VBO_HeightMapIndices);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(UINT)*nIndices, pIndices, GL_STATIC_DRAW);
+
+	delete[] pIndices;
+}
+
+void Renderer::InitializeHeightMap()
+{
+	char* filename = "./Textures/HeightMap/HeightMap.raw";
+	int nWidth = 513;
+	int nHeight = 513;
+
+	//Compile HeightMap Shader
+	m_Shader_HeightMap = CompileShaders("./Shaders/HeightMapShaders/HeightMap.vs", "./Shaders/HeightMapShaders/HeightMap.fs");
+
+	//Load HeightMap
+	LoadHeightMapImage(filename, nWidth, nHeight);
+
+	//Generate HeightMap Mesh
+	InitializeHeightMapGridMesh(nWidth, nHeight);
+
+	//Load Textures
+	m_Tex_HeightMap = CreatePngTexture("./Textures/HeightMap/world.png");
+	m_Tex_HeightMapDetail = CreatePngTexture("./Textures/HeightMap/base.png");
+	m_Tex_HeightMapWater = CreatePngTexture("./Textures/HeightMap/water.png");
+}
+
+void Renderer::InitializeSkyBox()
+{
+	//Compile SkyBox Shader
+	m_Shader_SkyBox = CompileShaders("./Shaders/SkyBoxShaders/SkyBox.vs", "./Shaders/SkyBoxShaders/SkyBox.fs");
+
+
+	float temp = 50.f;
+
+	float cube[] = {
+		-temp, -temp, temp,
+		temp, temp, temp, 
+		-temp, temp, temp,
+		-temp, -temp, temp,
+		temp, -temp, temp,
+		temp, temp, temp, 
+
+		temp, -temp, temp, 
+		temp, temp, -temp, 
+		temp, temp, temp,
+		temp, -temp, temp, 
+		temp, -temp, -temp,
+		temp, temp, -temp, 
+
+		-temp, temp, temp, 
+		temp, temp, -temp, 
+		-temp, temp, -temp,
+		-temp, temp, temp, 
+		temp, temp, temp, 
+		temp, temp, -temp, 
+
+		-temp, -temp, -temp,
+		-temp, temp, -temp,
+		temp, temp, -temp, 
+		-temp, -temp, -temp,
+		temp, temp, -temp, 
+		temp, -temp, -temp,
+
+		-temp, -temp, temp,
+		-temp, temp, temp, 
+		-temp, temp, -temp,
+		-temp, -temp, temp,
+		-temp, temp, -temp,
+		-temp, -temp, -temp,
+
+		-temp, -temp, temp, 
+		temp, -temp, -temp, 
+		temp, -temp, temp, 
+		-temp, -temp, temp, 
+		-temp, -temp, -temp,
+		temp, -temp, -temp, 
+	};
+
+	glGenBuffers(1, &m_VBO_SkyBox);
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBO_SkyBox);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(cube), cube, GL_STATIC_DRAW);
+
+	//Load Textures
+	glGenTextures(1, &m_Tex_Cube_SkyBox);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, m_Tex_Cube_SkyBox);
+
+	char* filePath = "./Textures/SkyBox/SkyBox1/front.png";
+	std::vector<unsigned char> imageFront;
+	unsigned width, height;
+	unsigned error = lodepng::decode(imageFront, width, height, filePath);
+	glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, &imageFront[0]);
+
+	filePath = "./Textures/SkyBox/SkyBox1/back.png";
+	std::vector<unsigned char> imageBack;
+	error = lodepng::decode(imageBack, width, height, filePath);
+	glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_X, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, &imageBack[0]);
+
+	filePath = "./Textures/SkyBox/SkyBox1/left.png";
+	std::vector<unsigned char> imageLeft;
+	error = lodepng::decode(imageLeft, width, height, filePath);
+	glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Z, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, &imageLeft[0]);
+
+	filePath = "./Textures/SkyBox/SkyBox1/right.png";
+	std::vector<unsigned char> imageRight;
+	error = lodepng::decode(imageRight, width, height, filePath);
+	glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, &imageRight[0]);
+
+	filePath = "./Textures/SkyBox/SkyBox1/top.png";
+	std::vector<unsigned char> imageTop;
+	error = lodepng::decode(imageTop, width, height, filePath);
+	glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Y, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, &imageTop[0]);
+
+	filePath = "./Textures/SkyBox/SkyBox1/bottom.png";
+	std::vector<unsigned char> imageBottom;
+	error = lodepng::decode(imageBottom, width, height, filePath);
+	glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, &imageBottom[0]);
+
+	glTexParameterf(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameterf(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 }

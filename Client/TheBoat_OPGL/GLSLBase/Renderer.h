@@ -47,6 +47,11 @@ public:
 
 	// Camera Setting 
 	void SetCameraPos(float x, float y, float z);
+	
+	void DrawHeightMap();
+	void DrawSkyBox();
+	void DrawTexture(GLuint texID, GLuint x, GLuint y, GLuint width, GLuint height);
+	
 	void SetCameraLook(float x, float y, float z);
 private:
 	void Initialize(int windowSizeX, int windowSizeY);
@@ -152,5 +157,27 @@ private:
 	
 	GLuint m_Shader_Bloom_P2;
 	GLuint m_Shader_Bloom_P3;
+
+	//HeightMap resources
+	void InitializeHeightMapGridMesh(int nWidth, int nHeight); 
+	void InitializeHeightMap();
+	void LoadHeightMapImage(char* pFileName, int nWidth, int nHeight);
+	glm::vec3 GetHeightMapNormal(int x, int y);
+	int m_HeightMapImageWidth;
+	int m_HeightMapImageHeight;
+	unsigned char* m_pHeightMapImage;
+	GLuint m_VBO_HeightMapVertices;
+	GLuint m_VBO_HeightMapIndices;
+	GLuint m_Count_HeightMapIndices;
+	GLuint m_Shader_HeightMap;
+	GLuint m_Tex_HeightMap;
+	GLuint m_Tex_HeightMapDetail;
+	GLuint m_Tex_HeightMapWater;
+
+	//SkyBox resources
+	void InitializeSkyBox();
+	GLuint m_Shader_SkyBox;
+	GLuint m_VBO_SkyBox;
+	GLuint m_Tex_Cube_SkyBox;
 };
 

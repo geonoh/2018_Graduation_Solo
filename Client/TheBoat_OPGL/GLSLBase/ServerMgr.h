@@ -18,7 +18,6 @@ class ServerMgr
 	WSADATA wsa;
 	SOCKET sock;
 	SOCKADDR_IN server_addr;
-	HWND async_handle;
 	WSABUF send_wsabuf;
 	WSABUF recv_wsabuf;
 	int clients_id = 0;
@@ -40,7 +39,7 @@ class ServerMgr
 	Vector3 sc_look_vec;
 
 	Vector3 collision_pos;
-	float client_hp[4] = { 0 };
+	int client_hp[4] = { 0 };
 	int camera_id = 0;
 	string server_ip;
 
@@ -63,7 +62,7 @@ public:
 	void IPInput();
 	void IPInput(string);
 
-	void Initialize(HWND& hwnd);
+	bool Initialize();
 	void ClientError();
 	void ReadPacket();
 	void SendPacket(int type);
@@ -83,7 +82,7 @@ public:
 	Vector3 ReturnItemPosition();
 
 	// 플레이어 체력
-	float GetPlayerHP(int p_n);
+	int GetPlayerHP(int p_n);
 
 	// 
 	void ReturnBuildingPosition(Vector3* building_pos);
