@@ -1,0 +1,149 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="Renderer.cpp">
+      <Filter>00.Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="LoadPng.cpp">
+      <Filter>01.LoadPng</Filter>
+    </ClCompile>
+    <ClCompile Include="GLSLBase.cpp">
+      <Filter>00.Main</Filter>
+    </ClCompile>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>00.Main</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Renderer.h">
+      <Filter>00.Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="LoadPng.h">
+      <Filter>01.LoadPng</Filter>
+    </ClInclude>
+    <ClInclude Include="stdafx.h">
+      <Filter>00.Main</Filter>
+    </ClInclude>
+    <ClInclude Include="targetver.h">
+      <Filter>00.Main</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Shaders\SolidRect.vs">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="Shaders\SolidRect.fs">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="Shaders\STParticle.fs">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="Shaders\STParticle.vs">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="Shaders\Test.fs">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="Shaders\Test.vs">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="Shaders\Radar.fs">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="Shaders\Radar.vs">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="Shaders\FillAll.fs">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="Shaders\FillAll.vs">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="Shaders\Texture.fs">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="Shaders\Texture.vs">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="Shaders\q1.fs">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="Shaders\q1.vs">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="Shaders\q2.fs">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="Shaders\q2.vs">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="Shaders\Texture_App.fs">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="Shaders\Texture_App.vs">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="Shaders\Texture_Anim.fs">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="Shaders\Texture_Anim.vs">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="Shaders\ProxyGeo.fs">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="Shaders\ProxyGeo.vs">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="Shaders\Particle.fs">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="Shaders\Particle.vs">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="Shaders\Proj.fs">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="Shaders\Proj.vs">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="Shaders\Test1.fs">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="Shaders\Test1.vs">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="Shaders\BloomP2.fs">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="Shaders\BloomP2.vs">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="Shaders\BloomP3.fs">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="Shaders\BloomP3.vs">
+      <Filter>Shader</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="ReadMe.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Shader">
+      <UniqueIdentifier>{67bf60d2-2daa-4412-a92a-1ef604d4703f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="00.Renderer">
+      <UniqueIdentifier>{0fa146cb-7a8a-4326-88a5-349a8d99ec66}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01.LoadPng">
+      <UniqueIdentifier>{26013841-d27f-4fc8-aa66-d422f23819e2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="00.Main">
+      <UniqueIdentifier>{cbc0185c-50fd-450b-9d67-0b626168df74}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03.ServerManager">
+      <UniqueIdentifier>{4f334154-2a4a-485f-ad93-a97304e059b3}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
