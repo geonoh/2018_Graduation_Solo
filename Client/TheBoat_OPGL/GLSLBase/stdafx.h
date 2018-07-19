@@ -13,11 +13,12 @@
 #include <thread>
 #include <mutex>
 //#include "../../../Server/TheBoat_server/TheBoat_server/protocol.h"
-#include "protocol.h"
 #include "Dependencies\glew.h"
 #include "Dependencies\freeglut.h"
-
+#include "../../../Server/TheBoat_server(OpenGL)/TheBoat_server/protocol.h"
 
 #define VIEW_ANGLE	45.f
-
+#define SCREEN_WIDTH	800
+#define SCREEN_HEIGHT	600
+#define NUM_OF_PLAYER	2
 using namespace std;

@@ -12,6 +12,12 @@
 
 class Renderer
 {
+private:
+	// Making Normalizsed Vector
+	// From Model to Camera Position
+	glm::vec3 MakingNormalizedLookVector(glm::vec3& eye, glm::vec3& object);
+	float GetVectorSize(glm::vec3& input_vec);
+	
 public:
 	Renderer(int windowSizeX, int windowSizeY);
 	~Renderer();

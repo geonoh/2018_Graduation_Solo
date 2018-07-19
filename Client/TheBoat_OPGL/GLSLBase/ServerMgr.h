@@ -2,7 +2,7 @@
 
 // Server 에서 받아오는 Player의 정보 
 struct SPlayer {
-	Vector3 pos;
+	VECTOR3 pos;
 	int player_status;
 };
 
@@ -36,19 +36,19 @@ class ServerMgr
 	DWORD saved_packet_size = 0;
 
 	SPlayer sc_vec_buff[4];
-	Vector3 sc_look_vec;
+	VECTOR3 sc_look_vec;
 
-	Vector3 collision_pos;
+	VECTOR3 collision_pos;
 	int client_hp[4] = { 0 };
 	int camera_id = 0;
 	string server_ip;
 
 	// 아이템 생성 부분
-	Vector3 item_pos;
+	VECTOR3 item_pos;
 	bool is_item_gen;
 
-	Vector3 building_pos[OBJECT_BUILDING];
-	Vector3 building_extents[OBJECT_BUILDING];
+	VECTOR3 building_pos[OBJECT_BUILDING];
+	VECTOR3 building_extents[OBJECT_BUILDING];
 
 	int ammo_counter = 0;
 
@@ -66,7 +66,7 @@ public:
 	void ClientError();
 	void ReadPacket();
 	void SendPacket(int type);
-	void SendPacket(int type, Vector3& xmvector);
+	void SendPacket(int type, VECTOR3& xmvector);
 	void ProcessPacket(char* ptr);
 	void ErrorDisplay(const char* msg, int err_no);
 	int GetAmmo();
@@ -75,16 +75,16 @@ public:
 	int ReturnCameraID();
 	Bullet GetBullet();
 	SPlayer ReturnPlayerPosStatus(int client_id);
-	Vector3 ReturnLookVector();
-	Vector3 ReturnCollsionPosition(bool* is_collide);
+	VECTOR3 ReturnLookVector();
+	VECTOR3 ReturnCollsionPosition(bool* is_collide);
 	// 아이템 생성 후 위치 Return
 	bool IsItemGen();
-	Vector3 ReturnItemPosition();
+	VECTOR3 ReturnItemPosition();
 
 	// 플레이어 체력
 	int GetPlayerHP(int p_n);
 
 	// 
-	void ReturnBuildingPosition(Vector3* building_pos);
-	void ReturnBuildingExtents(Vector3* building_pos);
+	void ReturnBuildingPosition(VECTOR3* building_pos);
+	void ReturnBuildingExtents(VECTOR3* building_pos);
 };

@@ -86,7 +86,7 @@ void Renderer::SetCameraLook(float x, float y, float z) {
 		m_v3Camera_Lookat,
 		m_v3Camera_Up
 	);
-	m_m4PersProj = glm::perspectiveRH((float)VIEW_ANGLE, 1.f, 1.f, 4.f);
+	m_m4PersProj = glm::perspectiveRH((float)VIEW_ANGLE, 1.f, 1.f, 1000.f);
 	m_m4ProjView = m_m4PersProj * m_m4View;
 }
 
@@ -97,7 +97,7 @@ void Renderer::SetCameraPos(float x, float y, float z) {
 		m_v3Camera_Lookat,
 		m_v3Camera_Up
 	);
-	m_m4PersProj = glm::perspectiveRH((float)VIEW_ANGLE, 1.f, 1.f, 4.f);
+	m_m4PersProj = glm::perspectiveRH((float)VIEW_ANGLE, 1.f, 1.f, 1000.f);
 	m_m4ProjView = m_m4PersProj * m_m4View;
 }
 
@@ -131,10 +131,24 @@ void Renderer::Initialize(int windowSizeX, int windowSizeY)
 	//Create Particles
 	CreateParticle();
 
+	// 
+	float denom = sqrt(0.f*0.f + 30.f*30.f + 1.f*1.f);
+	
 	//Initialize camera settings
-	m_v3Camera_Position = glm::vec3(0.f, 30.f, 0.f);
-	m_v3Camera_Lookat = glm::vec3(0.f, 30.f, 1.f);
-	m_v3Camera_Up = glm::vec3(0.f, 1.f, 0.f);
+	m_v3Camera_Position = glm::vec3(0.f, 60.f, 10.5f);
+	m_v3Camera_Lookat = glm::vec3(0.f, 0, 10.5f);
+	glm::vec3 model_pos = glm::vec3(-150.f, 90, 0.f);
+
+
+	glm::mat4 rot_mat;
+	glm::dot(m_v3Camera_Position, model_pos);
+	float between_cos = glm::dot(m_v3Camera_Position, model_pos) / (GetVectorSize(m_v3Camera_Position) * GetVectorSize(model_pos));
+	
+	//glm::rotate()
+	//glm::rotate()
+	//m_v3Camera_Lookat = MakingNormalizedLookVector(m_v3Camera_Position, model_pos);
+	printf("%f %f %f\n", m_v3Camera_Lookat.x, m_v3Camera_Lookat.y, m_v3Camera_Lookat.z);
+	m_v3Camera_Up = glm::vec3(1.f, 0.f, 0.f);
 	m_m4View = glm::lookAt(
 		m_v3Camera_Position,
 		m_v3Camera_Lookat,
@@ -173,6 +187,8 @@ void Renderer::Initialize(int windowSizeX, int windowSizeY)
 
 	//SkyBox Initialization
 	InitializeSkyBox();
+
+	m_Initialized = true;
 }
 
 bool Renderer::IsInitialized()
@@ -2027,4 +2043,24 @@ void Renderer::InitializeSkyBox()
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+}
+
+glm::vec3 Renderer::MakingNormalizedLookVector(glm::vec3& eye, glm::vec3& object) {
+	float diff_x = object.x - eye.x;
+	float diff_y = object.y - eye.y;
+	float diff_z = object.z - eye.z;
+
+	float dinominator = sqrt(diff_x * diff_x + diff_y * diff_y + diff_z * diff_z);
+
+	glm::vec3 norm_vec;
+	norm_vec.x = diff_x / dinominator;
+	norm_vec.y = diff_y / dinominator;
+	norm_vec.z = diff_z / dinominator;
+
+	return norm_vec;
+}
+
+float Renderer::GetVectorSize(glm::vec3& input_vec) {
+	float return_value = sqrt(input_vec.x * input_vec.x + input_vec.y*input_vec.y + input_vec.z*input_vec.z);
+	return return_value;
 }

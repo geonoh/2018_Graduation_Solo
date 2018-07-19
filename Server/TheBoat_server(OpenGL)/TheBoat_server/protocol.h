@@ -122,7 +122,7 @@
 #define MAP_POINT8_Z	3076.07
 ///////////////////////////////////////////////////
 
-struct Vector3 {
+struct VECTOR3 {
 	float x, y, z;
 };
 
@@ -158,7 +158,7 @@ struct SC_PACKET_LOOCVEC {
 	WORD id;
 	//glm::vec3 look_vec;
 	//DirectX::XMFLOAT3 look_vec;
-	Vector3 look_vec;
+	VECTOR3 look_vec;
 	int player_status;
 };
 
@@ -198,7 +198,7 @@ struct SC_PACKET_BULLET {
 	WORD bullet_id;
 	//DirectX::XMFLOAT3 pos;
 	//glm::vec3 pos;
-	Vector3 pos;
+	VECTOR3 pos;
 	float x, y, z;
 };
 
@@ -234,7 +234,7 @@ struct CS_PACKET_KEYUP {
 	BYTE type;
 	//DirectX::XMFLOAT3 look_vec;
 	//glm::vec3 look_vec;
-	Vector3 look_vec;
+	VECTOR3 look_vec;
 };
 struct CS_PACKET_KEYDOWN {
 	BYTE size;
@@ -295,6 +295,6 @@ struct CS_PACKET_LOOK_VECTOR {
 	BYTE type;
 	//DirectX::XMVECTOR look_vector;
 	//glm::vec3 look_vector;
-	Vector3 look_vector;
+	VECTOR3 look_vector;
 };
 

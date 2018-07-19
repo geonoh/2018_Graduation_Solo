@@ -11,6 +11,7 @@ but WITHOUT ANY WARRANTY.
 #include "stdafx.h"
 #include "Renderer.h"
 #include "ServerMgr.h"
+#include "Player.h"
 
 #define Dev_
 #define INCREASE_HEIGHT	0
@@ -28,12 +29,19 @@ int g_LBState = GLUT_UP;
 
 // Camera var
 float camera_pos_x = 0.f;
-float camera_pos_y = 0.5f;
-float camera_pos_z = 3.f;
-
+// Cube 그릴때 필요한것
+//float camera_pos_y = 0.5f;
+//float camera_pos_z = 3.f;
 float camera_look_x = 0.f;
-float camera_look_y = 0.f;
-float camera_look_z = 0.f;
+
+
+// Skybox, Terrain
+float camera_pos_y = 30.f;
+float camera_pos_z = 0.f;
+float camera_look_y = 30.f;
+float camera_look_z = 1.f;
+
+
 
 // ServerManager
 ServerMgr server_mgr;
@@ -46,9 +54,10 @@ void InitSocket();
 void NetworkThread();
 
 // Player HP
-int player_hp = 0;
-// Player Look vector
-Vector3 player_lookvec = { 0 };
+//int player_hp = 0;
+//VECTOR3 player_lookvec = { 0 };
+//VECTOR3 player_pos = { 0 };
+Player players[NUM_OF_PLAYER];
 
 // Client ID
 int client_id = NULL;
@@ -100,7 +109,7 @@ int main(int argc, char **argv)
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
 	glutInitWindowPosition(0, 0);
-	glutInitWindowSize(1500, 1000);
+	glutInitWindowSize(SCREEN_WIDTH, SCREEN_HEIGHT);
 	glutCreateWindow("TheBoat Client");
 	glewInit();
 	if (glewIsSupported("GL_VERSION_3_0"))
@@ -118,7 +127,7 @@ int main(int argc, char **argv)
 
 
 	// Initialize Renderer
-	g_Renderer = new Renderer(1500, 1000);
+	g_Renderer = new Renderer(SCREEN_WIDTH, SCREEN_HEIGHT);
 	if (!g_Renderer->IsInitialized())
 	{
 		std::cout << "Renderer could not be initialized.. \n";
@@ -191,7 +200,7 @@ void NetworkThread() {
 				if (server_mgr.IsItemGen())
 					server_mgr.ReturnItemPosition();
 
-				player_hp = server_mgr.GetPlayerHP(client_id);
+				players[client_id].SetHP(server_mgr.GetPlayerHP(client_id));
 			}
 		}
 	}
@@ -251,42 +260,42 @@ void KeyInput(unsigned char key, int x, int y)
 			keyboard[CS_KEY_PRESS_UP] = true;
 			server_mgr.SendPacket(CS_KEY_PRESS_UP);
 		}
-		camera_pos_z -= 0.01f;
+		camera_pos_z -= 0.1f;
 		break;
 	case 'a':
 		if (keyboard[CS_KEY_PRESS_LEFT] == false) {
 			keyboard[CS_KEY_PRESS_LEFT] = true;
 			server_mgr.SendPacket(CS_KEY_PRESS_LEFT);
 		}
-		camera_pos_x -= 0.01f;
+		camera_pos_x -= 0.1f;
 		break;
 	case 's':
 		if (keyboard[CS_KEY_PRESS_DOWN] == false) {
 			keyboard[CS_KEY_PRESS_DOWN] = true;
 			server_mgr.SendPacket(CS_KEY_PRESS_DOWN);
 		}
-		camera_pos_z += 0.01f;
+		camera_pos_z += 0.1f;
 		break;
 	case 'd':
 		if (keyboard[CS_KEY_PRESS_RIGHT] == false) {
 			keyboard[CS_KEY_PRESS_RIGHT] = true;
 			server_mgr.SendPacket(CS_KEY_PRESS_RIGHT);
 		}
-		camera_pos_x += 0.01f;
+		camera_pos_x += 0.1f;
 		break;
 	case 'q':
 		if (keyboard[INCREASE_HEIGHT] == false) {
 			keyboard[INCREASE_HEIGHT] = true;
 			//server_mgr.SendPacket(CS_KEY_PRESS_UP, player_lookvec);
 		}
-		camera_pos_y += 0.01f;
+		camera_pos_y += 0.1f;
 		break;
 	case 'e':
 		if (keyboard[DECREASE_HEIGHT] == false) {
 			keyboard[DECREASE_HEIGHT] = true;
 			//server_mgr.SendPacket(CS_KEY_PRESS_UP, player_lookvec);
 		}
-		camera_pos_y -= 0.01f;
+		camera_pos_y -= 0.1f;
 		break;
 	case VK_ESCAPE:
 		delete g_Renderer;
@@ -294,7 +303,9 @@ void KeyInput(unsigned char key, int x, int y)
 		break;
 	}
 	if (key == 'w' || key == 'a' || key == 's' || key == 'd' || key == 'q' || key == 'e') {
+		VECTOR3 normalized_lookvec = { 0 };
 		g_Renderer->SetCameraPos(camera_pos_x, camera_pos_y, camera_pos_z);
+		//g_Renderer->SetCameraLook();
 		printf("[Camera] %f, %f, %f \n", camera_pos_x, camera_pos_y, camera_pos_z);
 	}
 	RenderScene();
@@ -308,10 +319,14 @@ void MouseMove(int x, int y)
 	//g_prevY = (float)y;
 	// 마우스 움직일때마다 Player의 LookVector을 보내줘야한다. 
 	// 카메라의 Lookvec을 조종하므로써 카메라 앵글을 조절한다. 
-	//g_Renderer->SetCameraLook(player_lookvec.x, player_lookvec.y, player_lookvec.z);
-	float width_ratio = -(1 - ((float)x / 500.f));
-	float height_ratio = 1 - ((float)y / 500.f);
-	g_Renderer->SetCameraLook(width_ratio, height_ratio, 0.f);
+	//g_Renderer->SetCameraLook(player_lookvec.x, play5er_lookvec.y, player_lookvec.z);
+
+	VECTOR3 normalized_lookvec = { 0 };
+	
+	float denominator = sqrt(camera_look_x * camera_look_x + camera_look_y * camera_look_y + camera_look_z * camera_look_z);
+	float width_ratio = -(camera_pos_x - ((float)x / SCREEN_WIDTH));
+	float height_ratio = camera_pos_y - ((float)y / SCREEN_HEIGHT);
+	g_Renderer->SetCameraLook(width_ratio / denominator, height_ratio / denominator, 1.f / denominator);
 
 
 	printf("마우스 좌표 : [%d, %d], 카메라 look vec : [%f, %f] \n", x, y, width_ratio, height_ratio);

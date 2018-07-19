@@ -69,14 +69,18 @@ void ServerMgr::DecreaseAmmo() {
 }
 
 void ServerMgr::ReadPacket() {
-	DWORD io_bytes, io_flag = 0;
-
-	int retval = WSARecv(sock, &recv_wsabuf, 1, &io_bytes, &io_flag, NULL, NULL);
+	int io_bytes = 0, io_flag = 0;
+	printf("읽긴 하냐\n");
+	//int retval = WSARecv(sock, &recv_wsabuf, 1, &io_bytes, &io_flag, NULL, NULL);
+	
+	int retval = recv(sock, recv_buffer, io_bytes, io_flag);
 	if (retval == 1) {
-		int err_code = WSAGetLastError();
-		ErrorDisplay("[WSARecv] : 에러 ", err_code);
+		//int err_code = WSAGetLastError();
+		//ErrorDisplay("[WSARecv] : 에러 ", err_code);
+		printf("Recv Err\n");
 	}
 	BYTE* ptr = reinterpret_cast<BYTE*>(recv_buffer);
+	printf("오 읽음 ptr->1 : %d \n",ptr[0]);
 
 	while (io_bytes != 0) {
 		if (in_packet_size == 0)
@@ -235,7 +239,7 @@ bool ServerMgr::IsItemGen() {
 	return is_item_gen;
 }
 
-void ServerMgr::ReturnBuildingPosition(Vector3* input_building_pos) {
+void ServerMgr::ReturnBuildingPosition(VECTOR3* input_building_pos) {
 	for (int i = 0; i < OBJECT_BUILDING; ++i) {
 		input_building_pos[i].x = building_pos[i].x;
 		input_building_pos[i].y = building_pos[i].y;
@@ -243,7 +247,7 @@ void ServerMgr::ReturnBuildingPosition(Vector3* input_building_pos) {
 	}
 }
 
-void ServerMgr::ReturnBuildingExtents(Vector3* input_building_extents) {
+void ServerMgr::ReturnBuildingExtents(VECTOR3* input_building_extents) {
 	for (int i = 0; i < OBJECT_BUILDING; ++i) {
 		input_building_extents[i].x = building_extents[i].x;
 		input_building_extents[i].y = building_extents[i].y;
@@ -252,12 +256,12 @@ void ServerMgr::ReturnBuildingExtents(Vector3* input_building_extents) {
 }
 
 
-Vector3 ServerMgr::ReturnItemPosition() {
+VECTOR3 ServerMgr::ReturnItemPosition() {
 	is_item_gen = false;
 	return item_pos;
 }
 
-Vector3 ServerMgr::ReturnCollsionPosition(bool* is_collide) {
+VECTOR3 ServerMgr::ReturnCollsionPosition(bool* is_collide) {
 	*is_collide = s_is_collide;
 	s_is_collide = false;
 	return collision_pos;
@@ -391,7 +395,7 @@ SPlayer ServerMgr::ReturnPlayerPosStatus(int client_id) {
 	return sc_vec_buff[client_id];
 }
 
-Vector3 ServerMgr::ReturnLookVector() {
+VECTOR3 ServerMgr::ReturnLookVector() {
 	return sc_look_vec;
 }
 int ServerMgr::ReturnCameraID() {
