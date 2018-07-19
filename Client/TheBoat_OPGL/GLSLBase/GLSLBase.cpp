@@ -101,6 +101,7 @@ void SpecialKeyInput(int key, int x, int y)
 	RenderScene();
 }
 
+//int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLine, int nCmdShow)
 int main(int argc, char **argv)
 {
 	// Ελ½Ε
