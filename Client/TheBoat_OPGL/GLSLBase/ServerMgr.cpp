@@ -30,7 +30,8 @@ bool ServerMgr::Initialize() {
 	WSADATA	wsadata;
 	WSAStartup(MAKEWORD(2, 2), &wsadata);
 
-	sock = socket(AF_INET, SOCK_STREAM, 0);
+	//sock = socket(AF_INET, SOCK_STREAM, 0);
+	sock = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, NULL, 0, 0);
 
 	// 네이글 알고리즘 off
 	int opt_val = TRUE;
@@ -48,7 +49,9 @@ bool ServerMgr::Initialize() {
 	server_addr.sin_port = htons(SERVER_PORT);
 	server_addr.sin_addr.s_addr = inet_addr(server_ip.c_str());
 
-	retval = connect(sock, (SOCKADDR*)&server_addr, sizeof(server_addr));
+	//retval = connect(sock, (SOCKADDR*)&server_addr, sizeof(server_addr));
+	retval = WSAConnect(sock, (sockaddr *)&server_addr, sizeof(server_addr), NULL, NULL, NULL, NULL);
+
 	if (retval == SOCKET_ERROR) {
 		printf("---------------------------------\n");
 		printf("- Connect Err\n");
@@ -69,14 +72,14 @@ void ServerMgr::DecreaseAmmo() {
 }
 
 void ServerMgr::ReadPacket() {
-	int io_bytes = 0, io_flag = 0;
+	DWORD io_bytes = 0, io_flag = 0;
 	printf("읽긴 하냐\n");
-	//int retval = WSARecv(sock, &recv_wsabuf, 1, &io_bytes, &io_flag, NULL, NULL);
+	int retval = WSARecv(sock, &recv_wsabuf, 1, &io_bytes, &io_flag, NULL, NULL);
 	
-	int retval = recv(sock, recv_buffer, io_bytes, io_flag);
+	//int retval = recv(sock, recv_buffer, io_bytes, io_flag);
 	if (retval == 1) {
-		//int err_code = WSAGetLastError();
-		//ErrorDisplay("[WSARecv] : 에러 ", err_code);
+		int err_code = WSAGetLastError();
+		ErrorDisplay("[WSARecv] : 에러 ", err_code);
 		printf("Recv Err\n");
 	}
 	BYTE* ptr = reinterpret_cast<BYTE*>(recv_buffer);
