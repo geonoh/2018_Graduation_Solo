@@ -1,0 +1,74 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="리소스 파일">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="00.Fundamental">
+      <UniqueIdentifier>{09cc90b8-8b27-41e7-82c4-553edbb087dc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01.Rendering">
+      <UniqueIdentifier>{bb9dbc94-7034-48fe-96a3-c6feccf03de2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.ServerManager">
+      <UniqueIdentifier>{9587ff29-896f-4a40-a41c-b235bccc1fe0}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Resource.h">
+      <Filter>00.Fundamental</Filter>
+    </ClInclude>
+    <ClInclude Include="stdafx.h">
+      <Filter>00.Fundamental</Filter>
+    </ClInclude>
+    <ClInclude Include="targetver.h">
+      <Filter>00.Fundamental</Filter>
+    </ClInclude>
+    <ClInclude Include="TheBoat.h">
+      <Filter>00.Fundamental</Filter>
+    </ClInclude>
+    <ClInclude Include="LoadPng.h">
+      <Filter>01.Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer.h">
+      <Filter>01.Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="ServerMgr.h">
+      <Filter>02.ServerManager</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Server\TheBoat_server(OpenGL)\TheBoat_server\protocol.h">
+      <Filter>02.ServerManager</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>00.Fundamental</Filter>
+    </ClCompile>
+    <ClCompile Include="TheBoat.cpp">
+      <Filter>00.Fundamental</Filter>
+    </ClCompile>
+    <ClCompile Include="LoadPng.cpp">
+      <Filter>01.Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderer.cpp">
+      <Filter>01.Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="ServerMgr.cpp">
+      <Filter>02.ServerManager</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="TheBoat.rc">
+      <Filter>리소스 파일</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="small.ico">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="TheBoat.ico">
+      <Filter>리소스 파일</Filter>
+    </Image>
+  </ItemGroup>
+</Project>
