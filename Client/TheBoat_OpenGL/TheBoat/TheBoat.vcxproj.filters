@@ -37,9 +37,6 @@
     <ClInclude Include="ServerMgr.h">
       <Filter>02.ServerManager</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\Server\TheBoat_server(OpenGL)\TheBoat_server\protocol.h">
-      <Filter>02.ServerManager</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">

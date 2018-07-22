@@ -15,8 +15,7 @@
 //#include "../../../Server/TheBoat_server/TheBoat_server/protocol.h"
 #include "Dependencies\glew.h"
 #include "Dependencies\freeglut.h"
-#include "../../../Server/TheBoat_server(OpenGL)/TheBoat_server/protocol.h"
-
+#include "../../../../Server/TheBoat_server(OpenGL)/TheBoat_server/protocol.h"
 #define VIEW_ANGLE	45.f
 #define SCREEN_WIDTH	800
 #define SCREEN_HEIGHT	600
