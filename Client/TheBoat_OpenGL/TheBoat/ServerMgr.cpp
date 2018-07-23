@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "ServerMgr.h"
 
+
 void ServerMgr::ErrorDisplay(const char* msg, int err_no) {
 	_wsetlocale(LC_ALL, L"korean");
 	WCHAR *lpMsgBuf;
@@ -25,36 +26,39 @@ void ServerMgr::IPInput(string i_server_ip) {
 	server_ip = i_server_ip;
 }
 
-bool ServerMgr::Initialize() {
-	int retval = 0;
+bool ServerMgr::Initialize(HWND& hwnd) {
 	WSADATA	wsadata;
 	WSAStartup(MAKEWORD(2, 2), &wsadata);
 
-	sock = socket(AF_INET, SOCK_STREAM, 0);
-
-	// 네이글 알고리즘 off
+	sock = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, NULL, 0, 0);
 	int opt_val = TRUE;
 	setsockopt(sock, IPPROTO_TCP, TCP_NODELAY, (char*)&opt_val, sizeof(opt_val));
-	if (sock == INVALID_SOCKET) {
-		printf("---------------------------------\n");
-		printf("- Socket Err\n");
-		printf("---------------------------------\n");
-		return false;
-	}
 
-	SOCKADDR_IN server_addr;
-	ZeroMemory(&server_addr, sizeof(SOCKADDR_IN));
-	server_addr.sin_family = AF_INET;
-	server_addr.sin_port = htons(SERVER_PORT);
-	server_addr.sin_addr.s_addr = inet_addr(server_ip.c_str());
+	SOCKADDR_IN ServerAddr;
+	ZeroMemory(&ServerAddr, sizeof(SOCKADDR_IN));
+	ServerAddr.sin_family = AF_INET;
+	ServerAddr.sin_port = htons(SERVER_PORT);
+	// 아이피
+	ServerAddr.sin_addr.s_addr = inet_addr(server_ip.c_str());
+	//ServerAddr.sin_addr.s_addr = inet_addr("127.0.0.1");
+	//ServerAddr.sin_addr.s_addr = inet_addr("110.5.195.3");
 
-	retval = connect(sock, (SOCKADDR*)&server_addr, sizeof(server_addr));
+
+	int retval = WSAConnect(sock, (sockaddr *)&ServerAddr, sizeof(ServerAddr), NULL, NULL, NULL, NULL);
 	if (retval == SOCKET_ERROR) {
 		printf("---------------------------------\n");
 		printf("- Connect Err\n");
 		printf("---------------------------------\n");
 		return false;
 	}
+	async_handle = hwnd;
+	WSAAsyncSelect(sock, async_handle, WM_SOCKET, FD_CONNECT | FD_CLOSE | FD_READ);
+
+	send_wsabuf.buf = send_buffer;
+	send_wsabuf.len = CLIENT_BUF_SIZE;
+	recv_wsabuf.buf = recv_buffer;
+	recv_wsabuf.len = CLIENT_BUF_SIZE;
+
 	// 총알 갯수 초기화 
 	ammo_counter = MAX_AMMO_SIZE;
 	return true;
@@ -69,18 +73,14 @@ void ServerMgr::DecreaseAmmo() {
 }
 
 void ServerMgr::ReadPacket() {
-	int io_bytes = 0, io_flag = 0;
-	printf("읽긴 하냐\n");
-	//int retval = WSARecv(sock, &recv_wsabuf, 1, &io_bytes, &io_flag, NULL, NULL);
-	
-	int retval = recv(sock, recv_buffer, io_bytes, io_flag);
+	DWORD io_bytes, io_flag = 0;
+
+	int retval = WSARecv(sock, &recv_wsabuf, 1, &io_bytes, &io_flag, NULL, NULL);
 	if (retval == 1) {
-		//int err_code = WSAGetLastError();
-		//ErrorDisplay("[WSARecv] : 에러 ", err_code);
-		printf("Recv Err\n");
+		int err_code = WSAGetLastError();
+		ErrorDisplay("[WSARecv] : 에러 ", err_code);
 	}
 	BYTE* ptr = reinterpret_cast<BYTE*>(recv_buffer);
-	printf("오 읽음 ptr->1 : %d \n",ptr[0]);
 
 	while (io_bytes != 0) {
 		if (in_packet_size == 0)
@@ -153,7 +153,7 @@ void ServerMgr::ProcessPacket(char* ptr) {
 		sc_vec_buff[packets->id].pos.z = packets->z;
 		// 0 숨쉬기, 1: 걷기, 2: 뛰기
 		sc_vec_buff[packets->id].player_status = packets->player_status;
-		
+
 
 		break;
 	}
@@ -195,7 +195,7 @@ void ServerMgr::ProcessPacket(char* ptr) {
 		collision_pos.y = packets->y;
 		collision_pos.z = packets->z;
 		//client_hp[packets->client_id] = packets->hp;
-		printf("%d 플레이어 벽과 꽈당 [%f, %f, %f] 체력 : %f \n", packets->client_id, collision_pos.x,
+		printf("%d 플레이어 벽과 꽈당 [%f, %f, %f] \n", packets->client_id, collision_pos.x,
 			collision_pos.y, collision_pos.z, client_hp[packets->client_id]);
 
 		break;
@@ -211,7 +211,7 @@ void ServerMgr::ProcessPacket(char* ptr) {
 		break;
 	}
 	case SC_FULLY_AMMO: {
-		
+
 		SC_PACKET_AMMO_O* packets = reinterpret_cast<SC_PACKET_AMMO_O*>(ptr);
 		ammo_counter = MAX_AMMO_SIZE - packets->ammo;
 		//ammo_counter = MAX_AMMO_SIZE;
@@ -223,7 +223,7 @@ void ServerMgr::ProcessPacket(char* ptr) {
 		printf("총알 다씀\n");
 		break;
 	}
-	case SC_WORLD_TIME:{
+	case SC_WORLD_TIME: {
 		SC_PACKET_TIME* packets = reinterpret_cast<SC_PACKET_TIME*>(ptr);
 		world_time = packets->world_time;
 		printf("시간은 : %f\n", world_time);
@@ -231,7 +231,7 @@ void ServerMgr::ProcessPacket(char* ptr) {
 	}
 	}
 }
-int ServerMgr::GetPlayerHP(int p_n) {
+float ServerMgr::GetPlayerHP(int p_n) {
 	return client_hp[p_n];
 
 }
@@ -380,6 +380,117 @@ void ServerMgr::SendPacket(int type) {
 		break;
 	}
 
+	if (retval == 1) {
+		int error_code = WSAGetLastError();
+		ErrorDisplay("[WSASend] 에러 : ", error_code);
+	}
+
+}
+void ServerMgr::SendPacket(int type, VECTOR3& xmvector) {
+	CS_PACKET_KEYUP* packet_buffer = reinterpret_cast<CS_PACKET_KEYUP*>(send_buffer);
+	packet_buffer->size = sizeof(CS_PACKET_KEYUP);
+	send_wsabuf.len = sizeof(CS_PACKET_KEYUP);
+	int retval = 0;
+	DWORD iobytes;
+	switch (type) {
+	case CS_KEY_PRESS_UP:
+		packet_buffer->type = CS_KEY_PRESS_UP;
+		packet_buffer->look_vec = xmvector;
+		retval = WSASend(sock, &send_wsabuf, 1, &iobytes, 0, NULL, NULL);
+		break;
+	case CS_KEY_PRESS_DOWN:
+		packet_buffer->type = CS_KEY_PRESS_DOWN;
+		packet_buffer->look_vec = xmvector;
+		retval = WSASend(sock, &send_wsabuf, 1, &iobytes, 0, NULL, NULL);
+		break;
+	case CS_KEY_PRESS_RIGHT:
+		packet_buffer->type = CS_KEY_PRESS_RIGHT;
+		packet_buffer->look_vec = xmvector;
+		retval = WSASend(sock, &send_wsabuf, 1, &iobytes, 0, NULL, NULL);
+		break;
+	case CS_KEY_PRESS_LEFT:
+		packet_buffer->type = CS_KEY_PRESS_LEFT;
+		packet_buffer->look_vec = xmvector;
+		retval = WSASend(sock, &send_wsabuf, 1, &iobytes, 0, NULL, NULL);
+		break;
+
+	case CS_KEY_PRESS_SHIFT:
+		packet_buffer->type = CS_KEY_PRESS_SHIFT;
+		retval = WSASend(sock, &send_wsabuf, 1, &iobytes, 0, NULL, NULL);
+		break;
+	case CS_KEY_PRESS_SPACE:
+		packet_buffer->type = CS_KEY_PRESS_SPACE;
+		retval = WSASend(sock, &send_wsabuf, 1, &iobytes, 0, NULL, NULL);
+		break;
+	case CS_KEY_PRESS_1:
+		packet_buffer->type = CS_KEY_PRESS_1;
+		retval = WSASend(sock, &send_wsabuf, 1, &iobytes, 0, NULL, NULL);
+		break;
+	case CS_KEY_PRESS_2:
+		packet_buffer->type = CS_KEY_PRESS_2;
+		retval = WSASend(sock, &send_wsabuf, 1, &iobytes, 0, NULL, NULL);
+		break;
+
+
+	case CS_KEY_RELEASE_UP:
+		packet_buffer->type = CS_KEY_RELEASE_UP;
+		retval = WSASend(sock, &send_wsabuf, 1, &iobytes, 0, NULL, NULL);
+		break;
+	case CS_KEY_RELEASE_DOWN:
+		packet_buffer->type = CS_KEY_RELEASE_DOWN;
+		retval = WSASend(sock, &send_wsabuf, 1, &iobytes, 0, NULL, NULL);
+		break;
+	case CS_KEY_RELEASE_RIGHT:
+		packet_buffer->type = CS_KEY_RELEASE_RIGHT;
+		retval = WSASend(sock, &send_wsabuf, 1, &iobytes, 0, NULL, NULL);
+		break;
+	case CS_KEY_RELEASE_LEFT:
+		packet_buffer->type = CS_KEY_RELEASE_LEFT;
+		retval = WSASend(sock, &send_wsabuf, 1, &iobytes, 0, NULL, NULL);
+		break;
+
+	case CS_KEY_RELEASE_SHIFT:
+		packet_buffer->type = CS_KEY_RELEASE_SHIFT;
+		retval = WSASend(sock, &send_wsabuf, 1, &iobytes, 0, NULL, NULL);
+		break;
+	case CS_KEY_RELEASE_SPACE:
+		packet_buffer->type = CS_KEY_RELEASE_SPACE;
+		retval = WSASend(sock, &send_wsabuf, 1, &iobytes, 0, NULL, NULL);
+		break;
+	case CS_KEY_RELEASE_1:
+		packet_buffer->type = CS_KEY_RELEASE_1;
+		retval = WSASend(sock, &send_wsabuf, 1, &iobytes, 0, NULL, NULL);
+		break;
+	case CS_KEY_RELEASE_2:
+		packet_buffer->type = CS_KEY_RELEASE_2;
+		retval = WSASend(sock, &send_wsabuf, 1, &iobytes, 0, NULL, NULL);
+		break;
+
+
+	case CS_LEFT_BUTTON_DOWN:
+		packet_buffer->type = CS_LEFT_BUTTON_DOWN;
+		retval = WSASend(sock, &send_wsabuf, 1, &iobytes, 0, NULL, NULL);
+		break;
+	case CS_RIGHT_BUTTON_DOWN:
+		packet_buffer->type = CS_RIGHT_BUTTON_DOWN;
+		retval = WSASend(sock, &send_wsabuf, 1, &iobytes, 0, NULL, NULL);
+		break;
+
+	case CS_LEFT_BUTTON_UP:
+		packet_buffer->type = CS_LEFT_BUTTON_UP;
+		retval = WSASend(sock, &send_wsabuf, 1, &iobytes, 0, NULL, NULL);
+		break;
+	case CS_RIGHT_BUTTON_UP:
+		packet_buffer->type = CS_RIGHT_BUTTON_UP;
+		retval = WSASend(sock, &send_wsabuf, 1, &iobytes, 0, NULL, NULL);
+		break;
+
+	case CS_MOUSE_MOVE:
+		packet_buffer->type = CS_MOUSE_MOVE;
+		// 여기에 추가적으로 player의 look 벡터를 같이 해서 보내줘야한다.
+		packet_buffer->look_vec = xmvector;
+		retval = WSASend(sock, &send_wsabuf, 1, &iobytes, 0, NULL, NULL);
+	}
 	if (retval == 1) {
 		int error_code = WSAGetLastError();
 		ErrorDisplay("[WSASend] 에러 : ", error_code);

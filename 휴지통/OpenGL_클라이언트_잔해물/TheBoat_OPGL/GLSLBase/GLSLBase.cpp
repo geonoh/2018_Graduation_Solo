@@ -364,7 +364,7 @@ void RenderScene(void)
 	//g_Renderer->DrawParticle();
 	g_Renderer->DrawSkyBox();
 	g_Renderer->DrawHeightMap();
-	g_Renderer->Cube();
+	//g_Renderer->Cube();
 	//g_Renderer->Test1();
 
 	gTime += 0.005f;

@@ -6,18 +6,13 @@ struct SPlayer {
 	int player_status;
 };
 
-struct Bullet {
-	bool in_use = false;
-	int id;
-	float x, y, z;
-};
-
 
 class ServerMgr
 {
 	WSADATA wsa;
 	SOCKET sock;
 	SOCKADDR_IN server_addr;
+	HWND async_handle;
 	WSABUF send_wsabuf;
 	WSABUF recv_wsabuf;
 	int clients_id = 0;
@@ -39,7 +34,7 @@ class ServerMgr
 	VECTOR3 sc_look_vec;
 
 	VECTOR3 collision_pos;
-	int client_hp[4] = { 0 };
+	float client_hp[4] = { 0 };
 	int camera_id = 0;
 	string server_ip;
 
@@ -62,7 +57,7 @@ public:
 	void IPInput();
 	void IPInput(string);
 
-	bool Initialize();
+	bool Initialize(HWND& hwnd);
 	void ClientError();
 	void ReadPacket();
 	void SendPacket(int type);
@@ -82,7 +77,7 @@ public:
 	VECTOR3 ReturnItemPosition();
 
 	// 플레이어 체력
-	int GetPlayerHP(int p_n);
+	float GetPlayerHP(int p_n);
 
 	// 
 	void ReturnBuildingPosition(VECTOR3* building_pos);
