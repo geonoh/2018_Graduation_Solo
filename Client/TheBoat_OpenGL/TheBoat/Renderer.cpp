@@ -3,6 +3,7 @@
 #include "LoadPng.h"
 #include <Windows.h>
 #include <cstdlib>
+#include "CHeightMapImage.h"
 
 unsigned char * loadBMPRaw(const char * imagepath, unsigned int& outWidth, unsigned int& outHeight)
 {
@@ -72,11 +73,109 @@ unsigned char * loadBMPRaw(const char * imagepath, unsigned int& outWidth, unsig
 Renderer::Renderer(int windowSizeX, int windowSizeY)
 {
 	Initialize(windowSizeX, windowSizeY);
+	glm::vec3 xmf3Scale(1.f, 1.f, 1.f);
+	LPCTSTR file_name = _T("height_map.raw");
+	height_map = new CHeightMapImage(file_name, 513, 513, xmf3Scale);
+
+	printf("directX 좌표 : [%f, %f, %f] OpenGL 좌표 : [%f, %f, %f] \n",
+		eye_vec.x + 256, eye_vec.y, eye_vec.z + 256.f,
+		eye_vec.x, eye_vec.y, eye_vec.z);
+
+	UpdateView();
 }
 
 
 Renderer::~Renderer()
 {
+	delete height_map;
+}
+
+glm::mat4 Renderer::GetViewMatrix() const {
+	return mat_view;
+}
+
+void Renderer::MouseMove(int x, int y, int width, int height) {
+	float end_x = (float)(x - width / 2) / (width / 2);
+	float end_y = (float)(y - height / 2) / (height / 2);
+
+	//glm::vec2 mouse_delta = glm::vec2((float)x / width, (float)y / height) - mouse_position;
+	glm::vec2 mouse_delta = glm::vec2(end_x, end_y) - mouse_position;
+
+	const float mouse_x_sensitivity = 2.25f;
+	const float mouse_y_sensitivity = 2.25f;
+
+	yaw += mouse_x_sensitivity * mouse_delta.x;
+	pitch += mouse_y_sensitivity * mouse_delta.y;
+
+	//yaw += mouse_x_sensitivity * mouse_delta.x;
+	//pitch += mouse_y_sensitivity * mouse_delta.y;
+
+	//mouse_position = glm::vec2((float)x / width, (float)y / height);
+	mouse_position = glm::vec2(end_x, end_y);
+	UpdateView();
+}
+
+void Renderer::KeyPressed(const unsigned char key) {
+	float dx = 0.f; // 가로로 걸은 걸이
+	float dz = 0.f; // distance of z -> 앞뒤로 걸은 거리
+
+	switch (key) {
+	case 'w':
+	case 'W':
+		dz = 2;
+		break;
+	case 'a':
+	case 'A':
+		dx = -2;
+		break;
+	case 's':
+	case 'S':
+		dz = -2;
+		break;
+	case 'd':
+	case 'D':
+		dx = 2;
+		break;
+	}
+	
+	glm::mat4 mat = GetViewMatrix();
+	glm::vec3 forward(mat[0][2], mat[1][2], mat[2][2]);
+	glm::vec3 strafe(mat[0][0], mat[1][0], mat[2][0]);
+
+	const float speed = 0.12f;
+
+	eye_vec += (-dz * forward + dx * strafe)*speed;
+	// 와이 계산 필요
+	//eye_vec.z *= (-1);
+
+	eye_vec.y = height_map->GetHeight(eye_vec.x + 256.f, eye_vec.z + 256.f) + PLAYER_HEIGHT;
+	printf("%c 키 누름\n", key);
+	printf("directX 좌표 : [%f, %f, %f] OpenGL 좌표 : [%f, %f, %f] \n",
+		eye_vec.x + 256, eye_vec.y, eye_vec.z + 256.f,
+		eye_vec.x, eye_vec.y, eye_vec.z);
+	UpdateView();
+}
+
+void Renderer::UpdateView() {
+	glm::mat4 mat_pitch = glm::mat4(1.f);
+	glm::mat4 mat_yaw = glm::mat4(1.f);
+	glm::mat4 mat_roll = glm::mat4(1.f);
+
+	mat_pitch = glm::rotate(mat_pitch, pitch, glm::vec3(1.f, 0.f, 0.f));
+	mat_yaw = glm::rotate(mat_yaw, yaw, glm::vec3(0.f, 1.f, 0.f));
+	mat_roll = glm::rotate(mat_roll, roll, glm::vec3(0.f, 0.f, 1.f));
+
+	glm::mat4 rotate = mat_roll * mat_pitch * mat_yaw;
+
+	glm::mat4 translate = glm::mat4(1.f);
+	translate = glm::translate(translate, -eye_vec);
+
+	mat_view = rotate * translate;
+
+	m_m4View = mat_view;
+	m_m4PersProj = glm::perspectiveRH((float)VIEW_ANGLE, 1.f, 1.f, 1000.f);
+	m_m4ProjView = m_m4PersProj * m_m4View;
+
 }
 
 void Renderer::SetCameraLook(float x, float y, float z) {
@@ -147,7 +246,7 @@ void Renderer::Initialize(int windowSizeX, int windowSizeY)
 	//glm::rotate()
 	//glm::rotate()
 	//m_v3Camera_Lookat = MakingNormalizedLookVector(m_v3Camera_Position, model_pos);
-	printf("%f %f %f\n", m_v3Camera_Lookat.x, m_v3Camera_Lookat.y, m_v3Camera_Lookat.z);
+	//printf("%f %f %f\n", m_v3Camera_Lookat.x, m_v3Camera_Lookat.y, m_v3Camera_Lookat.z);
 	m_v3Camera_Up = glm::vec3(1.f, 0.f, 0.f);
 	m_m4View = glm::lookAt(
 		m_v3Camera_Position,

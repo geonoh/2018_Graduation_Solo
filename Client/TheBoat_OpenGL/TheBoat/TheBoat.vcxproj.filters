@@ -14,6 +14,12 @@
     <Filter Include="02.ServerManager">
       <UniqueIdentifier>{9587ff29-896f-4a40-a41c-b235bccc1fe0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="03.Player">
+      <UniqueIdentifier>{63cc2208-5b36-4c36-ac62-6738d6f5bc33}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="04.HeightMap">
+      <UniqueIdentifier>{4fd10234-58dc-46d0-beac-f3607feb39b6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Resource.h">
@@ -40,6 +46,12 @@
     <ClInclude Include="..\..\..\Server\TheBoat_server(OpenGL)\TheBoat_server\protocol.h">
       <Filter>02.ServerManager</Filter>
     </ClInclude>
+    <ClInclude Include="Player.h">
+      <Filter>03.Player</Filter>
+    </ClInclude>
+    <ClInclude Include="CHeightMapImage.h">
+      <Filter>04.HeightMap</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -56,6 +68,12 @@
     </ClCompile>
     <ClCompile Include="ServerMgr.cpp">
       <Filter>02.ServerManager</Filter>
+    </ClCompile>
+    <ClCompile Include="Player.cpp">
+      <Filter>03.Player</Filter>
+    </ClCompile>
+    <ClCompile Include="CHeightMapImage.cpp">
+      <Filter>04.HeightMap</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

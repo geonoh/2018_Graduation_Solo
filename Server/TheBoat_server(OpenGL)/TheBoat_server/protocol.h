@@ -27,6 +27,9 @@
 // "시간" 보내는 시간
 #define TIME_SEND_TIME			1
 
+// 플레이어의 키 
+#define PLAYER_HEIGHT			5.f
+
 ///////////////////////////////////////////////////
 // Server To Client
 #define SC_ENTER_PLAYER			1
@@ -69,24 +72,23 @@
 #define CS_KEY_PRESS_2			8
 #define CS_LEFT_BUTTON_DOWN		9
 #define CS_RIGHT_BUTTON_DOWN	10
+#define CS_PLAYER_READY			11
 
+#define CS_PLAYER_READY_CANCLE		12
+#define CS_KEY_RELEASE_UP			13
+#define CS_KEY_RELEASE_DOWN			14
+#define CS_KEY_RELEASE_LEFT			15
+#define CS_KEY_RELEASE_RIGHT		16
+#define CS_KEY_RELEASE_SPACE		17
+#define CS_KEY_RELEASE_SHIFT		18
+#define CS_KEY_RELEASE_1			19
+#define CS_KEY_RELEASE_2			20
+#define CS_LEFT_BUTTON_UP			21
+#define CS_RIGHT_BUTTON_UP			22
+#define CS_MOUSE_MOVE				23
+#define CS_RELOAD					24
+#define CS_PLAYER_TEAM_SELECT		25
 
-#define CS_KEY_RELEASE_UP			11
-#define CS_KEY_RELEASE_DOWN			12
-#define CS_KEY_RELEASE_LEFT			13
-#define CS_KEY_RELEASE_RIGHT		14
-#define CS_KEY_RELEASE_SPACE		15
-#define CS_KEY_RELEASE_SHIFT		16
-#define CS_KEY_RELEASE_1			17
-#define CS_KEY_RELEASE_2			18
-#define CS_LEFT_BUTTON_UP			19
-#define CS_RIGHT_BUTTON_UP			20
-#define CS_MOUSE_MOVE				21
-#define CS_RELOAD					22
-
-#define CS_PLAYER_READY		100
-#define CS_PLAYER_READY_CANCLE 101
-#define CS_PLAYER_TEAM_SELECT	102
 ///////////////////////////////////////////////////
 
 
@@ -124,6 +126,14 @@
 
 struct VECTOR3 {
 	float x, y, z;
+	VECTOR3() {
+
+	}
+	VECTOR3(float ix, float iy, float iz) {
+		x = ix;
+		y = iy;
+		z = iz;
+	}
 };
 
 

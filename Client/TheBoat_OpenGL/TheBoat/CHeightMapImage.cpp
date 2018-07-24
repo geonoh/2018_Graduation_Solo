@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "CHeightMapImage.h"
-
-CHeightMapImage::CHeightMapImage(LPCTSTR pFileName, int nWidth, int nLength, XMFLOAT3 xmf3Scale)
+CHeightMapImage::CHeightMapImage(LPCTSTR pFileName, int nWidth, int nLength, glm::vec3 xmf3Scale)
 {
 	m_nWidth = nWidth;
 	m_nLength = nLength;
@@ -32,9 +31,9 @@ CHeightMapImage::~CHeightMapImage()
 	m_pHeightMapPixels = NULL;
 }
 
-XMFLOAT3 CHeightMapImage::GetHeightMapNormal(int x, int z)
+glm::vec3 CHeightMapImage::GetHeightMapNormal(int x, int z)
 {
-	if ((x < 0.0f) || (z < 0.0f) || (x >= m_nWidth) || (z >= m_nLength)) return(XMFLOAT3(0.0f, 1.0f, 0.0f));
+	if ((x < 0.0f) || (z < 0.0f) || (x >= m_nWidth) || (z >= m_nLength)) return(glm::vec3(0.0f, 1.0f, 0.0f));
 
 	int nHeightMapIndex = x + (z * m_nWidth);
 	int xHeightMapAdd = (x < (m_nWidth - 1)) ? 1 : -1;
@@ -42,9 +41,11 @@ XMFLOAT3 CHeightMapImage::GetHeightMapNormal(int x, int z)
 	float y1 = (float)m_pHeightMapPixels[nHeightMapIndex] * m_xmf3Scale.y;
 	float y2 = (float)m_pHeightMapPixels[nHeightMapIndex + xHeightMapAdd] * m_xmf3Scale.y;
 	float y3 = (float)m_pHeightMapPixels[nHeightMapIndex + zHeightMapAdd] * m_xmf3Scale.y;
-	XMFLOAT3 xmf3Edge1 = XMFLOAT3(0.0f, y3 - y1, m_xmf3Scale.z);
-	XMFLOAT3 xmf3Edge2 = XMFLOAT3(m_xmf3Scale.x, y2 - y1, 0.0f);
-	XMFLOAT3 xmf3Normal = Vector3::CrossProduct(xmf3Edge1, xmf3Edge2, true);
+	glm::vec3 xmf3Edge1 = glm::vec3(0.0f, y3 - y1, m_xmf3Scale.z);
+	glm::vec3 xmf3Edge2 = glm::vec3(m_xmf3Scale.x, y2 - y1, 0.0f);
+	
+	//VECTOR3 xmf3Normal = Vector3::CrossProduct(xmf3Edge1, xmf3Edge2, true);
+	glm::vec3 xmf3Normal = glm::cross(xmf3Edge1, xmf3Edge2);
 
 	return(xmf3Normal);
 }
@@ -86,6 +87,6 @@ float CHeightMapImage::GetHeight(float fx, float fz, bool bReverseQuad)
 	float fBottomHeight = fBottomLeft * (1 - fxPercent) + fBottomRight * fxPercent;
 	float fHeight = fBottomHeight * (1 - fzPercent) + fTopHeight * fzPercent;
 
-	return(fHeight) * 2;
+	return(fHeight);
 }
 

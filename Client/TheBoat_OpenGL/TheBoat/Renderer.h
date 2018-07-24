@@ -5,11 +5,7 @@
 #include <fstream>
 #include <iostream>
 
-#include "Dependencies\glew.h"
-#include "glm/glm.hpp"
-#include "glm/gtc/matrix_transform.hpp"
-#include "glm/gtx/euler_angles.hpp"
-
+class CHeightMapImage;
 class Renderer
 {
 private:
@@ -18,6 +14,35 @@ private:
 	glm::vec3 MakingNormalizedLookVector(glm::vec3& eye, glm::vec3& object);
 	float GetVectorSize(glm::vec3& input_vec);
 	
+
+	// 카메라
+// ------------------------------------------------------------------------------
+private:
+	// Pitch Yaw Roll Angle
+	float pitch;
+	float yaw;
+	float roll;
+	// Eye vector
+	// 여기서 15는 heightmap 0,0 의 높이이다. 
+	glm::vec3 eye_vec{ 0.f,15.f + PLAYER_HEIGHT,0.f };
+	//
+	glm::mat4 mat_view;
+public:
+	// Camera Setting 
+	void SetCameraPos(float x, float y, float z);
+	// Update View
+	void UpdateView();
+	// 디버그용 Height
+	CHeightMapImage* height_map = nullptr;
+// ------------------------------------------------------------------------------
+	glm::mat4 GetViewMatrix() const;
+	void KeyPressed(const unsigned char key);
+
+	// Degug용 - 카메라 위치 height더해서 
+
+	void MouseMove(int x, int y, int width, int height);
+
+	glm::vec2 mouse_position;
 public:
 	Renderer(int windowSizeX, int windowSizeY);
 	~Renderer();
@@ -51,8 +76,7 @@ public:
 	void BloomPass2(GLuint texEmissive);
 	void BloomPass3(GLuint baseTex, GLuint bloomTex);
 
-	// Camera Setting 
-	void SetCameraPos(float x, float y, float z);
+
 	
 	void DrawHeightMap();
 	void DrawSkyBox();

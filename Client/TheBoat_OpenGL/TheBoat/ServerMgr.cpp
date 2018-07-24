@@ -43,7 +43,6 @@ bool ServerMgr::Initialize(HWND& hwnd) {
 	//ServerAddr.sin_addr.s_addr = inet_addr("127.0.0.1");
 	//ServerAddr.sin_addr.s_addr = inet_addr("110.5.195.3");
 
-
 	int retval = WSAConnect(sock, (sockaddr *)&ServerAddr, sizeof(ServerAddr), NULL, NULL, NULL, NULL);
 	if (retval == SOCKET_ERROR) {
 		printf("---------------------------------\n");

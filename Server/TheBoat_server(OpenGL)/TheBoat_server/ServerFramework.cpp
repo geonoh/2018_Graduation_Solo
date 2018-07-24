@@ -72,7 +72,7 @@ void ServerFramework::InitServer() {
 		printf("listen 에러\n");
 
 	XMFLOAT3 xmf3Scale(8.0f, 2.f, 8.0f);
-	LPCTSTR file_name = _T("terrain18.raw");
+	LPCTSTR file_name = _T("height_map.raw");
 	height_map = new CHeightMapImage(file_name, 513, 513, xmf3Scale);
 
 	client_lock.lock();
@@ -724,6 +724,9 @@ void ServerFramework::WorkerThread() {
 						clients[i].x += METER_PER_PIXEL * clients[i].look_vec.x * (RUN_SPEED * overlapped_buffer->elapsed_time);
 					}
 					else {
+						printf("%d플레이어 걷기 POS [%f, %f, %f] LV [%f, %f, %f]\n",
+							i, clients[i].x, clients[i].y, clients[i].z,
+							clients[i].look_vec.x, clients[i].look_vec.y, clients[i].look_vec.z);
 						clients[i].z += METER_PER_PIXEL * clients[i].look_vec.z * (WALK_SPEED * overlapped_buffer->elapsed_time);
 						clients[i].x += METER_PER_PIXEL * clients[i].look_vec.x * (WALK_SPEED * overlapped_buffer->elapsed_time);
 					}
