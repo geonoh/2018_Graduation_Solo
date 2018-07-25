@@ -43,14 +43,14 @@
     <ClInclude Include="ServerMgr.h">
       <Filter>02.ServerManager</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\Server\TheBoat_server(OpenGL)\TheBoat_server\protocol.h">
-      <Filter>02.ServerManager</Filter>
-    </ClInclude>
     <ClInclude Include="Player.h">
       <Filter>03.Player</Filter>
     </ClInclude>
     <ClInclude Include="CHeightMapImage.h">
       <Filter>04.HeightMap</Filter>
+    </ClInclude>
+    <ClInclude Include="protocol.h">
+      <Filter>02.ServerManager</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
