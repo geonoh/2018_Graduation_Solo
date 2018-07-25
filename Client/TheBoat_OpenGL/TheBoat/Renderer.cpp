@@ -77,9 +77,9 @@ Renderer::Renderer(int windowSizeX, int windowSizeY)
 	LPCTSTR file_name = _T("height_map.raw");
 	height_map = new CHeightMapImage(file_name, 513, 513, xmf3Scale);
 
-	printf("directX 좌표 : [%f, %f, %f] OpenGL 좌표 : [%f, %f, %f] \n",
-		eye_vec.x + 256, eye_vec.y, eye_vec.z + 256.f,
-		eye_vec.x, eye_vec.y, eye_vec.z);
+	//printf("directX 좌표 : [%f, %f, %f] OpenGL 좌표 : [%f, %f, %f] \n",
+	//	eye_vec.x + 256, eye_vec.y, eye_vec.z + 256.f,
+	//	eye_vec.x, eye_vec.y, eye_vec.z);
 
 	UpdateView();
 }
@@ -116,43 +116,47 @@ void Renderer::MouseMove(int x, int y, int width, int height) {
 }
 
 void Renderer::KeyPressed(const unsigned char key) {
-	float dx = 0.f; // 가로로 걸은 걸이
-	float dz = 0.f; // distance of z -> 앞뒤로 걸은 거리
+	//float dx = 0.f; // 가로로 걸은 걸이
+	//float dz = 0.f; // distance of z -> 앞뒤로 걸은 거리
 
-	switch (key) {
-	case 'w':
-	case 'W':
-		dz = 2;
-		break;
-	case 'a':
-	case 'A':
-		dx = -2;
-		break;
-	case 's':
-	case 'S':
-		dz = -2;
-		break;
-	case 'd':
-	case 'D':
-		dx = 2;
-		break;
-	}
-	
-	glm::mat4 mat = GetViewMatrix();
-	glm::vec3 forward(mat[0][2], mat[1][2], mat[2][2]);
-	glm::vec3 strafe(mat[0][0], mat[1][0], mat[2][0]);
+	//switch (key) {
+	//case 'w':
+	//case 'W':
+	//	dz = 2;
+	//	break;
+	//case 'a':
+	//case 'A':
+	//	dx = -2;
+	//	break;
+	//case 's':
+	//case 'S':
+	//	dz = -2;
+	//	break;
+	//case 'd':
+	//case 'D':
+	//	dx = 2;
+	//	break;
+	//}
+	//
+	//glm::mat4 mat = GetViewMatrix();
+	//glm::vec3 forward(mat[0][2], mat[1][2], mat[2][2]);
+	//// Look vec
+	////look_at = forward;
 
-	const float speed = 0.12f;
+	//glm::vec3 strafe(mat[0][0], mat[1][0], mat[2][0]);
 
-	eye_vec += (-dz * forward + dx * strafe)*speed;
-	// 와이 계산 필요
-	//eye_vec.z *= (-1);
+	//const float speed = 0.12f;
 
-	eye_vec.y = height_map->GetHeight(eye_vec.x + 256.f, eye_vec.z + 256.f) + PLAYER_HEIGHT;
-	printf("%c 키 누름\n", key);
-	printf("directX 좌표 : [%f, %f, %f] OpenGL 좌표 : [%f, %f, %f] \n",
-		eye_vec.x + 256, eye_vec.y, eye_vec.z + 256.f,
-		eye_vec.x, eye_vec.y, eye_vec.z);
+	//eye_vec += (-dz * forward + dx * strafe)*speed;
+	//// 와이 계산 필요
+	////eye_vec.z *= (-1);
+
+	//eye_vec.y = height_map->GetHeight(eye_vec.x + 256.f, eye_vec.z + 256.f) + PLAYER_HEIGHT;
+	//printf("%c 키 누름\n", key);
+	//printf("Look At [%f, %f, %f] \n", forward.x, forward.y, forward.z);
+	////printf("directX 좌표 : [%f, %f, %f] OpenGL 좌표 : [%f, %f, %f] \n",
+	////	eye_vec.x + 256, eye_vec.y, eye_vec.z + 256.f,
+	////	eye_vec.x, eye_vec.y, eye_vec.z);
 	UpdateView();
 }
 
@@ -167,38 +171,75 @@ void Renderer::UpdateView() {
 
 	glm::mat4 rotate = mat_roll * mat_pitch * mat_yaw;
 
+	//printf("%3f %3f %3f %3f \n", rotate[0][0], rotate[0][1], rotate[0][2], rotate[0][3]);
+	//printf("%3f %3f %3f %3f \n", rotate[1][0], rotate[1][1], rotate[1][2], rotate[1][3]);
+	//printf("%3f %3f %3f %3f \n", rotate[2][0], rotate[2][1], rotate[2][2], rotate[2][3]);
+	//printf("%3f %3f %3f %3f \n", rotate[3][0], rotate[3][1], rotate[3][2], rotate[3][3]);
+
+
 	glm::mat4 translate = glm::mat4(1.f);
 	translate = glm::translate(translate, -eye_vec);
 
 	mat_view = rotate * translate;
+
+	//printf("%3f %3f %3f %3f \n", mat_view[0][0], mat_view[0][1], mat_view[0][2], mat_view[0][3]);
+	//printf("%3f %3f %3f %3f \n", mat_view[1][0], mat_view[1][1], mat_view[1][2], mat_view[1][3]);
+	//printf("%3f %3f %3f %3f \n", mat_view[2][0], mat_view[2][1], mat_view[2][2], mat_view[2][3]);
+	//printf("%3f %3f %3f %3f \n", mat_view[3][0], mat_view[3][1], mat_view[3][2], mat_view[3][3]);
+
 
 	m_m4View = mat_view;
 	m_m4PersProj = glm::perspectiveRH((float)VIEW_ANGLE, 1.f, 1.f, 1000.f);
 	m_m4ProjView = m_m4PersProj * m_m4View;
 
 }
-
-void Renderer::SetCameraLook(float x, float y, float z) {
-	m_v3Camera_Lookat = glm::vec3(x, y, z);
-	m_m4View = glm::lookAt(
-		m_v3Camera_Position,
-		m_v3Camera_Lookat,
-		m_v3Camera_Up
-	);
-	m_m4PersProj = glm::perspectiveRH((float)VIEW_ANGLE, 1.f, 1.f, 1000.f);
-	m_m4ProjView = m_m4PersProj * m_m4View;
+glm::vec3 Renderer::GetCameraLook() {
+	glm::vec3 retval = glm::vec3{ mat_view[0][2],mat_view[1][2],mat_view[2][2] };
+	return retval;
 }
+void Renderer::SetCameraLook(float x, float y, float z) {
+	//look_at.x = x;
+	//look_at.y = y;
+	//look_at.z = z;
+
+	// 이거 수정해라
+	mat_view[0][2] = x;
+	mat_view[1][2] = y;
+	mat_view[2][2] = z;
+
+}
+
 
 void Renderer::SetCameraPos(float x, float y, float z) {
-	m_v3Camera_Position = glm::vec3(x, y, z);
-	m_m4View = glm::lookAt(
-		m_v3Camera_Position,
-		m_v3Camera_Lookat,
-		m_v3Camera_Up
-	);
-	m_m4PersProj = glm::perspectiveRH((float)VIEW_ANGLE, 1.f, 1.f, 1000.f);
-	m_m4ProjView = m_m4PersProj * m_m4View;
+
+	eye_vec.x = x;
+	eye_vec.z = z;
+	eye_vec.y = height_map->GetHeight(eye_vec.x + 256.f, eye_vec.z + 256.f) + PLAYER_HEIGHT;
+
 }
+
+//void Renderer::SetCameraLook(float x, float y, float z) {
+//	m_v3Camera_Lookat = glm::vec3(x, y, z);
+//	m_m4View = glm::lookAt(
+//		m_v3Camera_Position,
+//		m_v3Camera_Lookat,
+//		m_v3Camera_Up
+//	);
+//	m_m4PersProj = glm::perspectiveRH((float)VIEW_ANGLE, 1.f, 1.f, 1000.f);
+//	m_m4ProjView = m_m4PersProj * m_m4View;
+//}
+
+//void Renderer::SetCameraPos(float x, float y, float z) {
+//	m_v3Camera_Position = glm::vec3(x, y, z);
+//	m_m4View = glm::lookAt(
+//		m_v3Camera_Position,
+//		m_v3Camera_Lookat,
+//		m_v3Camera_Up
+//	);
+//	m_m4PersProj = glm::perspectiveRH((float)VIEW_ANGLE, 1.f, 1.f, 1000.f);
+//	m_m4ProjView = m_m4PersProj * m_m4View;
+//}
+
 
 void Renderer::Initialize(int windowSizeX, int windowSizeY)
 {

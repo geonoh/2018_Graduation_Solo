@@ -77,9 +77,9 @@ void ServerFramework::InitServer() {
 
 	client_lock.lock();
 	for (int i = 0; i < MAXIMUM_PLAYER; ++i) {
-		clients[i].x = 450.f;
-		clients[i].z = 800.f;
-		clients[i].y = height_map->GetHeight(clients[i].x, clients[i].z);
+		clients[i].x = 0.f;
+		clients[i].z = 0.f;
+		clients[i].y = height_map->GetHeight(clients[i].x , clients[i].z);
 		clients[i].hp = 100.f;
 		for (int j = 0; j < 4; ++j) {
 			clients[i].boat_parts[j] = false;
@@ -180,7 +180,8 @@ void ServerFramework::AcceptPlayer() {
 	clients[client_id].is_ready = false;
 	clients[client_id].is_running = false;
 	ZeroMemory(&clients[client_id].overlapped_ex.wsa_over, sizeof(WSAOVERLAPPED));
-	clients[client_id].overlapped_ex.is_recv = true;
+	//clients[client_id].overlapped_ex.is_recv = true;
+	clients[client_id].overlapped_ex.evt_type = EVT_RECV_PACKET;
 	clients[client_id].overlapped_ex.wsabuf.buf = clients[client_id].overlapped_ex.io_buffer;
 	clients[client_id].overlapped_ex.wsabuf.len = sizeof(clients[client_id].overlapped_ex.io_buffer);
 	clients[client_id].packet_size = 0;
@@ -583,7 +584,7 @@ void ServerFramework::WorkerThread() {
 			}
 		}
 		OverlappedExtensionSet* overlapped_buffer = reinterpret_cast<OverlappedExtensionSet*>(overlapped);
-		if (overlapped_buffer->is_recv == true) {
+		if (overlapped_buffer->evt_type == EVT_RECV_PACKET) {
 			int recved_size = data_size;
 			char* ptr = overlapped_buffer->io_buffer;
 			while (recved_size > 0) {
@@ -720,6 +721,16 @@ void ServerFramework::WorkerThread() {
 				clients[i].client_lock.lock();
 				if (clients[i].is_move_foward) {
 					if (clients[i].is_running) {
+						clients[i].z += (-1) * METER_PER_PIXEL * clients[i].look_vec.z * (RUN_SPEED * overlapped_buffer->elapsed_time);
+						clients[i].x += (-1) * METER_PER_PIXEL * clients[i].look_vec.x * (RUN_SPEED * overlapped_buffer->elapsed_time);
+					}
+					else {
+						clients[i].z += (-1) * METER_PER_PIXEL * clients[i].look_vec.z * (WALK_SPEED * overlapped_buffer->elapsed_time);
+						clients[i].x += (-1) * METER_PER_PIXEL * clients[i].look_vec.x * (WALK_SPEED * overlapped_buffer->elapsed_time);
+					}
+				}
+				if (clients[i].is_move_backward) {
+					if (clients[i].is_running) {
 						clients[i].z += METER_PER_PIXEL * clients[i].look_vec.z * (RUN_SPEED * overlapped_buffer->elapsed_time);
 						clients[i].x += METER_PER_PIXEL * clients[i].look_vec.x * (RUN_SPEED * overlapped_buffer->elapsed_time);
 					}
@@ -730,16 +741,7 @@ void ServerFramework::WorkerThread() {
 						clients[i].z += METER_PER_PIXEL * clients[i].look_vec.z * (WALK_SPEED * overlapped_buffer->elapsed_time);
 						clients[i].x += METER_PER_PIXEL * clients[i].look_vec.x * (WALK_SPEED * overlapped_buffer->elapsed_time);
 					}
-				}
-				if (clients[i].is_move_backward) {
-					if (clients[i].is_running) {
-						clients[i].z += (-1) * METER_PER_PIXEL * clients[i].look_vec.z * (RUN_SPEED * overlapped_buffer->elapsed_time);
-						clients[i].x += (-1) * METER_PER_PIXEL * clients[i].look_vec.x * (RUN_SPEED * overlapped_buffer->elapsed_time);
-					}
-					else {
-						clients[i].z += (-1) * METER_PER_PIXEL * clients[i].look_vec.z * (WALK_SPEED * overlapped_buffer->elapsed_time);
-						clients[i].x += (-1) * METER_PER_PIXEL * clients[i].look_vec.x * (WALK_SPEED * overlapped_buffer->elapsed_time);
-					}
+
 				}
 				if (clients[i].is_move_left) {
 					if (clients[i].is_running) {
@@ -760,7 +762,6 @@ void ServerFramework::WorkerThread() {
 						clients[i].z += (-1) * METER_PER_PIXEL * clients[i].look_vec.x * (WALK_SPEED * overlapped_buffer->elapsed_time);
 						clients[i].x += METER_PER_PIXEL * clients[i].look_vec.z * (WALK_SPEED * overlapped_buffer->elapsed_time);
 					}
-
 				}
 				clients[i].client_lock.unlock();
 				clients[i].SetOOBB(XMFLOAT3(clients[i].x, clients[i].y, clients[i].z), XMFLOAT3(OBB_SCALE_PLAYER_X, OBB_SCALE_PLAYER_Y, OBB_SCALE_PLAYER_Z), XMFLOAT4(0, 0, 0, 1));
@@ -1118,7 +1119,7 @@ void ServerFramework::WorkerThread() {
 
 		}
 		// Send로 인해 할당된 영역 반납
-		else {
+		else if(overlapped_buffer->evt_type == EVT_SEND_PACKET){
 			delete overlapped_buffer;
 		}
 	}
@@ -1129,7 +1130,7 @@ void ServerFramework::SendPacket(int cl_id, void* packet) {
 	char* send_buffer = reinterpret_cast<char*>(packet);
 
 	memcpy(&overlapped->io_buffer, packet, send_buffer[0]);
-	overlapped->is_recv = false;
+	overlapped->evt_type = EVT_SEND_PACKET;
 	overlapped->wsabuf.buf = overlapped->io_buffer;
 	overlapped->wsabuf.len = send_buffer[0];
 	ZeroMemory(&overlapped->wsa_over, sizeof(WSAOVERLAPPED));

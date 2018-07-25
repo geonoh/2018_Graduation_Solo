@@ -255,12 +255,12 @@ void ServerMgr::ReturnBuildingExtents(VECTOR3* input_building_extents) {
 }
 
 
-VECTOR3 ServerMgr::ReturnItemPosition() {
+glm::vec3 ServerMgr::ReturnItemPosition() {
 	is_item_gen = false;
 	return item_pos;
 }
 
-VECTOR3 ServerMgr::ReturnCollsionPosition(bool* is_collide) {
+glm::vec3 ServerMgr::ReturnCollsionPosition(bool* is_collide) {
 	*is_collide = s_is_collide;
 	s_is_collide = false;
 	return collision_pos;
@@ -385,7 +385,7 @@ void ServerMgr::SendPacket(int type) {
 	}
 
 }
-void ServerMgr::SendPacket(int type, VECTOR3& xmvector) {
+void ServerMgr::SendPacket(int type, glm::vec3 xmvector) {
 	CS_PACKET_KEYUP* packet_buffer = reinterpret_cast<CS_PACKET_KEYUP*>(send_buffer);
 	packet_buffer->size = sizeof(CS_PACKET_KEYUP);
 	send_wsabuf.len = sizeof(CS_PACKET_KEYUP);
@@ -505,7 +505,7 @@ SPlayer ServerMgr::ReturnPlayerPosStatus(int client_id) {
 	return sc_vec_buff[client_id];
 }
 
-VECTOR3 ServerMgr::ReturnLookVector() {
+glm::vec3 ServerMgr::ReturnLookVector() {
 	return sc_look_vec;
 }
 int ServerMgr::ReturnCameraID() {

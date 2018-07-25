@@ -31,19 +31,19 @@ class ServerMgr
 	DWORD saved_packet_size = 0;
 
 	SPlayer sc_vec_buff[4];
-	VECTOR3 sc_look_vec;
+	glm::vec3 sc_look_vec;
 
-	VECTOR3 collision_pos;
+	glm::vec3 collision_pos;
 	float client_hp[4] = { 0 };
 	int camera_id = 0;
 	string server_ip;
 
 	// 아이템 생성 부분
-	VECTOR3 item_pos;
+	glm::vec3 item_pos;
 	bool is_item_gen;
 
-	VECTOR3 building_pos[OBJECT_BUILDING];
-	VECTOR3 building_extents[OBJECT_BUILDING];
+	glm::vec3 building_pos[OBJECT_BUILDING];
+	glm::vec3 building_extents[OBJECT_BUILDING];
 
 	int ammo_counter = 0;
 
@@ -61,7 +61,7 @@ public:
 	void ClientError();
 	void ReadPacket();
 	void SendPacket(int type);
-	void SendPacket(int type, VECTOR3& xmvector);
+	void SendPacket(int type, glm::vec3 xmvector);
 	void ProcessPacket(char* ptr);
 	void ErrorDisplay(const char* msg, int err_no);
 	int GetAmmo();
@@ -70,11 +70,11 @@ public:
 	int ReturnCameraID();
 	Bullet GetBullet();
 	SPlayer ReturnPlayerPosStatus(int client_id);
-	VECTOR3 ReturnLookVector();
-	VECTOR3 ReturnCollsionPosition(bool* is_collide);
+	glm::vec3 ReturnLookVector();
+	glm::vec3 ReturnCollsionPosition(bool* is_collide);
 	// 아이템 생성 후 위치 Return
 	bool IsItemGen();
-	VECTOR3 ReturnItemPosition();
+	glm::vec3 ReturnItemPosition();
 
 	// 플레이어 체력
 	float GetPlayerHP(int p_n);

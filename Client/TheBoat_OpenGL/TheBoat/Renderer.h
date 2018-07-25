@@ -25,10 +25,13 @@ private:
 	// Eye vector
 	// 여기서 15는 heightmap 0,0 의 높이이다. 
 	glm::vec3 eye_vec{ 0.f,15.f + PLAYER_HEIGHT,0.f };
+	//glm::vec3 look_at;
 	//
 	glm::mat4 mat_view;
 public:
 	// Camera Setting 
+	void SetCameraLook(float x, float y, float z);
+	glm::vec3 GetCameraLook();
 	void SetCameraPos(float x, float y, float z);
 	// Update View
 	void UpdateView();
@@ -82,7 +85,6 @@ public:
 	void DrawSkyBox();
 	void DrawTexture(GLuint texID, GLuint x, GLuint y, GLuint width, GLuint height);
 	
-	void SetCameraLook(float x, float y, float z);
 private:
 	void Initialize(int windowSizeX, int windowSizeY);
 	bool ReadFile(const char* filename, std::string *target);

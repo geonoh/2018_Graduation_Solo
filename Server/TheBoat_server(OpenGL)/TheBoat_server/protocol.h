@@ -43,21 +43,22 @@
 #define SC_ITEM_GEN				9	// Actually Item gen packet
 #define SC_BUILDING_GEN			10
 #define SC_GAME_START			11
-#define SC_OUT_OF_AMMO			18
-#define SC_FULLY_AMMO			19
-#define SC_WORLD_TIME			20
+#define SC_OUT_OF_AMMO			12
+#define SC_FULLY_AMMO			13
+#define SC_WORLD_TIME			14
 ///////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////
 // Event
-#define EVT_COLLISION			12
-#define EVT_PLAYER_POS_SEND		13
-#define EVT_BULLET_GENERATE		14
-#define EVT_BULLET_UPDATE		15
-#define EVT_BOAT_ITEM_GEN		16
-#define EVT_PACKET_RECV			17
-#define EVT_SEND_TIME			21
-#define EVT_AMMO_ITEM_GEN		22
+#define EVT_SEND_PACKET			15
+#define EVT_RECV_PACKET			16
+#define EVT_COLLISION			17	//
+#define EVT_PLAYER_POS_SEND		18	//
+#define EVT_BULLET_GENERATE		19	//
+#define EVT_BULLET_UPDATE		20	//
+#define EVT_BOAT_ITEM_GEN		21	//
+#define EVT_SEND_TIME			22	//
+#define EVT_AMMO_ITEM_GEN		23	//
 ///////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////
@@ -168,7 +169,7 @@ struct SC_PACKET_LOOCVEC {
 	WORD id;
 	//glm::vec3 look_vec;
 	//DirectX::XMFLOAT3 look_vec;
-	VECTOR3 look_vec;
+	glm::vec3 look_vec;
 	int player_status;
 };
 
@@ -208,7 +209,7 @@ struct SC_PACKET_BULLET {
 	WORD bullet_id;
 	//DirectX::XMFLOAT3 pos;
 	//glm::vec3 pos;
-	VECTOR3 pos;
+	glm::vec3 pos;
 	float x, y, z;
 };
 
@@ -244,7 +245,7 @@ struct CS_PACKET_KEYUP {
 	BYTE type;
 	//DirectX::XMFLOAT3 look_vec;
 	//glm::vec3 look_vec;
-	VECTOR3 look_vec;
+	glm::vec3 look_vec;
 };
 struct CS_PACKET_KEYDOWN {
 	BYTE size;
@@ -305,6 +306,6 @@ struct CS_PACKET_LOOK_VECTOR {
 	BYTE type;
 	//DirectX::XMVECTOR look_vector;
 	//glm::vec3 look_vector;
-	VECTOR3 look_vector;
+	glm::vec3 look_vector;
 };
 
