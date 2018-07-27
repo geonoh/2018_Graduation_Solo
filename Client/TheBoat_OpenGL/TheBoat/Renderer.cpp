@@ -116,49 +116,49 @@ void Renderer::MouseMove(int x, int y, int width, int height) {
 }
 
 void Renderer::KeyPressed(const unsigned char key) {
-#ifdef _Dev
-	float dx = 0.f; // 가로로 걸은 걸이
-	float dz = 0.f; // distance of z -> 앞뒤로 걸은 거리
-
-	switch (key) {
-	case 'w':
-	case 'W':
-		dz = 2;
-		break;
-	case 'a':
-	case 'A':
-		dx = -2;
-		break;
-	case 's':
-	case 'S':
-		dz = -2;
-		break;
-	case 'd':
-	case 'D':
-		dx = 2;
-		break;
-	}
-	
-	glm::mat4 mat = GetViewMatrix();
-	glm::vec3 forward(mat[0][2], mat[1][2], mat[2][2]);
-	// Look vec
-	//look_at = forward;
-
-	glm::vec3 strafe(mat[0][0], mat[1][0], mat[2][0]);
-
-	const float speed = 0.12f;
-
-	eye_vec += (-dz * forward + dx * strafe)*speed;
-	// 와이 계산 필요
-	//eye_vec.z *= (-1);
-
-	eye_vec.y = height_map->GetHeight(eye_vec.x + 256.f, eye_vec.z + 256.f) + PLAYER_HEIGHT;
-	//printf("%c 키 누름\n", key);
-	//printf("Look At [%f, %f, %f] \n", forward.x, forward.y, forward.z);
-	//printf("directX 좌표 : [%f, %f, %f] OpenGL 좌표 : [%f, %f, %f] \n",
-	//	eye_vec.x + 256, eye_vec.y, eye_vec.z + 256.f,
-	//	eye_vec.x, eye_vec.y, eye_vec.z);
-#endif
+//#ifdef _Dev
+//	float dx = 0.f; // 가로로 걸은 걸이
+//	float dz = 0.f; // distance of z -> 앞뒤로 걸은 거리
+//
+//	switch (key) {
+//	case 'w':
+//	case 'W':
+//		dz = 2;
+//		break;
+//	case 'a':
+//	case 'A':
+//		dx = -2;
+//		break;
+//	case 's':
+//	case 'S':
+//		dz = -2;
+//		break;
+//	case 'd':
+//	case 'D':
+//		dx = 2;
+//		break;
+//	}
+//	
+//	glm::mat4 mat = GetViewMatrix();
+//	glm::vec3 forward(mat[0][2], mat[1][2], mat[2][2]);
+//	// Look vec
+//	//look_at = forward;
+//
+//	glm::vec3 strafe(mat[0][0], mat[1][0], mat[2][0]);
+//
+//	const float speed = 0.12f;
+//
+//	eye_vec += (-dz * forward + dx * strafe)*speed;
+//	// 와이 계산 필요
+//	//eye_vec.z *= (-1);
+//
+//	eye_vec.y = height_map->GetHeight(eye_vec.x + 256.f, eye_vec.z + 256.f) + PLAYER_HEIGHT;
+//	//printf("%c 키 누름\n", key);
+//	//printf("Look At [%f, %f, %f] \n", forward.x, forward.y, forward.z);
+//	//printf("directX 좌표 : [%f, %f, %f] OpenGL 좌표 : [%f, %f, %f] \n",
+//	//	eye_vec.x + 256, eye_vec.y, eye_vec.z + 256.f,
+//	//	eye_vec.x, eye_vec.y, eye_vec.z);
+//#endif
 	UpdateView();
 }
 
@@ -1915,18 +1915,22 @@ void Renderer::DrawHeightMap()
 	glDisableVertexAttribArray(attribTex);
 }
 
+
 void Renderer::DrawSkyBox()
 {
 	GLuint shader = m_Shader_SkyBox;
-	
+
 	glDepthMask(GL_FALSE);
 	glDisable(GL_CULL_FACE);
 
 	glUseProgram(shader);
-	
+
 	GLuint pvm = glGetUniformLocation(shader, "u_PVM");
 
-	glm::mat4 mat4PVM = m_m4ProjView*m_m4Model;
+	glm::mat4 translate = glm::mat4(1.f);
+	translate = glm::translate(translate, eye_vec);
+
+	glm::mat4 mat4PVM = m_m4ProjView * translate;
 
 	glUniformMatrix4fv(pvm, 1, GL_FALSE, &mat4PVM[0][0]);
 
@@ -1946,7 +1950,6 @@ void Renderer::DrawSkyBox()
 	glDisableVertexAttribArray(attribPosition);
 	glDepthMask(GL_TRUE);
 }
-
 void Renderer::LoadHeightMapImage(const char* pFileName, int nWidth, int nHeight)
 {
 	BYTE *pHeightMapPixels = new BYTE[nWidth * nHeight];
