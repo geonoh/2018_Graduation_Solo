@@ -190,6 +190,8 @@
     <None Include="Shaders\BloomP3.vs" />
     <None Include="Shaders\FillAll.fs" />
     <None Include="Shaders\FillAll.vs" />
+    <None Include="Shaders\HeightMapShaders\HeightMap.fs" />
+    <None Include="Shaders\HeightMapShaders\HeightMap.vs" />
     <None Include="Shaders\Particle.fs" />
     <None Include="Shaders\Particle.vs" />
     <None Include="Shaders\Proj.fs" />

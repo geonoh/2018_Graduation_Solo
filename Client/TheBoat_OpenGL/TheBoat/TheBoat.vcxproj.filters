@@ -189,5 +189,11 @@
     <None Include="Shaders\Texture_App.vs">
       <Filter>05.Shader</Filter>
     </None>
+    <None Include="Shaders\HeightMapShaders\HeightMap.fs">
+      <Filter>05.Shader</Filter>
+    </None>
+    <None Include="Shaders\HeightMapShaders\HeightMap.vs">
+      <Filter>05.Shader</Filter>
+    </None>
   </ItemGroup>
 </Project>
