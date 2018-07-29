@@ -2,14 +2,13 @@
 
 // Server 에서 받아오는 Player의 정보 
 struct SPlayer {
-	VECTOR3 pos;
+	glm::vec3 pos;
 	int player_status;
 };
 
 
 class ServerMgr
 {
-	WSADATA wsa;
 	SOCKET sock;
 	SOCKADDR_IN server_addr;
 	HWND async_handle;
@@ -17,7 +16,7 @@ class ServerMgr
 	WSABUF recv_wsabuf;
 	int clients_id = 0;
 
-	Bullet bullets[MAX_AMMO_SIZE] = { 0 };
+	Bullet bullets[MAX_AMMO] = { 0 };
 	int recvd_bullet_id = 0;
 
 	bool first_set_id = true;
@@ -80,6 +79,6 @@ public:
 	float GetPlayerHP(int p_n);
 
 	// 
-	void ReturnBuildingPosition(VECTOR3* building_pos);
-	void ReturnBuildingExtents(VECTOR3* building_pos);
+	void ReturnBuildingPosition(glm::vec3* building_pos);
+	void ReturnBuildingExtents(glm::vec3* building_pos);
 };

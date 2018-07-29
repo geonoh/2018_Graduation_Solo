@@ -2,16 +2,16 @@
 class Player
 {
 	float hp;
-	VECTOR3 pos;
-	VECTOR3 look;
+	glm::vec3 pos;
+	glm::vec3 look;
 public:
 	float GetHP();
 	void SetHP(float HP);
 
-	VECTOR3 GetPos();
+	glm::vec3 GetPos();
 	void SetPos(float x, float y, float z);
 
-	VECTOR3 GetLook();
+	glm::vec3 GetLook();
 	void SetLook(float x, float y, float z);
 
 	Player();

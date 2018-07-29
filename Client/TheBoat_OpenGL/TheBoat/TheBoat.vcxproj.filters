@@ -20,6 +20,9 @@
     <Filter Include="04.HeightMap">
       <UniqueIdentifier>{4fd10234-58dc-46d0-beac-f3607feb39b6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="05.Shader">
+      <UniqueIdentifier>{2275d687-8646-4c4b-9ebb-0a1ebda69295}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Resource.h">
@@ -49,7 +52,7 @@
     <ClInclude Include="CHeightMapImage.h">
       <Filter>04.HeightMap</Filter>
     </ClInclude>
-    <ClInclude Include="protocol.h">
+    <ClInclude Include="..\..\..\Server\TheBoat_server(OpenGL)\TheBoat_server\protocol.h">
       <Filter>02.ServerManager</Filter>
     </ClInclude>
   </ItemGroup>
@@ -88,5 +91,103 @@
     <Image Include="TheBoat.ico">
       <Filter>리소스 파일</Filter>
     </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Shaders\Proj.fs">
+      <Filter>05.Shader</Filter>
+    </None>
+    <None Include="Shaders\Proj.vs">
+      <Filter>05.Shader</Filter>
+    </None>
+    <None Include="Shaders\BloomP2.fs">
+      <Filter>05.Shader</Filter>
+    </None>
+    <None Include="Shaders\BloomP2.vs">
+      <Filter>05.Shader</Filter>
+    </None>
+    <None Include="Shaders\BloomP3.fs">
+      <Filter>05.Shader</Filter>
+    </None>
+    <None Include="Shaders\BloomP3.vs">
+      <Filter>05.Shader</Filter>
+    </None>
+    <None Include="Shaders\FillAll.fs">
+      <Filter>05.Shader</Filter>
+    </None>
+    <None Include="Shaders\FillAll.vs">
+      <Filter>05.Shader</Filter>
+    </None>
+    <None Include="Shaders\Particle.fs">
+      <Filter>05.Shader</Filter>
+    </None>
+    <None Include="Shaders\Particle.vs">
+      <Filter>05.Shader</Filter>
+    </None>
+    <None Include="Shaders\ProxyGeo.fs">
+      <Filter>05.Shader</Filter>
+    </None>
+    <None Include="Shaders\ProxyGeo.vs">
+      <Filter>05.Shader</Filter>
+    </None>
+    <None Include="Shaders\q1.fs">
+      <Filter>05.Shader</Filter>
+    </None>
+    <None Include="Shaders\q1.vs">
+      <Filter>05.Shader</Filter>
+    </None>
+    <None Include="Shaders\q2.fs">
+      <Filter>05.Shader</Filter>
+    </None>
+    <None Include="Shaders\q2.vs">
+      <Filter>05.Shader</Filter>
+    </None>
+    <None Include="Shaders\Radar.fs">
+      <Filter>05.Shader</Filter>
+    </None>
+    <None Include="Shaders\Radar.vs">
+      <Filter>05.Shader</Filter>
+    </None>
+    <None Include="Shaders\SolidRect.fs">
+      <Filter>05.Shader</Filter>
+    </None>
+    <None Include="Shaders\SolidRect.vs">
+      <Filter>05.Shader</Filter>
+    </None>
+    <None Include="Shaders\STParticle.fs">
+      <Filter>05.Shader</Filter>
+    </None>
+    <None Include="Shaders\STParticle.vs">
+      <Filter>05.Shader</Filter>
+    </None>
+    <None Include="Shaders\Test.fs">
+      <Filter>05.Shader</Filter>
+    </None>
+    <None Include="Shaders\Test.vs">
+      <Filter>05.Shader</Filter>
+    </None>
+    <None Include="Shaders\Test1.fs">
+      <Filter>05.Shader</Filter>
+    </None>
+    <None Include="Shaders\Test1.vs">
+      <Filter>05.Shader</Filter>
+    </None>
+    <None Include="Shaders\Texture.fs">
+      <Filter>05.Shader</Filter>
+    </None>
+    <None Include="Shaders\Texture.vs">
+      <Filter>05.Shader</Filter>
+    </None>
+    <None Include="Shaders\Texture_Anim.fs">
+      <Filter>05.Shader</Filter>
+    </None>
+    <None Include="Shaders\Texture_Anim.vs">
+      <Filter>05.Shader</Filter>
+    </None>
+    <None Include="Shaders\Texture_App.fs">
+      <Filter>05.Shader</Filter>
+    </None>
+    <None Include="Shaders\Texture_App.vs">
+      <Filter>05.Shader</Filter>
+    </None>
   </ItemGroup>
 </Project>

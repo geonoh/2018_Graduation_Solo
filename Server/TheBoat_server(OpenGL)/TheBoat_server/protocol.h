@@ -4,10 +4,10 @@
 #define SERVER_PORT			4000
 #define MAX_BUFFER_SIZE		4000
 #define MAX_PACKET_SIZE		256
-#define MAXIMUM_PLAYER		2
+#define MAX_PLAYER		2
 #define	WM_SOCKET			WM_USER + 1
 #define CLIENT_BUF_SIZE		1024
-#define MAX_AMMO_SIZE			30
+#define MAX_AMMO			30
 
 // 보트 부품
 #define MAX_BOAT_ITEM			4
@@ -28,7 +28,14 @@
 #define TIME_SEND_TIME			1
 
 // 플레이어의 키 
-#define PLAYER_HEIGHT			5.f
+//#define PLAYER_HEIGHT			5.f
+#define OBB_SCALE_PLAYER_X		5.f
+#define OBB_SCALE_PLAYER_Y		8.f
+#define OBB_SCALE_PLAYER_Z		5.f
+
+// HeightMap에서 사용
+// DirectX12 -> OpenGL 상수
+#define DX12_TO_OPGL			256.f
 
 ///////////////////////////////////////////////////
 // Server To Client
@@ -125,17 +132,17 @@
 #define MAP_POINT8_Z	3076.07
 ///////////////////////////////////////////////////
 
-struct VECTOR3 {
-	float x, y, z;
-	VECTOR3() {
-
-	}
-	VECTOR3(float ix, float iy, float iz) {
-		x = ix;
-		y = iy;
-		z = iz;
-	}
-};
+//struct VECTOR3 {
+//	float x, y, z;
+//	VECTOR3() {
+//
+//	}
+//	VECTOR3(float ix, float iy, float iz) {
+//		x = ix;
+//		y = iy;
+//		z = iz;
+//	}
+//};
 
 
 
@@ -247,7 +254,7 @@ struct CS_PACKET_KEYUP {
 	//glm::vec3 look_vec;
 	glm::vec3 look_vec;
 };
-struct CS_PACKET_KEYDOWN {
+struct CS_PACKET_g_bKeyDown {
 	BYTE size;
 	BYTE type;
 };

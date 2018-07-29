@@ -24,10 +24,13 @@ private:
 	float roll;
 	// Eye vector
 	// 여기서 15는 heightmap 0,0 의 높이이다. 
-	glm::vec3 eye_vec{ 0.f,15.f + PLAYER_HEIGHT,0.f };
+	glm::vec3 eye_vec{ 0.f,15.f + OBB_SCALE_PLAYER_Y,0.f };
 	//glm::vec3 look_at;
 	//
 	glm::mat4 mat_view;
+
+	int m_iMousePosX = 0;
+	int m_iMousePosY = 0;
 public:
 	// Camera Setting 
 	void SetCameraLook(float x, float y, float z);
@@ -36,7 +39,7 @@ public:
 	// Update View
 	void UpdateView();
 	// 디버그용 Height
-	CHeightMapImage* height_map = nullptr;
+	CHeightMapImage* m_HeightMap = nullptr;
 // ------------------------------------------------------------------------------
 	glm::mat4 GetViewMatrix() const;
 	void KeyPressed(const unsigned char key);
@@ -46,6 +49,11 @@ public:
 	void MouseMove(int x, int y, int width, int height);
 
 	glm::vec2 mouse_position;
+
+	// Cube
+	void InitializeCube();
+	// Texture
+	void InitializeTextureImage();
 public:
 	Renderer(int windowSizeX, int windowSizeY);
 	~Renderer();
@@ -62,14 +70,15 @@ public:
 	void Bogang();
 	void Q1();
 	void Q2();
-	void Cube();
 	void SetRotation(float rX, float rY);
-	void Test1();
+	void DrawUITexture();
 
 	void ProxyGeo();
 
 	void DrawSTParticle(float sx, float sy, float tx, float ty, float time);
 	void DrawParticle();
+
+	void DrawCube(float x, float y, float z);
 
 	float m_targetPointX, m_targetPointY;
 

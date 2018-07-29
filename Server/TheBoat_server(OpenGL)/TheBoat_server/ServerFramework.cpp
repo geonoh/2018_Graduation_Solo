@@ -71,15 +71,15 @@ void ServerFramework::InitServer() {
 	if (retval == SOCKET_ERROR)
 		printf("listen 에러\n");
 
-	XMFLOAT3 xmf3Scale(8.0f, 2.f, 8.0f);
+	XMFLOAT3 xmf3Scale(1.f, 1.f, 1.f);
 	LPCTSTR file_name = _T("height_map.raw");
 	height_map = new CHeightMapImage(file_name, 513, 513, xmf3Scale);
 
 	client_lock.lock();
-	for (int i = 0; i < MAXIMUM_PLAYER; ++i) {
+	for (int i = 0; i < MAX_PLAYER; ++i) {
 		clients[i].x = 0.f;
 		clients[i].z = 0.f;
-		clients[i].y = height_map->GetHeight(clients[i].x , clients[i].z);
+		clients[i].y = height_map->GetHeight(clients[i].x + DX12_TO_OPGL, clients[i].z + DX12_TO_OPGL) + PLAYER_HEIGHT;
 		clients[i].hp = 100.f;
 		for (int j = 0; j < 4; ++j) {
 			clients[i].boat_parts[j] = false;
@@ -87,13 +87,13 @@ void ServerFramework::InitServer() {
 	}
 	client_lock.unlock();
 
-	for (int i = 0; i < MAXIMUM_PLAYER; ++i) {
+	for (int i = 0; i < MAX_PLAYER; ++i) {
 		clients[i].SetOOBB(XMFLOAT3(clients[i].x, clients[i].y, clients[i].z), XMFLOAT3(OBB_SCALE_PLAYER_X, OBB_SCALE_PLAYER_Y, OBB_SCALE_PLAYER_Z), XMFLOAT4(0, 0, 0, 1));
 		clients[i].bounding_box.Center;
 	}
 
-	for (int j = 0; j < MAXIMUM_PLAYER; ++j) {
-		for (int i = 0; i < MAX_AMMO_SIZE; ++i) {
+	for (int j = 0; j < MAX_PLAYER; ++j) {
+		for (int i = 0; i < MAX_AMMO; ++i) {
 			bullets[j][i].SetOOBB(XMFLOAT3(bullets[j][i].x, bullets[j][i].y, bullets[j][i].z),
 				XMFLOAT3(OBB_SCALE_BULLET_X, OBB_SCALE_BULLET_Y, OBB_SCALE_BULLET_Z),
 				XMFLOAT4(0, 0, 0, 1)); 
@@ -162,7 +162,7 @@ void ServerFramework::AcceptPlayer() {
 		inet_ntoa(c_addr.sin_addr), ntohs(c_addr.sin_port));
 
 	int client_id = -1;
-	for (int i = 0; i < MAXIMUM_PLAYER; ++i) {
+	for (int i = 0; i < MAX_PLAYER; ++i) {
 		if (clients[i].in_use == false) {
 			client_id = i;
 			break;
@@ -210,7 +210,7 @@ void ServerFramework::AcceptPlayer() {
 	SendPacket(client_id, &packet);
 
 	// 나 제외 플레이어에게 입장정보 전송
-	for (int i = 0; i < MAXIMUM_PLAYER; ++i) {
+	for (int i = 0; i < MAX_PLAYER; ++i) {
 		if (clients[i].in_use && (client_id != i)) {
 			printf("%d에게 %d의 정보를 보낸다\n", i, client_id);
 			SendPacket(i, &packet);
@@ -233,14 +233,14 @@ void ServerFramework::AcceptPlayer() {
 	}
 
 	// 다른 클라이언트의 위치 보내주기
-	for (int i = 0; i < MAXIMUM_PLAYER; ++i) {
+	for (int i = 0; i < MAX_PLAYER; ++i) {
 		ZeroMemory(&packet, sizeof(packet));
 		if (i != client_id) {
 			if (clients[i].in_use == true) {
 				packet.id = i;
 				packet.size = sizeof(SC_PACKET_ENTER_PLAYER);
 				packet.type = SC_ENTER_PLAYER;
-				clients[i].y = height_map->GetHeight(clients[i].x, clients[i].z);
+				clients[i].y = height_map->GetHeight(clients[i].x + DX12_TO_OPGL, clients[i].z + DX12_TO_OPGL) + PLAYER_HEIGHT;
 				packet.x = clients[i].x;
 				packet.y = clients[i].y;
 				packet.z = clients[i].z;
@@ -340,7 +340,7 @@ void ServerFramework::ProcessPacket(int cl_id, char* packet) {
 
 			}
 			//// 탄창에 30발 미만인경우 다 옮기고 ar_ammo를 0으로 만들어야 한다. 
-			//if (clients[cl_id].ar_ammo <= MAX_AMMO_SIZE) {
+			//if (clients[cl_id].ar_ammo <= MAX_AMMO) {
 			//	//bullet_counter[cl_id] -= clients[cl_id].ar_ammo;
 			//	clients[cl_id].ar_ammo -= bullet_counter[cl_id];
 			//	clients[cl_id].ar_ammo = 0;
@@ -394,7 +394,7 @@ void ServerFramework::ProcessPacket(int cl_id, char* packet) {
 	case CS_LEFT_BUTTON_DOWN:
 		// 주무기
 		if (clients[cl_id].equipted_weapon == 0) {
-			if (bullet_counter[cl_id] == MAX_AMMO_SIZE) {
+			if (bullet_counter[cl_id] == MAX_AMMO) {
 				printf("총알 장전 필요\n");
 				SC_PACKET_AMMO_O packets;
 				packets.size = sizeof(SC_PACKET_AMMO_O);
@@ -411,7 +411,7 @@ void ServerFramework::ProcessPacket(int cl_id, char* packet) {
 		}
 		// 보조무기
 		else if (clients[cl_id].equipted_weapon == 1) {
-			if (bullet_counter[cl_id] == MAX_AMMO_SIZE) {
+			if (bullet_counter[cl_id] == MAX_AMMO) {
 				printf("총알 장전 필요\n");
 				SC_PACKET_AMMO_O packets;
 				packets.size = sizeof(SC_PACKET_AMMO_O);
@@ -465,7 +465,7 @@ void ServerFramework::ProcessPacket(int cl_id, char* packet) {
 			packets.player_status = 1;
 		}
 		
-		for (int i = 0; i < MAXIMUM_PLAYER; ++i) {
+		for (int i = 0; i < MAX_PLAYER; ++i) {
 			if (clients[i].in_use == true) {
 				SendPacket(i, &packets);
 			}
@@ -476,12 +476,12 @@ void ServerFramework::ProcessPacket(int cl_id, char* packet) {
 		int ready_count = 0;
 		printf("%d 플레이어 레디\n", cl_id);
 		player_ready[cl_id] = true;
-		for (int i = 0; i < MAXIMUM_PLAYER; ++i) {
+		for (int i = 0; i < MAX_PLAYER; ++i) {
 			if (player_ready[i]) {
 				ready_count++;
 			}
 		}
-		if (ready_count == MAXIMUM_PLAYER) {
+		if (ready_count == MAX_PLAYER) {
 			GameStart();
 		}
 		break;
@@ -500,7 +500,7 @@ void ServerFramework::GameStart() {
 	printf("게임 시작\n");
 
 	// 플레이어  위치 섞기
-	for (int i = 0; i < MAXIMUM_PLAYER; ++i) {
+	for (int i = 0; i < MAX_PLAYER; ++i) {
 		int dice = rand() % 4;
 		switch (dice) {
 		case MAP_AREA_1:
@@ -524,25 +524,25 @@ void ServerFramework::GameStart() {
 			clients[i].z = rand() % 1500 + 400;
 			break;
 		}
-		clients[i].y = height_map->GetHeight(clients[i].x, clients[i].z);
+		clients[i].y = height_map->GetHeight(clients[i].x + DX12_TO_OPGL, clients[i].z + DX12_TO_OPGL) + PLAYER_HEIGHT;
 		clients[i].hp = 100.f;
 	}
 
 	// OOBB 셋
-	for (int i = 0; i < MAXIMUM_PLAYER; ++i) {
+	for (int i = 0; i < MAX_PLAYER; ++i) {
 		//clients[i].SetOOBB(XMFLOAT3(0, 0, 0), XMFLOAT3(10.f, 10.f, 10.f), XMFLOAT4(0, 0, 0, 1));
 		clients[i].SetOOBB(XMFLOAT3(clients[i].x, clients[i].y, clients[i].z), XMFLOAT3(OBB_SCALE_PLAYER_X, OBB_SCALE_PLAYER_Y, OBB_SCALE_PLAYER_Z), XMFLOAT4(0, 0, 0, 1));
 	}
 
 	// Bullet의 OBB
-	for (int j = 0; j < MAXIMUM_PLAYER; ++j) {
-		for (int i = 0; i < MAX_AMMO_SIZE; ++i) {
+	for (int j = 0; j < MAX_PLAYER; ++j) {
+		for (int i = 0; i < MAX_AMMO; ++i) {
 			bullets[j][i].SetOOBB(XMFLOAT3(bullets[j][i].x, bullets[j][i].y, bullets[j][i].z),
 				XMFLOAT3(OBB_SCALE_BULLET_X, OBB_SCALE_BULLET_Y, OBB_SCALE_BULLET_Z),
 				XMFLOAT4(0, 0, 0, 1));
 		}
 	}
-	for (int i = 0; i < MAXIMUM_PLAYER; ++i) {
+	for (int i = 0; i < MAX_PLAYER; ++i) {
 		ol_ex[i].evt_type = EVT_PLAYER_POS_SEND;
 		PostQueuedCompletionStatus(iocp_handle, 0, i, reinterpret_cast<WSAOVERLAPPED*>(&ol_ex[i]));
 	}
@@ -550,7 +550,7 @@ void ServerFramework::GameStart() {
 	//SC_PACKET_START packets;
 	//packets.size = sizeof(SC_PACKET_START);
 	//packets.type = SC_ITEM_GEN;
-	//for (int i = 0; i < MAXIMUM_PLAYER; ++i) {
+	//for (int i = 0; i < MAX_PLAYER; ++i) {
 	//	if (clients[i].in_use == true) {
 	//		SendPacket(i, &packets);
 	//	}
@@ -657,14 +657,14 @@ void ServerFramework::WorkerThread() {
 				}
 				packets.x = rand() % 4000;
 				packets.z = rand() % 4000;
-				packets.y = height_map->GetHeight(packets.x, packets.z);
+				packets.y = height_map->GetHeight(packets.x + DX12_TO_OPGL, packets.z + DX12_TO_OPGL) + PLAYER_HEIGHT;
 				packets.item_type = dice;
 
 				items[dice]->SetPosition(packets.x, packets.y, packets.z);
 
 				// 부품의 타입도 정해야한다. 
 				printf("[아이템 생성 : Type %d] : %f %f %f \n", items[dice]->GetItemType(), packets.x, packets.y, packets.z);
-				for (int i = 0; i < MAXIMUM_PLAYER; ++i) {
+				for (int i = 0; i < MAX_PLAYER; ++i) {
 					if (clients[i].in_use == true) {
 						SendPacket(i, &packets);
 					}
@@ -696,14 +696,14 @@ void ServerFramework::WorkerThread() {
 				items[dice]->SetItemType(dice);
 				packets.x = rand() % 4000;
 				packets.z = rand() % 4000;
-				packets.y = height_map->GetHeight(packets.x, packets.z);
+				packets.y = height_map->GetHeight(packets.x + DX12_TO_OPGL, packets.z + DX12_TO_OPGL) + PLAYER_HEIGHT;
 				packets.item_type = dice;
 
 				items[dice]->SetPosition(packets.x, packets.y, packets.z);
 
 				// 부품의 타입도 정해야한다. 
 				printf("[아이템 생성 : Type %d] : %f %f %f \n", items[dice]->GetItemType(), packets.x, packets.y, packets.z);
-				for (int i = 0; i < MAXIMUM_PLAYER; ++i) {
+				for (int i = 0; i < MAX_PLAYER; ++i) {
 					if (clients[i].in_use == true) {
 						SendPacket(i, &packets);
 					}
@@ -716,7 +716,7 @@ void ServerFramework::WorkerThread() {
 		// TimerThread에서 호출
 		// 1/20 마다 모든 플레이어에게 정보 전송
 		else if (overlapped_buffer->evt_type == EVT_PLAYER_POS_SEND) {
-			for (int i = 0; i < MAXIMUM_PLAYER; ++i) {
+			for (int i = 0; i < MAX_PLAYER; ++i) {
 				//client_lock.lock();
 				clients[i].client_lock.lock();
 				if (clients[i].is_move_foward) {
@@ -773,7 +773,7 @@ void ServerFramework::WorkerThread() {
 				packets.id = client_id;
 				packets.size = sizeof(SC_PACKET_POS);
 				packets.type = SC_POS;
-				clients[client_id].y = height_map->GetHeight(clients[client_id].x, clients[client_id].z);
+				clients[client_id].y = height_map->GetHeight(clients[client_id].x + DX12_TO_OPGL, clients[client_id].z + DX12_TO_OPGL) + PLAYER_HEIGHT;
 				packets.x = clients[client_id].x;
 				packets.y = clients[client_id].y;
 				packets.z = clients[client_id].z;
@@ -791,7 +791,7 @@ void ServerFramework::WorkerThread() {
 				}
 				//packets.player_status = clients[client_id].is_running;
 				//printf("높이 : %f\n", clients[client_id].y);
-				for (int i = 0; i < MAXIMUM_PLAYER; ++i) {
+				for (int i = 0; i < MAX_PLAYER; ++i) {
 					if (clients[i].in_use == true) {
 						SendPacket(i, &packets);
 					}
@@ -800,7 +800,7 @@ void ServerFramework::WorkerThread() {
 			}
 		}
 		else if (overlapped_buffer->evt_type == EVT_COLLISION) {
-			for (int i = 0; i < MAXIMUM_PLAYER; ++i) {
+			for (int i = 0; i < MAX_PLAYER; ++i) {
 				for (int j = 0; j < MAX_BOAT_ITEM; ++j) {
 					if (clients[i].in_use&&items[j]->in_use) {
 						ContainmentType contain_type = clients[i].bounding_box.Contains(items[j]->bounding_box);
@@ -834,8 +834,8 @@ void ServerFramework::WorkerThread() {
 
 			// OBB 충돌체크 
 			//for (int i = 0; i < OBJECT_BUILDING; ++i) {
-			//	for (int j = 0; j < MAX_AMMO_SIZE; ++j) {
-			//		for (int k = 0; (k < MAXIMUM_PLAYER); ++k) {
+			//	for (int j = 0; j < MAX_AMMO; ++j) {
+			//		for (int k = 0; (k < MAX_PLAYER); ++k) {
 			//			if (bullets[k][j].in_use) {
 			//				ContainmentType contain_type = building[i]->bounding_box.Contains(bullets[k][j].bounding_box);
 			//				switch (contain_type) {
@@ -887,7 +887,7 @@ void ServerFramework::WorkerThread() {
 			//		}
 			//	}
 			//}
-			for (int j = 0; (j < MAXIMUM_PLAYER - 1); ++j) {
+			for (int j = 0; (j < MAX_PLAYER - 1); ++j) {
 				// 
 				//for (int k = 0; k < OBJECT_BUILDING; ++k) {
 				//	if (clients[j].in_use && clients[j + 1].in_use) {
@@ -936,7 +936,7 @@ void ServerFramework::WorkerThread() {
 				//	}
 				//}
 				// 
-				for (int i = 0; i < MAX_AMMO_SIZE; ++i) {
+				for (int i = 0; i < MAX_AMMO; ++i) {
 					if (bullets[j + 1][i].in_use && clients[j].in_use) {
 						ContainmentType containType = clients[j].bounding_box.Contains(bullets[j + 1][i].bounding_box);
 						switch (containType)
@@ -1045,8 +1045,8 @@ void ServerFramework::WorkerThread() {
 			int shooter_id = overlapped_buffer->shooter_player_id;
 			if (clients[shooter_id].equipted_weapon == 0) {
 				printf("%d가 발사한 총알 : %d\n", shooter_id, bullet_counter[shooter_id]);
-				if (bullet_counter[shooter_id] == MAX_AMMO_SIZE - 1) {
-					for (int d = 0; d < MAX_AMMO_SIZE; ++d) {
+				if (bullet_counter[shooter_id] == MAX_AMMO - 1) {
+					for (int d = 0; d < MAX_AMMO; ++d) {
 						bullets[shooter_id][d].in_use = false;
 					}
 				}
@@ -1069,7 +1069,7 @@ void ServerFramework::WorkerThread() {
 			packets.world_time = overlapped_buffer->world_time;
 			printf("시간 보냄 %f \n", packets.world_time);
 
-			for (int i = 0; i < MAXIMUM_PLAYER; ++i) {
+			for (int i = 0; i < MAX_PLAYER; ++i) {
 				if (clients[i].in_use)
 					SendPacket(i, &packets);
 			}
@@ -1077,8 +1077,8 @@ void ServerFramework::WorkerThread() {
 		else if (overlapped_buffer->evt_type == EVT_BULLET_UPDATE) {
 			// i 가 플레이어
 			// j 가 플레이어가 발사한 총알
-			for (int i = 0; i < MAXIMUM_PLAYER; ++i) {
-				for (int j = 0; j < MAX_AMMO_SIZE; ++j) {
+			for (int i = 0; i < MAX_PLAYER; ++i) {
+				for (int j = 0; j < MAX_AMMO; ++j) {
 					if (bullets[i][j].in_use) {
 						bullets[i][j].x += METER_PER_PIXEL * bullets[i][j].look_vec.x * (AR_SPEED * overlapped_buffer->elapsed_time);
 						bullets[i][j].y += METER_PER_PIXEL * bullets[i][j].look_vec.y * (AR_SPEED * overlapped_buffer->elapsed_time);
@@ -1157,7 +1157,7 @@ void ServerFramework::DisconnectPlayer(int cl_id) {
 	packet.type = SC_REMOVE_PLAYER;
 
 	// 플레이어가 나갔다는 정보를 모든 클라이언트에 뿌려준다.
-	for (int i = 0; i < MAXIMUM_PLAYER; ++i) {
+	for (int i = 0; i < MAX_PLAYER; ++i) {
 		if (clients[i].in_use == true) {
 			SendPacket(i, &packet);
 		}
@@ -1183,7 +1183,7 @@ void ServerFramework::Update(duration<float>& elapsed_time) {
 
 	sender_time += elapsed_time.count();
 	if (sender_time >= UPDATE_TIME) {   // 1/60 초마다 데이터 송신
-		for (int i = 0; i < MAXIMUM_PLAYER; ++i) {
+		for (int i = 0; i < MAX_PLAYER; ++i) {
 			if (clients[i].is_move_backward || clients[i].is_move_foward || clients[i].is_move_left || clients[i].is_move_right) {
 				ol_ex[i].evt_type = EVT_PLAYER_POS_SEND;
 				ol_ex[i].elapsed_time = elapsed_time.count() + sender_time;

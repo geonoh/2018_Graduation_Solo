@@ -59,7 +59,7 @@ bool ServerMgr::Initialize(HWND& hwnd) {
 	recv_wsabuf.len = CLIENT_BUF_SIZE;
 
 	// 총알 갯수 초기화 
-	ammo_counter = MAX_AMMO_SIZE;
+	ammo_counter = MAX_AMMO;
 	return true;
 }
 
@@ -212,8 +212,8 @@ void ServerMgr::ProcessPacket(char* ptr) {
 	case SC_FULLY_AMMO: {
 
 		SC_PACKET_AMMO_O* packets = reinterpret_cast<SC_PACKET_AMMO_O*>(ptr);
-		ammo_counter = MAX_AMMO_SIZE - packets->ammo;
-		//ammo_counter = MAX_AMMO_SIZE;
+		ammo_counter = MAX_AMMO - packets->ammo;
+		//ammo_counter = MAX_AMMO;
 
 		printf("재장전 완료\n");
 		break;
@@ -238,7 +238,7 @@ bool ServerMgr::IsItemGen() {
 	return is_item_gen;
 }
 
-void ServerMgr::ReturnBuildingPosition(VECTOR3* input_building_pos) {
+void ServerMgr::ReturnBuildingPosition(glm::vec3* input_building_pos) {
 	for (int i = 0; i < OBJECT_BUILDING; ++i) {
 		input_building_pos[i].x = building_pos[i].x;
 		input_building_pos[i].y = building_pos[i].y;
@@ -246,7 +246,7 @@ void ServerMgr::ReturnBuildingPosition(VECTOR3* input_building_pos) {
 	}
 }
 
-void ServerMgr::ReturnBuildingExtents(VECTOR3* input_building_extents) {
+void ServerMgr::ReturnBuildingExtents(glm::vec3* input_building_extents) {
 	for (int i = 0; i < OBJECT_BUILDING; ++i) {
 		input_building_extents[i].x = building_extents[i].x;
 		input_building_extents[i].y = building_extents[i].y;

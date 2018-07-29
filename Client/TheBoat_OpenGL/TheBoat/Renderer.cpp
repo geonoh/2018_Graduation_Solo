@@ -75,7 +75,7 @@ Renderer::Renderer(int windowSizeX, int windowSizeY)
 	Initialize(windowSizeX, windowSizeY);
 	glm::vec3 xmf3Scale(1.f, 1.f, 1.f);
 	LPCTSTR file_name = _T("height_map.raw");
-	height_map = new CHeightMapImage(file_name, 513, 513, xmf3Scale);
+	m_HeightMap = new CHeightMapImage(file_name, 513, 513, xmf3Scale);
 
 	//printf("directX ÁÂÇ¥ : [%f, %f, %f] OpenGL ÁÂÇ¥ : [%f, %f, %f] \n",
 	//	eye_vec.x + 256, eye_vec.y, eye_vec.z + 256.f,
@@ -87,7 +87,7 @@ Renderer::Renderer(int windowSizeX, int windowSizeY)
 
 Renderer::~Renderer()
 {
-	delete height_map;
+	delete m_HeightMap;
 }
 
 glm::mat4 Renderer::GetViewMatrix() const {
@@ -183,12 +183,12 @@ void Renderer::UpdateView() {
 	translate = glm::translate(translate, -eye_vec);
 
 	mat_view = rotate * translate;
-
 	//printf("%3f %3f %3f %3f \n", mat_view[0][0], mat_view[0][1], mat_view[0][2], mat_view[0][3]);
 	//printf("%3f %3f %3f %3f \n", mat_view[1][0], mat_view[1][1], mat_view[1][2], mat_view[1][3]);
 	//printf("%3f %3f %3f %3f \n", mat_view[2][0], mat_view[2][1], mat_view[2][2], mat_view[2][3]);
 	//printf("%3f %3f %3f %3f \n", mat_view[3][0], mat_view[3][1], mat_view[3][2], mat_view[3][3]);
 
+	// ÀÌ °è»ê ÈÄ view matrix¸¦ 
 
 	m_m4View = mat_view;
 	m_m4PersProj = glm::perspectiveRH((float)VIEW_ANGLE, 1.f, 1.f, 1000.f);
@@ -208,6 +208,9 @@ void Renderer::SetCameraLook(float x, float y, float z) {
 	mat_view[0][2] = x;
 	mat_view[1][2] = y;
 	mat_view[2][2] = z;
+	m_m4View = mat_view;
+	m_m4PersProj = glm::perspectiveRH((float)VIEW_ANGLE, 1.f, 1.f, 1000.f);
+	m_m4ProjView = m_m4PersProj * m_m4View;
 
 }
 
@@ -216,7 +219,9 @@ void Renderer::SetCameraPos(float x, float y, float z) {
 
 	eye_vec.x = x;
 	eye_vec.z = z;
-	eye_vec.y = height_map->GetHeight(eye_vec.x + 256.f, eye_vec.z + 256.f) + PLAYER_HEIGHT;
+	eye_vec.y = y;
+	//eye_vec.y = m_HeightMap->GetHeight(eye_vec.x + DX12_TO_OPGL, eye_vec.z + DX12_TO_OPGL) + PLAYER_HEIGHT;
+	//printf("SetCameraPos [%f, %f, %f]\n", eye_vec.x, eye_vec.y, eye_vec.z);
 
 }
 
@@ -330,7 +335,18 @@ void Renderer::Initialize(int windowSizeX, int windowSizeY)
 	//SkyBox Initialization
 	InitializeSkyBox();
 
+	//Cube Initialization
+	InitializeCube();
+
+	//Draw Texture Image
+	InitializeTextureImage();
+
 	m_Initialized = true;
+}
+
+void Renderer::InitializeTextureImage() {
+	m_Shader_Test1 = CompileShaders("./Shaders/Test1.vs", "./Shaders/Test1.fs");
+
 }
 
 bool Renderer::IsInitialized()
@@ -1529,8 +1545,7 @@ void Renderer::SetRotation(float rX, float rY)
 	m_m4Model
 		= m_m4ModelTranslation*m_m4ModelRotation*m_m4ModelScaling;
 }
-
-void Renderer::Cube()
+void Renderer::DrawCube(float x, float y, float z)
 {
 	GLuint shader = m_Shader_Proj;
 
@@ -1547,8 +1562,12 @@ void Renderer::Cube()
 	GLuint light = glGetUniformLocation(shader, "u_LightPos");
 	GLuint camera = glGetUniformLocation(shader, "u_CameraPos");
 
+	glm::mat4 m4ModelPosition = glm::translate(glm::mat4(1.f), glm::vec3(x, y, z)) * 
+		glm::scale(glm::mat4(1.f), glm::vec3(10.f, 16.f, 10.f));
+	m4ModelPosition *= m_m4Model;
+	//m_m4ModelTranslation
 	glUniformMatrix4fv(projView, 1, GL_FALSE, &m_m4ProjView[0][0]);
-	glUniformMatrix4fv(model, 1, GL_FALSE, &m_m4Model[0][0]);
+	glUniformMatrix4fv(model, 1, GL_FALSE, &m4ModelPosition[0][0]);
 	glUniformMatrix4fv(rotation, 1, GL_FALSE, &m_m4ModelRotation[0][0]);
 	glUniform3f(light, 2, 0, 0);
 	glUniform3f(camera, m_v3Camera_Position.x,
@@ -1574,9 +1593,10 @@ void Renderer::Cube()
 	glDisableVertexAttribArray(attribPosition);
 	glDisableVertexAttribArray(attribNormal);
 	glDisableVertexAttribArray(attribColor);
+
 }
 
-void Renderer::Test1()
+void Renderer::DrawUITexture()
 {
 	GLuint shader = m_Shader_Test1;
 
@@ -2208,4 +2228,9 @@ glm::vec3 Renderer::MakingNormalizedLookVector(glm::vec3& eye, glm::vec3& object
 float Renderer::GetVectorSize(glm::vec3& input_vec) {
 	float return_value = sqrt(input_vec.x * input_vec.x + input_vec.y*input_vec.y + input_vec.z*input_vec.z);
 	return return_value;
+}
+
+
+void Renderer::InitializeCube() {
+	m_Shader_Proj = CompileShaders("./Shaders/Proj.vs", "./Shaders/Proj.fs");
 }

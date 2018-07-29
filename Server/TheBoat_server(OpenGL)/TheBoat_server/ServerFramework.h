@@ -27,7 +27,7 @@ class ServerFramework
 
 	BOOL mode_selector;	// 
 
-	Client clients[MAXIMUM_PLAYER];
+	Client clients[MAX_PLAYER];
 	bool player_entered[4] = { 0 };
 	bool player_ready[4] = { 0 };		// Player_Ready 패킷 도착하면 해당 
 										// Client_ID에 맞는 배열 true
@@ -66,7 +66,7 @@ class ServerFramework
 	// 10은 아이템 생성 - Ammo
 	OverlappedExtensionSet ol_ex[20];
 
-	Bullet bullets[4][MAX_AMMO_SIZE] = { 0 };
+	Bullet bullets[4][MAX_AMMO] = { 0 };
 	mutex bullet_lock;
 	// 플레이어별 몇 번째 총알까지 발사했는지 저장하는 변수
 	int bullet_counter[4] = { 0 };
