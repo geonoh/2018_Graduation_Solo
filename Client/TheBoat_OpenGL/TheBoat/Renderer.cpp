@@ -1692,6 +1692,12 @@ void Renderer::DrawCube(float x, float y, float z)
 void Renderer::DrawCube(float x, float y, float z, float rot_x, float rot_y, float rot_z)
 {
 	printf("DrawCube : [%f, %f, %f] \n", rot_x, rot_y, rot_z);
+
+	glm::vec3 v3RotationX(rot_x, 0.f, 0.f);
+	glm::vec3 v3RotationZ(0.f, 0.f, rot_z);
+	float fCosBetweenXZ = glm::dot(v3RotationX, v3RotationZ) / (rot_x*rot_z);
+	float fAngleY;
+
 	GLuint shader = m_Shader_Proj;
 
 	glUseProgram(shader);

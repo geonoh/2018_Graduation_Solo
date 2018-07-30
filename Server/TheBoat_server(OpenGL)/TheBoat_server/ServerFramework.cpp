@@ -735,9 +735,9 @@ void ServerFramework::WorkerThread() {
 						clients[i].x += METER_PER_PIXEL * clients[i].look_vec.x * (RUN_SPEED * overlapped_buffer->elapsed_time);
 					}
 					else {
-						printf("%d플레이어 걷기 POS [%f, %f, %f] LV [%f, %f, %f]\n",
-							i, clients[i].x, clients[i].y, clients[i].z,
-							clients[i].look_vec.x, clients[i].look_vec.y, clients[i].look_vec.z);
+						//printf("%d플레이어 걷기 POS [%f, %f, %f] LV [%f, %f, %f]\n",
+						//	i, clients[i].x, clients[i].y, clients[i].z,
+						//	clients[i].look_vec.x, clients[i].look_vec.y, clients[i].look_vec.z);
 						clients[i].z += METER_PER_PIXEL * clients[i].look_vec.z * (WALK_SPEED * overlapped_buffer->elapsed_time);
 						clients[i].x += METER_PER_PIXEL * clients[i].look_vec.x * (WALK_SPEED * overlapped_buffer->elapsed_time);
 					}
