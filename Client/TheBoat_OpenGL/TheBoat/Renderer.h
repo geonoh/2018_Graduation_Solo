@@ -31,6 +31,10 @@ private:
 
 	int m_iMousePosX = 0;
 	int m_iMousePosY = 0;
+
+	float m_fCameraRotationX = 0.f;
+	float m_fCameraRotationY = 0.f;
+	float m_fCameraRotationZ = 0.f;
 public:
 	// Camera Setting 
 	void SetCameraLook(float x, float y, float z);
@@ -78,7 +82,9 @@ public:
 	void DrawSTParticle(float sx, float sy, float tx, float ty, float time);
 	void DrawParticle();
 
+
 	void DrawCube(float x, float y, float z);
+	void DrawCube(float x, float y, float z, float rot_x, float rot_y, float rot_z);
 
 	float m_targetPointX, m_targetPointY;
 

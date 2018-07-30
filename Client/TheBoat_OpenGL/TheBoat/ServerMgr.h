@@ -30,7 +30,7 @@ class ServerMgr
 	DWORD saved_packet_size = 0;
 
 	SPlayer sc_vec_buff[4];
-	glm::vec3 sc_look_vec;
+	glm::vec3 m_v3PlayerLookVector[MAX_PLAYER];
 
 	glm::vec3 collision_pos;
 	float client_hp[4] = { 0 };
@@ -69,7 +69,7 @@ public:
 	int ReturnCameraID();
 	Bullet GetBullet();
 	SPlayer ReturnPlayerPosStatus(int client_id);
-	glm::vec3 ReturnLookVector();
+	glm::vec3 ReturnLookVector(int client_id);
 	glm::vec3 ReturnCollsionPosition(bool* is_collide);
 	// 아이템 생성 후 위치 Return
 	bool IsItemGen();

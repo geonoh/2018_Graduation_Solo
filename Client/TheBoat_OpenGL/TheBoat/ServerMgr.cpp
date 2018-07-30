@@ -159,7 +159,7 @@ void ServerMgr::ProcessPacket(char* ptr) {
 	case SC_PLAYER_LOOKVEC: {
 		SC_PACKET_LOOCVEC* packets = reinterpret_cast<SC_PACKET_LOOCVEC*>(ptr);
 		clients_id = packets->id;
-		sc_look_vec = packets->look_vec;
+		m_v3PlayerLookVector[clients_id] = packets->look_vec;
 		sc_vec_buff[packets->id].player_status = packets->player_status;
 
 		break;
@@ -505,8 +505,8 @@ SPlayer ServerMgr::ReturnPlayerPosStatus(int client_id) {
 	return sc_vec_buff[client_id];
 }
 
-glm::vec3 ServerMgr::ReturnLookVector() {
-	return sc_look_vec;
+glm::vec3 ServerMgr::ReturnLookVector(int client_id) {
+	return m_v3PlayerLookVector[client_id];
 }
 int ServerMgr::ReturnCameraID() {
 	return camera_id;

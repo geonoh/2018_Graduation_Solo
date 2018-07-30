@@ -95,6 +95,45 @@ glm::mat4 Renderer::GetViewMatrix() const {
 }
 
 void Renderer::MouseMove(int x, int y, int width, int height) {
+	//GLfloat vertMouseSensitivity = 10.0f;
+	//GLfloat horizMouseSensitivity = 10.0f;
+
+	////cout << "Mouse cursor is at position (" << mouseX << ", " << mouseY << endl;
+
+	//int horizMovement = x - (width / 2);
+	//int vertMovement = y - (height / 2);
+
+	//m_fCameraRotationX += vertMovement / vertMouseSensitivity;
+	//m_fCameraRotationY += horizMovement / horizMouseSensitivity;
+
+	//// Control looking up and down with the mouse forward/back movement
+	//// Limit loking up to vertically up
+	//if (m_fCameraRotationX < -90.0f)
+	//{
+	//	m_fCameraRotationX = -90.0f;
+	//}
+
+	//// Limit looking down to vertically down
+	//if (m_fCameraRotationX > 90.0f)
+	//{
+	//	m_fCameraRotationX = 90.0f;
+	//}
+
+	//// Looking left and right. Keep the angles in the range -180.0f (anticlockwise turn looking behind) to 180.0f (clockwise turn looking behind)
+	//if (m_fCameraRotationY < -180.0f)
+	//{
+	//	m_fCameraRotationY += 360.0f;
+	//}
+
+	//if (m_fCameraRotationY > 180.0f)
+	//{
+	//	m_fCameraRotationY -= 360.0f;
+	//}
+
+	//// Reset the mouse position to the centre of the window each frame
+	//glutWarpPointer((width / 2), (height / 2));
+
+
 	float end_x = (float)(x - width / 2) / (width / 2);
 	float end_y = (float)(y - height / 2) / (height / 2);
 
@@ -172,6 +211,20 @@ void Renderer::UpdateView() {
 	mat_roll = glm::rotate(mat_roll, roll, glm::vec3(0.f, 0.f, 1.f));
 
 	glm::mat4 rotate = mat_roll * mat_pitch * mat_yaw;
+
+	//glm::mat4 m4Rotation( 1.f );
+	//rotation_matrix[0][0] = cos(euler_z)*cos(euler_y);
+	//rotation_matrix[1][0] = cos(euler_z)*sin(euler_y)*sin(m_fEulerX) - sin(euler_z)*cos(m_fEulerX);
+	//rotation_matrix[2][0] = cos(euler_z)*sin(euler_y)*cos(m_fEulerX) + sin(euler_z)*sin(m_fEulerX);
+
+	//rotation_matrix[0][1] = sin(euler_z)*cos(euler_y);
+	//rotation_matrix[1][1] = sin(euler_z)*sin(euler_y)*sin(m_fEulerX) + cos(euler_z)*cos(m_fEulerX);
+	//rotation_matrix[2][1] = sin(euler_z)*sin(euler_y)*cos(m_fEulerX) - cos(euler_z)*sin(m_fEulerX);
+
+	//rotation_matrix[0][2] = -sin(euler_y);
+	//rotation_matrix[1][2] = cos(euler_y)*sin(m_fEulerX);
+	//rotation_matrix[2][2] = cos(euler_y)*cos(m_fEulerX);
+
 
 	//printf("%3f %3f %3f %3f \n", rotate[0][0], rotate[0][1], rotate[0][2], rotate[0][3]);
 	//printf("%3f %3f %3f %3f \n", rotate[1][0], rotate[1][1], rotate[1][2], rotate[1][3]);
@@ -1545,6 +1598,7 @@ void Renderer::SetRotation(float rX, float rY)
 	m_m4Model
 		= m_m4ModelTranslation*m_m4ModelRotation*m_m4ModelScaling;
 }
+
 void Renderer::DrawCube(float x, float y, float z)
 {
 	GLuint shader = m_Shader_Proj;
@@ -1569,6 +1623,67 @@ void Renderer::DrawCube(float x, float y, float z)
 	glUniformMatrix4fv(projView, 1, GL_FALSE, &m_m4ProjView[0][0]);
 	glUniformMatrix4fv(model, 1, GL_FALSE, &m4ModelPosition[0][0]);
 	glUniformMatrix4fv(rotation, 1, GL_FALSE, &m_m4ModelRotation[0][0]);
+	glUniform3f(light, 2, 0, 0);
+	glUniform3f(camera, m_v3Camera_Position.x,
+		m_v3Camera_Position.y,
+		m_v3Camera_Position.z);
+
+	int attribPosition = glGetAttribLocation(shader, "a_Position");
+	int attribNormal = glGetAttribLocation(shader, "a_Normal");
+	int attribColor = glGetAttribLocation(shader, "a_Color");
+
+	glEnableVertexAttribArray(attribPosition);
+	glEnableVertexAttribArray(attribNormal);
+	glEnableVertexAttribArray(attribColor);
+
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBO_Cube);
+
+	glVertexAttribPointer(attribPosition, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 10, 0);
+	glVertexAttribPointer(attribNormal, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 10, (GLvoid*)(sizeof(float) * 3));
+	glVertexAttribPointer(attribColor, 4, GL_FLOAT, GL_FALSE, sizeof(float) * 10, (GLvoid*)(sizeof(float) * 6));
+
+	glDrawArrays(GL_TRIANGLES, 0, 36);
+
+	glDisableVertexAttribArray(attribPosition);
+	glDisableVertexAttribArray(attribNormal);
+	glDisableVertexAttribArray(attribColor);
+
+}
+
+
+
+void Renderer::DrawCube(float x, float y, float z, float rot_x, float rot_y, float rot_z)
+{
+	printf("DrawCube : [%f, %f, %f] \n", rot_x, rot_y, rot_z);
+	GLuint shader = m_Shader_Proj;
+
+	glUseProgram(shader);
+
+	glEnable(GL_CULL_FACE);
+
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LEQUAL);
+
+	GLuint projView = glGetUniformLocation(shader, "u_ProjView");
+	GLuint model = glGetUniformLocation(shader, "u_Model");
+	GLuint rotation = glGetUniformLocation(shader, "u_Rotation");
+	GLuint light = glGetUniformLocation(shader, "u_LightPos");
+	GLuint camera = glGetUniformLocation(shader, "u_CameraPos");
+
+	//glm::mat4 m4ModelPosition = glm::translate(glm::mat4(1.f), glm::vec3(x, y, z)) * glm::eulerAngleXYZ(rot_x, rot_y, rot_z) *
+	//	glm::scale(glm::mat4(1.f), glm::vec3(10.f, 16.f, 10.f));
+	//glm::mat4 m4Rot = glm::eulerAngleXYZ(rot_x, rot_y, rot_z);
+
+	glm::mat4 m4ModelPosition = glm::translate(glm::mat4(1.f), glm::vec3(x, y, z)) * glm::eulerAngleXYZ(0.f, rot_x, 0.f) *
+		glm::scale(glm::mat4(1.f), glm::vec3(10.f, 16.f, 10.f));
+	glm::mat4 m4Rot = glm::eulerAngleXYZ(0.f, rot_x, 0.f);
+
+
+	m4ModelPosition *= m_m4Model;
+	//m_m4ModelTranslation
+	glUniformMatrix4fv(projView, 1, GL_FALSE, &m_m4ProjView[0][0]);
+	glUniformMatrix4fv(model, 1, GL_FALSE, &m4ModelPosition[0][0]);
+	glUniformMatrix4fv(rotation, 1, GL_FALSE, &m4Rot[0][0]);
 	glUniform3f(light, 2, 0, 0);
 	glUniform3f(camera, m_v3Camera_Position.x,
 		m_v3Camera_Position.y,
