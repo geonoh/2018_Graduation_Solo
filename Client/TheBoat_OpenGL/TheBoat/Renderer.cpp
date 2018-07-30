@@ -5,6 +5,12 @@
 #include <cstdlib>
 #include "CHeightMapImage.h"
 
+float ToRadians(const float &fAngleInDegrees) {
+	return fAngleInDegrees * TO_RADS;
+}
+
+
+
 unsigned char * loadBMPRaw(const char * imagepath, unsigned int& outWidth, unsigned int& outHeight)
 {
 	printf("Reading image %s\n", imagepath);
@@ -95,62 +101,62 @@ glm::mat4 Renderer::GetViewMatrix() const {
 }
 
 void Renderer::MouseMove(int x, int y, int width, int height) {
-	//GLfloat vertMouseSensitivity = 10.0f;
-	//GLfloat horizMouseSensitivity = 10.0f;
+	GLfloat vertMouseSensitivity = 10.0f;
+	GLfloat horizMouseSensitivity = 10.0f;
 
-	////cout << "Mouse cursor is at position (" << mouseX << ", " << mouseY << endl;
+	//cout << "Mouse cursor is at position (" << mouseX << ", " << mouseY << endl;
 
-	//int horizMovement = x - (width / 2);
-	//int vertMovement = y - (height / 2);
+	int horizMovement = x - (width / 2);
+	int vertMovement = y - (height / 2);
 
-	//m_fCameraRotationX += vertMovement / vertMouseSensitivity;
-	//m_fCameraRotationY += horizMovement / horizMouseSensitivity;
+	m_fCameraRotationX += vertMovement / vertMouseSensitivity;
+	m_fCameraRotationY += horizMovement / horizMouseSensitivity;
 
-	//// Control looking up and down with the mouse forward/back movement
-	//// Limit loking up to vertically up
-	//if (m_fCameraRotationX < -90.0f)
-	//{
-	//	m_fCameraRotationX = -90.0f;
-	//}
+	// Control looking up and down with the mouse forward/back movement
+	// Limit loking up to vertically up
+	if (m_fCameraRotationX < -90.0f)
+	{
+		m_fCameraRotationX = -90.0f;
+	}
 
-	//// Limit looking down to vertically down
-	//if (m_fCameraRotationX > 90.0f)
-	//{
-	//	m_fCameraRotationX = 90.0f;
-	//}
+	// Limit looking down to vertically down
+	if (m_fCameraRotationX > 90.0f)
+	{
+		m_fCameraRotationX = 90.0f;
+	}
 
-	//// Looking left and right. Keep the angles in the range -180.0f (anticlockwise turn looking behind) to 180.0f (clockwise turn looking behind)
-	//if (m_fCameraRotationY < -180.0f)
-	//{
-	//	m_fCameraRotationY += 360.0f;
-	//}
+	// Looking left and right. Keep the angles in the range -180.0f (anticlockwise turn looking behind) to 180.0f (clockwise turn looking behind)
+	if (m_fCameraRotationY < -180.0f)
+	{
+		m_fCameraRotationY += 360.0f;
+	}
 
-	//if (m_fCameraRotationY > 180.0f)
-	//{
-	//	m_fCameraRotationY -= 360.0f;
-	//}
+	if (m_fCameraRotationY > 180.0f)
+	{
+		m_fCameraRotationY -= 360.0f;
+	}
 
-	//// Reset the mouse position to the centre of the window each frame
-	//glutWarpPointer((width / 2), (height / 2));
+	// Reset the mouse position to the centre of the window each frame
+	glutWarpPointer((width / 2), (height / 2));
 
 
-	float end_x = (float)(x - width / 2) / (width / 2);
-	float end_y = (float)(y - height / 2) / (height / 2);
+	//float end_x = (float)(x - width / 2) / (width / 2);
+	//float end_y = (float)(y - height / 2) / (height / 2);
 
-	//glm::vec2 mouse_delta = glm::vec2((float)x / width, (float)y / height) - mouse_position;
-	glm::vec2 mouse_delta = glm::vec2(end_x, end_y) - mouse_position;
+	////glm::vec2 mouse_delta = glm::vec2((float)x / width, (float)y / height) - mouse_position;
+	//glm::vec2 mouse_delta = glm::vec2(end_x, end_y) - mouse_position;
 
-	const float mouse_x_sensitivity = 2.25f;
-	const float mouse_y_sensitivity = 2.25f;
-
-	yaw += mouse_x_sensitivity * mouse_delta.x;
-	pitch += mouse_y_sensitivity * mouse_delta.y;
+	//const float mouse_x_sensitivity = 2.25f;
+	//const float mouse_y_sensitivity = 2.25f;
 
 	//yaw += mouse_x_sensitivity * mouse_delta.x;
 	//pitch += mouse_y_sensitivity * mouse_delta.y;
 
-	//mouse_position = glm::vec2((float)x / width, (float)y / height);
-	mouse_position = glm::vec2(end_x, end_y);
+	////yaw += mouse_x_sensitivity * mouse_delta.x;
+	////pitch += mouse_y_sensitivity * mouse_delta.y;
+
+	////mouse_position = glm::vec2((float)x / width, (float)y / height);
+	//mouse_position = glm::vec2(end_x, end_y);
 	UpdateView();
 }
 
@@ -202,28 +208,59 @@ void Renderer::KeyPressed(const unsigned char key) {
 }
 
 void Renderer::UpdateView() {
-	glm::mat4 mat_pitch = glm::mat4(1.f);
-	glm::mat4 mat_yaw = glm::mat4(1.f);
-	glm::mat4 mat_roll = glm::mat4(1.f);
+	//glm::mat4 mat_pitch = glm::mat4(1.f);
+	//glm::mat4 mat_yaw = glm::mat4(1.f);
+	//glm::mat4 mat_roll = glm::mat4(1.f);
 
-	mat_pitch = glm::rotate(mat_pitch, pitch, glm::vec3(1.f, 0.f, 0.f));
-	mat_yaw = glm::rotate(mat_yaw, yaw, glm::vec3(0.f, 1.f, 0.f));
-	mat_roll = glm::rotate(mat_roll, roll, glm::vec3(0.f, 0.f, 1.f));
+	//mat_pitch = glm::rotate(mat_pitch, pitch, glm::vec3(1.f, 0.f, 0.f));
+	//mat_yaw = glm::rotate(mat_yaw, yaw, glm::vec3(0.f, 1.f, 0.f));
+	//mat_roll = glm::rotate(mat_roll, roll, glm::vec3(0.f, 0.f, 1.f));
 
-	glm::mat4 rotate = mat_roll * mat_pitch * mat_yaw;
+	//glm::mat4 rotate = mat_roll * mat_pitch * mat_yaw;
 
-	//glm::mat4 m4Rotation( 1.f );
-	//rotation_matrix[0][0] = cos(euler_z)*cos(euler_y);
-	//rotation_matrix[1][0] = cos(euler_z)*sin(euler_y)*sin(m_fEulerX) - sin(euler_z)*cos(m_fEulerX);
-	//rotation_matrix[2][0] = cos(euler_z)*sin(euler_y)*cos(m_fEulerX) + sin(euler_z)*sin(m_fEulerX);
+	glm::mat4 m4Rotation( 1.f );
 
-	//rotation_matrix[0][1] = sin(euler_z)*cos(euler_y);
-	//rotation_matrix[1][1] = sin(euler_z)*sin(euler_y)*sin(m_fEulerX) + cos(euler_z)*cos(m_fEulerX);
-	//rotation_matrix[2][1] = sin(euler_z)*sin(euler_y)*cos(m_fEulerX) - cos(euler_z)*sin(m_fEulerX);
+	glm::mat4 m4RotationX(1.f);	// X绵 扁霖
+	glm::mat4 m4RotationY(1.f);	// X绵 扁霖
 
-	//rotation_matrix[0][2] = -sin(euler_y);
-	//rotation_matrix[1][2] = cos(euler_y)*sin(m_fEulerX);
-	//rotation_matrix[2][2] = cos(euler_y)*cos(m_fEulerX);
+	// 0青
+	m4RotationX[0][0] = 1.f;
+	m4RotationX[1][0] = 0.f;
+	m4RotationX[2][0] = 0.f;
+	// 1青
+	m4RotationX[0][1] = 0.f;
+	m4RotationX[1][1] = cos(ToRadians(m_fCameraRotationX));
+	m4RotationX[2][1] = -sin(ToRadians(m_fCameraRotationX));
+	// 2青
+	m4RotationX[0][2] = 0.f;
+	m4RotationX[1][2] = sin(ToRadians(m_fCameraRotationX));
+	m4RotationX[2][2] = cos(ToRadians(m_fCameraRotationX));
+
+	// 0青
+	m4RotationY[0][0] = cos(ToRadians(m_fCameraRotationY));
+	m4RotationY[1][0] = 0.f;
+	m4RotationY[2][0] = sin(ToRadians(m_fCameraRotationY));
+	// 1青	 
+	m4RotationY[0][1] = 0.f;
+	m4RotationY[1][1] = 1.f;
+	m4RotationY[2][1] = 0.f;
+	// 2青	 
+	m4RotationY[0][2] = -sin(ToRadians(m_fCameraRotationY));
+	m4RotationY[1][2] = 0.f;
+	m4RotationY[2][2] = cos(ToRadians(m_fCameraRotationY));
+
+	m4Rotation = m4RotationX * m4RotationY;
+	//m4Rotation[0][0] = cos(ToRadians(m_fCameraRotationZ))*cos(ToRadians(m_fCameraRotationY));
+	//m4Rotation[1][0] = cos(ToRadians(m_fCameraRotationZ))*sin(ToRadians(m_fCameraRotationY))*sin(ToRadians(m_fCameraRotationX)) - sin(ToRadians(m_fCameraRotationZ))*cos(ToRadians(m_fCameraRotationX));
+	//m4Rotation[2][0] = cos(ToRadians(m_fCameraRotationZ))*sin(ToRadians(m_fCameraRotationY))*cos(ToRadians(m_fCameraRotationX)) + sin(ToRadians(m_fCameraRotationZ))*sin(ToRadians(m_fCameraRotationX));
+	//
+	//m4Rotation[0][1] = sin(ToRadians(m_fCameraRotationZ))*cos(ToRadians(m_fCameraRotationZ));
+	//m4Rotation[1][1] = sin(ToRadians(m_fCameraRotationZ))*sin(ToRadians(m_fCameraRotationZ))*sin(ToRadians(m_fCameraRotationX)) + cos(ToRadians(m_fCameraRotationZ))*cos(ToRadians(m_fCameraRotationX));
+	//m4Rotation[2][1] = sin(ToRadians(m_fCameraRotationZ))*sin(ToRadians(m_fCameraRotationZ))*cos(ToRadians(m_fCameraRotationX)) - cos(ToRadians(m_fCameraRotationZ))*sin(ToRadians(m_fCameraRotationX));
+	//
+	//m4Rotation[0][2] = -sin(ToRadians(m_fCameraRotationY));
+	//m4Rotation[1][2] = cos(ToRadians(m_fCameraRotationY))*sin(ToRadians(m_fCameraRotationX));
+	//m4Rotation[2][2] = cos(ToRadians(m_fCameraRotationY))*cos(ToRadians(m_fCameraRotationX));
 
 
 	//printf("%3f %3f %3f %3f \n", rotate[0][0], rotate[0][1], rotate[0][2], rotate[0][3]);
@@ -232,10 +269,10 @@ void Renderer::UpdateView() {
 	//printf("%3f %3f %3f %3f \n", rotate[3][0], rotate[3][1], rotate[3][2], rotate[3][3]);
 
 
-	glm::mat4 translate = glm::mat4(1.f);
-	translate = glm::translate(translate, -eye_vec);
+	glm::mat4 m4Translate = glm::mat4(1.f);
+	m4Translate = glm::translate(m4Translate, -eye_vec);
 
-	mat_view = rotate * translate;
+	mat_view = m4Rotation * m4Translate;
 	//printf("%3f %3f %3f %3f \n", mat_view[0][0], mat_view[0][1], mat_view[0][2], mat_view[0][3]);
 	//printf("%3f %3f %3f %3f \n", mat_view[1][0], mat_view[1][1], mat_view[1][2], mat_view[1][3]);
 	//printf("%3f %3f %3f %3f \n", mat_view[2][0], mat_view[2][1], mat_view[2][2], mat_view[2][3]);
