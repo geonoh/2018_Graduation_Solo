@@ -44,7 +44,6 @@ class ServerMgr
 	glm::vec3 building_pos[OBJECT_BUILDING];
 	glm::vec3 building_extents[OBJECT_BUILDING];
 
-	int ammo_counter = 0;
 
 
 	bool s_is_collide = false;
@@ -52,7 +51,13 @@ class ServerMgr
 	// ½Ã°£
 	//time_point<system_clock> world_time;
 	float world_time;
+
+	int m_CurrentAmmo = 0;
+	int m_TotalAmmo = 0;
+	bool m_bNeedReloading;
 public:
+	bool GetNeedReload();
+	void SetNeedReload(bool i_Need);
 	void IPInput();
 	void IPInput(string);
 
@@ -63,7 +68,8 @@ public:
 	void SendPacket(int type, glm::vec3 xmvector);
 	void ProcessPacket(char* ptr);
 	void ErrorDisplay(const char* msg, int err_no);
-	int GetAmmo();
+	int GetCurrentAmmo();
+	int GetTotalAmmo();
 	void DecreaseAmmo();
 	int GetClientID();
 	int ReturnCameraID();

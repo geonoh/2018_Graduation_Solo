@@ -53,6 +53,7 @@
 #define SC_OUT_OF_AMMO			12
 #define SC_FULLY_AMMO			13
 #define SC_WORLD_TIME			14
+#define SC_AMMO					24
 ///////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////
@@ -168,6 +169,8 @@ struct SC_PACKET_ENTER_PLAYER {
 	// 건물 크기 보낼 때만 사용
 	float hp;
 	float size_x, size_y, size_z;
+	int m_CurrentAmmo;
+	int m_TotalAmmo;
 };
 
 struct SC_PACKET_LOOCVEC {
@@ -229,6 +232,14 @@ struct SC_PACKET_AMMO_O {
 	BYTE size;
 	BYTE type;
 	char ammo;
+	char m_cTotalAmmo;
+};
+
+struct SC_PACKET_AMMO {
+	BYTE size;
+	BYTE type;
+	char m_CurrentAmmo;
+	char m_TotalAmmo;
 };
 
 struct SC_PACKET_TIME {

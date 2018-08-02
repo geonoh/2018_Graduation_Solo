@@ -33,3 +33,17 @@ void Player::SetLook(float x, float y, float z) {
 	glm::vec3 i_look{ x,y,z };
 	look = i_look;
 }
+
+int Player::GetCurrentAmmo() {
+	return m_CurrentAmmo;
+}
+void Player::SetCurrentAmmo(int i_iAmmo) {
+	m_CurrentAmmo = i_iAmmo;
+}
+
+int Player::GetTotalAmmo() {
+	return m_TotalAmmo;
+}
+void Player::SetTotalAmmo(int i_iAmmo) {
+	m_TotalAmmo = i_iAmmo;
+}

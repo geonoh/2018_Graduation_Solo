@@ -59,16 +59,21 @@ bool ServerMgr::Initialize(HWND& hwnd) {
 	recv_wsabuf.len = CLIENT_BUF_SIZE;
 
 	// 총알 갯수 초기화 
-	ammo_counter = MAX_AMMO;
+	m_CurrentAmmo = 0;
+	m_TotalAmmo = 0;
 	return true;
 }
 
-int ServerMgr::GetAmmo() {
-	return ammo_counter;
+int ServerMgr::GetCurrentAmmo() {
+	return m_CurrentAmmo;
+}
+
+int ServerMgr::GetTotalAmmo() {
+	return m_TotalAmmo;
 }
 
 void ServerMgr::DecreaseAmmo() {
-	ammo_counter -= 1;
+	m_CurrentAmmo -= 1;
 }
 
 void ServerMgr::ReadPacket() {
@@ -115,6 +120,8 @@ void ServerMgr::ProcessPacket(char* ptr) {
 		if (first_set_id) {
 			clients_id = packets->id;
 			camera_id = packets->id;
+			m_CurrentAmmo = packets->m_CurrentAmmo;
+			m_TotalAmmo = packets->m_TotalAmmo;
 			first_set_id = false;
 		}
 		sc_vec_buff[packets->id].pos.x = packets->x;
@@ -173,7 +180,7 @@ void ServerMgr::ProcessPacket(char* ptr) {
 		bullets[packets->bullet_id].y = packets->y;
 		bullets[packets->bullet_id].z = packets->z;
 
-		//printf("[Bullet] %d 플레이어 총알 ID[%d] \n", clients_id, packets->bullet_id);
+		printf("[Bullet] %d 플레이어 총알 ID[%d] \n", clients_id, packets->bullet_id);
 		break;
 	}
 	case SC_COLLSION_PB: {
@@ -194,8 +201,8 @@ void ServerMgr::ProcessPacket(char* ptr) {
 		collision_pos.y = packets->y;
 		collision_pos.z = packets->z;
 		//client_hp[packets->client_id] = packets->hp;
-		printf("%d 플레이어 벽과 꽈당 [%f, %f, %f] \n", packets->client_id, collision_pos.x,
-			collision_pos.y, collision_pos.z, client_hp[packets->client_id]);
+		//printf("%d 플레이어 벽과 꽈당 [%f, %f, %f] \n", packets->client_id, collision_pos.x,
+		//	collision_pos.y, collision_pos.z, client_hp[packets->client_id]);
 
 		break;
 	}
@@ -212,14 +219,21 @@ void ServerMgr::ProcessPacket(char* ptr) {
 	case SC_FULLY_AMMO: {
 
 		SC_PACKET_AMMO_O* packets = reinterpret_cast<SC_PACKET_AMMO_O*>(ptr);
-		ammo_counter = MAX_AMMO - packets->ammo;
-		//ammo_counter = MAX_AMMO;
+		m_CurrentAmmo = packets->ammo;
+		m_TotalAmmo = packets->m_cTotalAmmo;
 
 		printf("재장전 완료\n");
 		break;
 	}
+	case SC_AMMO: {
+		SC_PACKET_AMMO* packets = reinterpret_cast<SC_PACKET_AMMO*>(ptr);
+		m_CurrentAmmo = packets->m_CurrentAmmo;
+		m_TotalAmmo = packets->m_TotalAmmo;
+		break;
+	}
 	case SC_OUT_OF_AMMO: {
 		printf("총알 다씀\n");
+		m_bNeedReloading = true;
 		break;
 	}
 	case SC_WORLD_TIME: {
@@ -230,6 +244,14 @@ void ServerMgr::ProcessPacket(char* ptr) {
 	}
 	}
 }
+
+bool ServerMgr::GetNeedReload() {
+	return false;
+}
+void ServerMgr::SetNeedReload(bool i_Need) {
+
+}
+
 float ServerMgr::GetPlayerHP(int p_n) {
 	return client_hp[p_n];
 

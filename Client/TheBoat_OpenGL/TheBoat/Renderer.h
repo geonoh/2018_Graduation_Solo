@@ -35,7 +35,23 @@ private:
 	float m_fCameraRotationX = 0.f;
 	float m_fCameraRotationY = 0.f;
 	float m_fCameraRotationZ = 0.f;
+
 public:
+	// Texture
+	GLuint m_Tex_Slash = 0;
+	GLuint m_Tex_Number1 = 0;
+	GLuint m_Tex_Number2 = 0;
+	GLuint m_Tex_Number3 = 0;
+	GLuint m_Tex_Number4 = 0;
+	GLuint m_Tex_Number5 = 0;
+	GLuint m_Tex_Number6 = 0;
+	GLuint m_Tex_Number7 = 0;
+	GLuint m_Tex_Number8 = 0;
+	GLuint m_Tex_Number9 = 0;
+	GLuint m_Tex_Number0 = 0;
+	GLuint m_Tex_Minimap = 0;
+	GLuint m_Tex_Pin = 0;
+
 	// Camera Setting 
 	void SetCameraLook(float x, float y, float z);
 	glm::vec3 GetCameraLook();
@@ -58,6 +74,15 @@ public:
 	void InitializeCube();
 	// Texture
 	void InitializeTextureImage();
+
+
+	// 0 ~ 9 Number
+	// 10 Minimap
+	void DrawUITexture(int i_iTextureId, float i_fStartPosX, float i_fStartPosY, float i_fScaleX, float i_fScaleY);
+
+	void DrawUITexture();
+	void DrawIntro(bool Enter);
+
 public:
 	Renderer(int windowSizeX, int windowSizeY);
 	~Renderer();
@@ -75,12 +100,13 @@ public:
 	void Q1();
 	void Q2();
 	void SetRotation(float rX, float rY);
-	void DrawUITexture();
+
 
 	void ProxyGeo();
 
 	void DrawSTParticle(float sx, float sy, float tx, float ty, float time);
-	void DrawParticle();
+	void InitializeParticle();
+	void DrawParticle(float amount);
 
 
 	void DrawCube(float x, float y, float z);
@@ -89,6 +115,7 @@ public:
 	float m_targetPointX, m_targetPointY;
 
 	GLuint CreatePngTexture(const char * filePath);
+	GLuint CreateBMPTexture(const char * filePath);
 
 	void BloomPass1();
 	void BloomPass2(GLuint texEmissive);
@@ -109,6 +136,7 @@ private:
 	void CreateProxyGeo();
 	void CreateParticle();
 	void GenFBOs();
+	float GetHeightValue(int x, int y);
 
 	bool m_Initialized = false;
 	

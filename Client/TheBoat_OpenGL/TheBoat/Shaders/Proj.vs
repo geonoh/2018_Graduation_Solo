@@ -11,6 +11,7 @@ uniform mat4 u_Rotation;
 out vec4 v_Color;
 out vec3 v_Normal;
 out vec3 v_Pos;
+out vec2 v_Tex;
 
 void main()
 {
@@ -18,4 +19,5 @@ void main()
   v_Color = a_Color;
   v_Normal = (u_Rotation * vec4(a_Normal, 0.f)).xyz;
   v_Pos = (u_Model * vec4(a_Position, 1.f)).xyz;
+  v_Tex = a_Color.ba;
 }

@@ -349,8 +349,12 @@ void Renderer::Initialize(int windowSizeX, int windowSizeY)
 
 	float vertPosTex[30] =
 	{
-		-0.5f, 0.5f, 0.0f, 0.0f, 1.0f, -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 0.5f, 0.5f, 0.0f, 1.0f, 1.0f,
-		0.5f, 0.5f, 0.0f, 1.0f, 1.0f, -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 0.5f, -0.5f, 0.0f, 1.0f, 0.0f
+		0.f, 0.f, 0.0f, 0.0f, 1.0f, 
+		0.f, -1.f, 0.0f, 0.0f, 0.0f, 
+		1.f, 0.f, 0.0f, 1.0f, 1.0f,
+		1.f, 0.f, 0.0f, 1.0f, 1.0f, 
+		0.f, -1.f, 0.0f, 0.0f, 0.0f, 
+		1.f, -1.f, 0.0f, 1.0f, 0.0f
 	};
 
 
@@ -431,12 +435,43 @@ void Renderer::Initialize(int windowSizeX, int windowSizeY)
 	//Draw Texture Image
 	InitializeTextureImage();
 
+	// Particle
+	InitializeParticle();
+
 	m_Initialized = true;
 }
 
 void Renderer::InitializeTextureImage() {
 	m_Shader_Test1 = CompileShaders("./Shaders/Test1.vs", "./Shaders/Test1.fs");
 
+
+	m_Tex_Minimap = CreatePngTexture("./Textures/HeightMap/world.png");
+	m_Tex_Slash = CreatePngTexture("./Textures/Numbers/Slash.png");
+	m_Tex_Number0 = CreatePngTexture("./Textures/Numbers/Num0.png");
+	m_Tex_Number1 = CreatePngTexture("./Textures/Numbers/Num1.png");
+	m_Tex_Number2 = CreatePngTexture("./Textures/Numbers/Num2.png");
+	m_Tex_Number3 = CreatePngTexture("./Textures/Numbers/Num3.png");
+	m_Tex_Number4 = CreatePngTexture("./Textures/Numbers/Num4.png");
+	m_Tex_Number5 = CreatePngTexture("./Textures/Numbers/Num5.png");
+	m_Tex_Number6 = CreatePngTexture("./Textures/Numbers/Num6.png");
+	m_Tex_Number7 = CreatePngTexture("./Textures/Numbers/Num7.png");
+	m_Tex_Number8 = CreatePngTexture("./Textures/Numbers/Num8.png");
+	m_Tex_Number9 = CreatePngTexture("./Textures/Numbers/Num9.png");
+
+
+	m_Tex_Pin = CreatePngTexture("./Textures/Pin.png");
+	//m_Tex_Number0 = CreatePngTexture("./Textures/HeightMap/world.png");
+	//m_Tex_Number1 = CreatePngTexture("./Textures/HeightMap/world.png");
+	//m_Tex_Number2 = CreatePngTexture("./Textures/HeightMap/world.png");
+	//m_Tex_Number3 = CreatePngTexture("./Textures/HeightMap/world.png");
+	//m_Tex_Number4 = CreatePngTexture("./Textures/HeightMap/world.png");
+	//m_Tex_Number5 = CreatePngTexture("./Textures/HeightMap/world.png");
+	//m_Tex_Number6 = CreatePngTexture("./Textures/HeightMap/world.png");
+	//m_Tex_Number7 = CreatePngTexture("./Textures/HeightMap/world.png");
+	//m_Tex_Number8 = CreatePngTexture("./Textures/HeightMap/world.png");
+	//m_Tex_Number9 = CreatePngTexture("./Textures/HeightMap/world.png");
+
+	//CreatePngTexture()
 }
 
 bool Renderer::IsInitialized()
@@ -455,12 +490,30 @@ GLuint Renderer::CreatePngTexture(const char * filePath)
 	std::vector<unsigned char> image;
 	unsigned width, height;
 	unsigned error = lodepng::decode(image, width, height, filePath);
-
+	if (error)
+		printf("CreatePNGTexture Error code : %d \n", error);
 	glBindTexture(GL_TEXTURE_2D, temp);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	//glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA, width, height, 0, GL_BGRA, GL_UNSIGNED_BYTE, &image[0]);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, &image[0]);
 
+	return temp;
+}
+
+GLuint Renderer::CreateBMPTexture(const char * filePath)
+{
+	GLuint temp;
+
+	unsigned int x, y;
+	unsigned char * temp1 = loadBMPRaw(filePath, x, y);
+	glGenTextures(1, &temp);
+	glBindTexture(GL_TEXTURE_2D, temp);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, x, y, 0, GL_RGB, GL_UNSIGNED_BYTE, temp1);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	return temp;
 }
 
@@ -468,49 +521,151 @@ void Renderer::CreateVertexBufferObjects()
 {
 	float temp = 0.5f;
 
-	float cube[] = {
-		-temp, -temp, temp, 0.f, 0.f, 1.f, 1.f, 0.f, 0.f, 1.f, //x, y, z, nx, ny, nz, r, g, b, a
-		temp, temp, temp, 0.f, 0.f, 1.f, 1.f, 0.f, 0.f, 1.f,
-		-temp, temp, temp, 0.f, 0.f, 1.f, 1.f, 0.f, 0.f, 1.f,
-		-temp, -temp, temp, 0.f, 0.f, 1.f, 1.f, 0.f, 0.f, 1.f,
-		temp, -temp, temp, 0.f, 0.f, 1.f, 1.f, 0.f, 0.f, 1.f,
-		temp, temp, temp, 0.f, 0.f, 1.f, 1.f, 0.f, 0.f, 1.f, // first face : R
+	//float cube[] = {
+	//	//x, y, z, nx, ny, nz, r, g, b, a , tx, ty
+	//	-temp, -temp, temp, 0.f, 0.f, 1.f, 1.f, 0.f, 0.f, 1.f, 0.f, 0.f,
+	//	temp, temp, temp, 0.f, 0.f, 1.f, 1.f, 0.f, 0.f, 1.f, 1.f, 1.f,
+	//	-temp, temp, temp, 0.f, 0.f, 1.f, 1.f, 0.f, 0.f, 1.f, 0.f, 1.f,
+	//	-temp, -temp, temp, 0.f, 0.f, 1.f, 1.f, 0.f, 0.f, 1.f, 0.f, 0.f,
+	//	temp, -temp, temp, 0.f, 0.f, 1.f, 1.f, 0.f, 0.f, 1.f, 1.f, 0.f,
+	//	temp, temp, temp, 0.f, 0.f, 1.f, 1.f, 0.f, 0.f, 1.f, 1.f, 1.f,
+	//	// first face : R : Front 
 
-		temp, -temp, temp, 1.f, 0.f, 0.f, 0.f, 1.f, 0.f, 1.f, //x, y, z, nx, ny, nz, r, g, b, a
-		temp, temp, -temp, 1.f, 0.f, 0.f, 0.f, 1.f, 0.f, 1.f,
-		temp, temp, temp, 1.f, 0.f, 0.f, 0.f, 1.f, 0.f, 1.f,
-		temp, -temp, temp, 1.f, 0.f, 0.f, 0.f, 1.f, 0.f, 1.f, //x, y, z, nx, ny, nz, r, g, b, a
-		temp, -temp, -temp, 1.f, 0.f, 0.f, 0.f, 1.f, 0.f, 1.f,
-		temp, temp, -temp, 1.f, 0.f, 0.f, 0.f, 1.f, 0.f, 1.f, //second face : G
+	//	//x, y, z, nx, ny, nz, r, g, b, a, tx, ty
+	//	temp, -temp, temp, 1.f, 0.f, 0.f, 0.f, 1.f, 0.f, 1.f, 0.f, 0.f,
+	//	temp, temp, -temp, 1.f, 0.f, 0.f, 0.f, 1.f, 0.f, 1.f, 1.f, 1.f,
+	//	temp, temp, temp, 1.f, 0.f, 0.f, 0.f, 1.f, 0.f, 1.f, 0.f, 1.f,
+	//	temp, -temp, temp, 1.f, 0.f, 0.f, 0.f, 1.f, 0.f, 1.f, 0.f, 0.f,
+	//	temp, -temp, -temp, 1.f, 0.f, 0.f, 0.f, 1.f, 0.f, 1.f, 1.f, 0.f,
+	//	temp, temp, -temp, 1.f, 0.f, 0.f, 0.f, 1.f, 0.f, 1.f, 1.f, 1.f,	
+	//	//second face : G : Right
 
-		-temp, temp, temp, 0.f, 1.f, 0.f, 0.f, 0.f, 1.f, 1.f, //x, y, z, nx, ny, nz, r, g, b, a
-		temp, temp, -temp, 0.f, 1.f, 0.f, 0.f, 0.f, 1.f, 1.f,
-		-temp, temp, -temp, 0.f, 1.f, 0.f, 0.f, 0.f, 1.f, 1.f,
-		-temp, temp, temp, 0.f, 1.f, 0.f, 0.f, 0.f, 1.f, 1.f, //x, y, z, nx, ny, nz, r, g, b, a
-		temp, temp, temp, 0.f, 1.f, 0.f, 0.f, 0.f, 1.f, 1.f,
-		temp, temp, -temp, 0.f, 1.f, 0.f, 0.f, 0.f, 1.f, 1.f, //third face : B
+	//	//x, y, z, nx, ny, nz, r, g, b, a, tx, ty
+	//	-temp, temp, temp, 0.f, 1.f, 0.f, 0.f, 0.f, 1.f, 1.f,  0.f, 0.f,
+	//	temp, temp, -temp, 0.f, 1.f, 0.f, 0.f, 0.f, 1.f, 1.f, 1.f, 1.f,
+	//	-temp, temp, -temp, 0.f, 1.f, 0.f, 0.f, 0.f, 1.f, 1.f, 0.f, 1.f,
+	//	-temp, temp, temp, 0.f, 1.f, 0.f, 0.f, 0.f, 1.f, 1.f, 0.f, 0.f,
+	//	temp, temp, temp, 0.f, 1.f, 0.f, 0.f, 0.f, 1.f, 1.f, 1.f, 0.f,
+	//	temp, temp, -temp, 0.f, 1.f, 0.f, 0.f, 0.f, 1.f, 1.f, 1.f, 1.f,
+	//	//third face : B	: UP
 
-		-temp, -temp, -temp, 0.f, 0.f, -1.f, 1.f, 1.f, 0.f, 1.f, //x, y, z, nx, ny, nz, r, g, b, a
-		-temp, temp, -temp, 0.f, 0.f, -1.f, 1.f, 1.f, 0.f, 1.f,
-		temp, temp, -temp, 0.f, 0.f, -1.f, 1.f, 1.f, 0.f, 1.f,
-		-temp, -temp, -temp, 0.f, 0.f, -1.f, 1.f, 1.f, 0.f, 1.f, //x, y, z, nx, ny, nz, r, g, b, a
-		temp, temp, -temp, 0.f, 0.f, -1.f, 1.f, 1.f, 0.f, 1.f,
-		temp, -temp, -temp, 0.f, 0.f, -1.f, 1.f, 1.f, 0.f, 1.f, //fourth face : R+G (yellow)
+	//	//x, y, z, nx, ny, nz, r, g, b, a, tx, ty
+	//	-temp, -temp, -temp, 0.f, 0.f, -1.f, 1.f, 1.f, 0.f, 1.f, 1.f, 0.f, 
+	//	-temp, temp, -temp, 0.f, 0.f, -1.f, 1.f, 1.f, 0.f, 1.f, 0.f, 1.f,
+	//	temp, temp, -temp, 0.f, 0.f, -1.f, 1.f, 1.f, 0.f, 1.f, 1.f, 1.f,
+	//	-temp, -temp, -temp, 0.f, 0.f, -1.f, 1.f, 1.f, 0.f, 1.f, 1.f, 0.f,
+	//	temp, temp, -temp, 0.f, 0.f, -1.f, 1.f, 1.f, 0.f, 1.f, 0.f, 1.f,
+	//	temp, -temp, -temp, 0.f, 0.f, -1.f, 1.f, 1.f, 0.f, 1.f, 0.f, 0.f,
+	//	//fourth face : R+G (yellow) : Back
 
-		-temp, -temp, temp, -1.f, 0.f, 0.f, 1.f, 0.f, 1.f, 1.f, //x, y, z, nx, ny, nz, r, g, b, a 
-		-temp, temp, temp, -1.f, 0.f, 0.f, 1.f, 0.f, 1.f, 1.f,
-		-temp, temp, -temp, -1.f, 0.f, 0.f, 1.f, 0.f, 1.f, 1.f,
-		-temp, -temp, temp, -1.f, 0.f, 0.f, 1.f, 0.f, 1.f, 1.f, //x, y, z, nx, ny, nz, r, g, b, a 
-		-temp, temp, -temp, -1.f, 0.f, 0.f, 1.f, 0.f, 1.f, 1.f,
-		-temp, -temp, -temp, -1.f, 0.f, 0.f, 1.f, 0.f, 1.f, 1.f, // fifth face : R+B (purple)
+	//	//x, y, z, nx, ny, nz, r, g, b, a, tx, ty 
+	//	-temp, -temp, temp, -1.f, 0.f, 0.f, 1.f, 0.f, 1.f, 1.f, 1.f, 0.f,
+	//	-temp, temp, temp, -1.f, 0.f, 0.f, 1.f, 0.f, 1.f, 1.f, 0.f, 1.f,
+	//	-temp, temp, -temp, -1.f, 0.f, 0.f, 1.f, 0.f, 1.f, 1.f, 1.f, 1.f,
+	//	-temp, -temp, temp, -1.f, 0.f, 0.f, 1.f, 0.f, 1.f, 1.f, 1.f, 0.f,
+	//	-temp, temp, -temp, -1.f, 0.f, 0.f, 1.f, 0.f, 1.f, 1.f, 0.f, 1.f,
+	//	-temp, -temp, -temp, -1.f, 0.f, 0.f, 1.f, 0.f, 1.f, 1.f, 0.f, 0.f,
+	//	// fifth face : R+B (purple) : Left
 
-		-temp, -temp, temp, 0.f, -1.f, 0.f, 0.f, 1.f, 1.f, 1.f, //x, y, z, nx, ny, nz, r, g, b, a 
-		temp, -temp, -temp, 0.f, -1.f, 0.f, 0.f, 1.f, 1.f, 1.f,
-		temp, -temp, temp, 0.f, -1.f, 0.f, 0.f, 1.f, 1.f, 1.f,
-		-temp, -temp, temp, 0.f, -1.f, 0.f, 0.f, 1.f, 1.f, 1.f, //x, y, z, nx, ny, nz, r, g, b, a 
-		-temp, -temp, -temp, 0.f, -1.f, 0.f, 0.f, 1.f, 1.f, 1.f,
-		temp, -temp, -temp, 0.f, -1.f, 0.f, 0.f, 1.f, 1.f, 1.f, //sixth face : G+B (Cyan)
-	};
+	//	//x, y, z, nx, ny, nz, r, g, b, a, tx, ty
+	//	-temp, -temp, temp, 0.f, -1.f, 0.f, 0.f, 1.f, 1.f, 1.f, 0.f, 0.f,
+	//	temp, -temp, -temp, 0.f, -1.f, 0.f, 0.f, 1.f, 1.f, 1.f, 1.f, 1.f,
+	//	temp, -temp, temp, 0.f, -1.f, 0.f, 0.f, 1.f, 1.f, 1.f, 1.f, 0.f,
+	//	-temp, -temp, temp, 0.f, -1.f, 0.f, 0.f, 1.f, 1.f, 1.f, 0.f, 0.f,
+	//	-temp, -temp, -temp, 0.f, -1.f, 0.f, 0.f, 1.f, 1.f, 1.f, 0.f, 1.f,
+	//	temp, -temp, -temp, 0.f, -1.f, 0.f, 0.f, 1.f, 1.f, 1.f, 1.f, 1.f
+	//	//sixth face : G+B (Cyan) : Bottom
+	//};
+
+	//float cube[] = {
+	//	-temp, -temp, temp, 0.f, 0.f, 1.f, 1.f, 0.f, 0.f, 1.f, 0.f, 0.f,  //x, y, z, nx, ny, nz, r, g, b, a
+	//	temp, temp, temp, 0.f, 0.f, 1.f, 1.f, 0.f, 0.f, 1.f, 1.f, 1.f,
+	//	-temp, temp, temp, 0.f, 0.f, 1.f, 1.f, 0.f, 0.f, 1.f, 0.f, 1.f,
+	//	-temp, -temp, temp, 0.f, 0.f, 1.f, 1.f, 0.f, 0.f, 1.f, 0.f, 0.f,
+	//	temp, -temp, temp, 0.f, 0.f, 1.f, 1.f, 0.f, 0.f, 1.f, 1.f, 0.f,
+	//	temp, temp, temp, 0.f, 0.f, 1.f, 1.f, 0.f, 0.f, 1.f, 1.f, 1.f,// first face : R
+
+	//	temp, -temp, temp, 1.f, 0.f, 0.f, 0.f, 1.f, 0.f, 1.f, 0.f, 0.f,//x, y, z, nx, ny, nz, r, g, b, a
+	//	temp, temp, -temp, 1.f, 0.f, 0.f, 0.f, 1.f, 0.f, 1.f, 1.f, 1.f,
+	//	temp, temp, temp, 1.f, 0.f, 0.f, 0.f, 1.f, 0.f, 1.f, 0.f, 1.f,
+	//	temp, -temp, temp, 1.f, 0.f, 0.f, 0.f, 1.f, 0.f, 1.f, 0.f, 0.f,//x, y, z, nx, ny, nz, r, g, b, a
+	//	temp, -temp, -temp, 1.f, 0.f, 0.f, 0.f, 1.f, 0.f, 1.f, 1.f, 0.f,
+	//	temp, temp, -temp, 1.f, 0.f, 0.f, 0.f, 1.f, 0.f, 1.f, 1.f, 1.f,//second face : G
+
+	//	-temp, temp, temp, 0.f, 1.f, 0.f, 0.f, 0.f, 1.f, 1.f, 0.f, 0.f, //x, y, z, nx, ny, nz, r, g, b, a
+	//	temp, temp, -temp, 0.f, 1.f, 0.f, 0.f, 0.f, 1.f, 1.f, 1.f, 1.f,
+	//	-temp, temp, -temp, 0.f, 1.f, 0.f, 0.f, 0.f, 1.f, 1.f, 0.f, 1.f,
+	//	-temp, temp, temp, 0.f, 1.f, 0.f, 0.f, 0.f, 1.f, 1.f, 0.f, 0.f,//x, y, z, nx, ny, nz, r, g, b, a
+	//	temp, temp, temp, 0.f, 1.f, 0.f, 0.f, 0.f, 1.f, 1.f, 1.f, 0.f,
+	//	temp, temp, -temp, 0.f, 1.f, 0.f, 0.f, 0.f, 1.f, 1.f, 1.f, 1.f,//third face : B
+
+	//	-temp, -temp, -temp, 0.f, 0.f, -1.f, 1.f, 1.f, 0.f, 1.f, 1.f, 0.f, //x, y, z, nx, ny, nz, r, g, b, a
+	//	-temp, temp, -temp, 0.f, 0.f, -1.f, 1.f, 1.f, 0.f, 1.f, 0.f, 1.f,
+	//	temp, temp, -temp, 0.f, 0.f, -1.f, 1.f, 1.f, 0.f, 1.f, 1.f, 1.f,
+	//	-temp, -temp, -temp, 0.f, 0.f, -1.f, 1.f, 1.f, 0.f, 1.f, 1.f, 0.f,//x, y, z, nx, ny, nz, r, g, b, a
+	//	temp, temp, -temp, 0.f, 0.f, -1.f, 1.f, 1.f, 0.f, 1.f, 0.f, 1.f,
+	//	temp, -temp, -temp, 0.f, 0.f, -1.f, 1.f, 1.f, 0.f, 1.f, 0.f, 0.f,//fourth face : R+G (yellow)
+
+	//	-temp, -temp, temp, -1.f, 0.f, 0.f, 1.f, 0.f, 1.f, 1.f, 1.f, 0.f, //x, y, z, nx, ny, nz, r, g, b, a 
+	//	-temp, temp, temp, -1.f, 0.f, 0.f, 1.f, 0.f, 1.f, 1.f, 0.f, 1.f,
+	//	-temp, temp, -temp, -1.f, 0.f, 0.f, 1.f, 0.f, 1.f, 1.f, 1.f, 1.f,
+	//	-temp, -temp, temp, -1.f, 0.f, 0.f, 1.f, 0.f, 1.f, 1.f, 1.f, 0.f,//x, y, z, nx, ny, nz, r, g, b, a 
+	//	-temp, temp, -temp, -1.f, 0.f, 0.f, 1.f, 0.f, 1.f, 1.f, 0.f, 1.f,
+	//	-temp, -temp, -temp, -1.f, 0.f, 0.f, 1.f, 0.f, 1.f, 1.f, 0.f, 0.f, // fifth face : R+B (purple)
+
+	//	-temp, -temp, temp, 0.f, -1.f, 0.f, 0.f, 1.f, 1.f, 1.f, 0.f, 0.f, //x, y, z, nx, ny, nz, r, g, b, a 
+	//	temp, -temp, -temp, 0.f, -1.f, 0.f, 0.f, 1.f, 1.f, 1.f, 1.f, 1.f,
+	//	temp, -temp, temp, 0.f, -1.f, 0.f, 0.f, 1.f, 1.f, 1.f, 1.f, 0.f,
+	//	-temp, -temp, temp, 0.f, -1.f, 0.f, 0.f, 1.f, 1.f, 1.f, 0.f, 0.f,//x, y, z, nx, ny, nz, r, g, b, a 
+	//	-temp, -temp, -temp, 0.f, -1.f, 0.f, 0.f, 1.f, 1.f, 1.f, 0.f, 1.f,
+	//	temp, -temp, -temp, 0.f, -1.f, 0.f, 0.f, 1.f, 1.f, 1.f, 1.f, 1.f //sixth face : G+B (Cyan)
+	//};
+
+
+float cube[] = {
+	-temp, -temp, temp, 0.f, 0.f, 1.f, 1.f, 0.f, 0.f, 0.f,//x, y, z, nx, ny, nz, r, g, tx, ty
+	temp, temp, temp, 0.f, 0.f, 1.f, 1.f, 0.f, 1.f, 1.f,
+	-temp, temp, temp, 0.f, 0.f, 1.f, 1.f, 0.f,  0.f, 1.f,
+	-temp, -temp, temp, 0.f, 0.f, 1.f, 1.f, 0.f,  0.f, 0.f,
+	temp, -temp, temp, 0.f, 0.f, 1.f, 1.f, 0.f, 1.f, 0.f,
+	temp, temp, temp, 0.f, 0.f, 1.f, 1.f, 0.f, 1.f, 1.f,// first face : R
+
+	temp, -temp, temp, 1.f, 0.f, 0.f, 0.f, 1.f, 0.f, 1.f, //x, y, z, nx, ny, nz, r, g, tx, ty
+	temp, temp, -temp, 1.f, 0.f, 0.f, 0.f, 1.f, 1.f, 0.f,
+	temp, temp, temp, 1.f, 0.f, 0.f, 0.f, 1.f, 1.f, 1.f,
+	temp, -temp, temp, 1.f, 0.f, 0.f, 0.f, 1.f, 0.f, 1.f, //x, y, z, nx, ny, nz, r, g, tx, ty
+	temp, -temp, -temp, 1.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f,
+	temp, temp, -temp, 1.f, 0.f, 0.f, 0.f, 1.f, 1.f, 0.f, //second face : G
+
+	-temp, temp, temp, 0.f, 1.f, 0.f, 0.f, 0.f, 0.f, 1.f, //x, y, z, nx, ny, nz, r, g, tx, ty
+	temp, temp, -temp, 0.f, 1.f, 0.f, 0.f, 0.f, 1.f, 0.f,
+	-temp, temp, -temp, 0.f, 1.f, 0.f, 0.f, 0.f, 0.f, 0.f,
+	-temp, temp, temp, 0.f, 1.f, 0.f, 0.f, 0.f, 0.f, 1.f, //x, y, z, nx, ny, nz, r, g, tx, ty
+	temp, temp, temp, 0.f, 1.f, 0.f, 0.f, 0.f, 1.f, 1.f,
+	temp, temp, -temp, 0.f, 1.f, 0.f, 0.f, 0.f, 1.f, 0.f, //third face : B
+
+	-temp, -temp, -temp, 0.f, 0.f, -1.f, 1.f, 1.f,  0.f, 0.f, //x, y, z, nx, ny, nz, r, g, tx, ty
+	-temp, temp, -temp, 0.f, 0.f, -1.f, 1.f, 1.f, 0.f, 1.f,
+	temp, temp, -temp, 0.f, 0.f, -1.f, 1.f, 1.f, 1.f, 1.f,
+	-temp, -temp, -temp, 0.f, 0.f, -1.f, 1.f, 1.f, 0.f, 0.f, //x, y, z, nx, ny, nz, r, g, tx, ty
+	temp, temp, -temp, 0.f, 0.f, -1.f, 1.f, 1.f, 1.f, 1.f,
+	temp, -temp, -temp, 0.f, 0.f, -1.f, 1.f, 1.f, 1.f, 0.f, //fourth face : R+G (yellow)
+
+	-temp, -temp, temp, -1.f, 0.f, 0.f, 1.f, 0.f, 0.f, 1.f, //x, y, z, nx, ny, nz, r, g, tx, ty
+	-temp, temp, temp, -1.f, 0.f, 0.f, 1.f, 0.f, 1.f, 1.f,
+	-temp, temp, -temp, -1.f, 0.f, 0.f, 1.f, 0.f, 1.f, 0.f,
+	-temp, -temp, temp, -1.f, 0.f, 0.f, 1.f, 0.f, 0.f, 1.f, //x, y, z, nx, ny, nz, r, g, tx, ty
+	-temp, temp, -temp, -1.f, 0.f, 0.f, 1.f, 0.f, 1.f, 0.f,
+	-temp, -temp, -temp, -1.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, // fifth face : R+B (purple)
+
+	-temp, -temp, temp, 0.f, -1.f, 0.f, 0.f, 1.f, 0.f, 1.f, //x, y, z, nx, ny, nz, r, g, tx, ty
+	temp, -temp, -temp, 0.f, -1.f, 0.f, 0.f, 1.f, 1.f, 0.f,
+	temp, -temp, temp, 0.f, -1.f, 0.f, 0.f, 1.f, 1.f, 1.f,
+	-temp, -temp, temp, 0.f, -1.f, 0.f, 0.f, 1.f, 0.f, 1.f, //x, y, z, nx, ny, nz, r, g, tx, ty
+	-temp, -temp, -temp, 0.f, -1.f, 0.f, 0.f, 1.f, 0.f, 0.f,
+	temp, -temp, -temp, 0.f, -1.f, 0.f, 0.f, 1.f, 1.f, 0.f, //sixth face : G+B (Cyan)
+};
+
 
 	glGenBuffers(1, &m_VBO_Cube);
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBO_Cube);
@@ -1570,25 +1725,174 @@ void Renderer::ProxyGeo()
 
 	glDisableVertexAttribArray(attribPos);
 }
-
-void Renderer::DrawParticle()
+void Renderer::InitializeParticle()
 {
-	glBindFramebuffer(GL_FRAMEBUFFER, m_FBO_P1);
-	GLenum drawBuffers[2] = { GL_COLOR_ATTACHMENT0 , GL_COLOR_ATTACHMENT1 };
-	glDrawBuffers(2, drawBuffers);
+	//Compile particle shader
+	m_Shader_Particle = CompileShaders("./Shaders/Particle.vs", "./Shaders/Particle.fs");
 
-	glClearColor(0, 0, 0, 1);
-	glClearDepth(1.f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glClearColor(0, 0, 0, 0);
+	int particleCount = 500000;
+	float particleSize = 1.f*((float)rand() / (float)RAND_MAX);
 
+	float* particleVertices = new float[particleCount * 2 * 3 * (3 + 2 + 4)];
+	int particleFloatCount = particleCount * 2 * 3 * (3 + 2 + 4);
+	m_Count_Particle = particleCount * 2 * 3;
+
+	int particleVertIndex = 0;
+
+	for (int i = 0; i < particleCount; i++)
+	{
+		float randomValueX = 0.f;
+		float randomValueY = 0.f;
+		float randomValueZ = 0.f;
+		float randomStartTime = 0.f;
+		float velocityScale = 0.1f;
+		float particleInitPosX = 0.f; //((float)rand() / (float)RAND_MAX)*((float)m_HeightMapImageWidth - (float)m_HeightMapImageWidth / 2.f);
+		float particleInitPosY = 1.f;// ((float)rand() / (float)RAND_MAX)*200.f;
+		float particleInitPosZ = 1.f;// ((float)rand() / (float)RAND_MAX)*((float)m_HeightMapImageHeight - (float)m_HeightMapImageHeight / 2.f);
+
+
+		randomValueX = (rand() / (float)RAND_MAX - 0.5)*velocityScale;
+		randomValueY = (rand() / (float)RAND_MAX - 0.5)*velocityScale;
+		randomValueZ = 0.f;
+		randomStartTime = (rand() / (float)RAND_MAX)*3.f;
+		particleSize = 1.f*((float)rand() / (float)RAND_MAX);
+		//particleInitPosX = (rand() / (float)RAND_MAX - 0.5)*2;
+		//particleInitPosY = (rand() / (float)RAND_MAX - 0.5)*2;
+
+		particleInitPosX = 2.0f * (((float)rand() / (float)RAND_MAX) - 0.5f)*((float)m_HeightMapImageWidth / 2.f);
+		particleInitPosY = ((float)rand() / (float)RAND_MAX)*256.f;
+		particleInitPosZ = 2.0f * (((float)rand() / (float)RAND_MAX) - 0.5f)*((float)m_HeightMapImageHeight / 2.f);
+
+		particleVertices[particleVertIndex] = -particleSize / 2.f + particleInitPosX;
+		particleVertIndex++;
+		particleVertices[particleVertIndex] = -particleSize / 2.f + particleInitPosY;
+		particleVertIndex++;
+		particleVertices[particleVertIndex] = particleInitPosZ;
+		particleVertIndex++;
+		particleVertices[particleVertIndex] = 0.f;
+		particleVertIndex++;
+		particleVertices[particleVertIndex] = 0.f;
+		particleVertIndex++;
+		particleVertices[particleVertIndex] = randomValueX;
+		particleVertIndex++;
+		particleVertices[particleVertIndex] = randomValueY;
+		particleVertIndex++;
+		particleVertices[particleVertIndex] = randomValueZ;
+		particleVertIndex++;
+		particleVertices[particleVertIndex] = randomStartTime;
+		particleVertIndex++;
+
+		particleVertices[particleVertIndex] = particleSize / 2.f + particleInitPosX;
+		particleVertIndex++;
+		particleVertices[particleVertIndex] = -particleSize / 2.f + particleInitPosY;
+		particleVertIndex++;
+		particleVertices[particleVertIndex] = particleInitPosZ;
+		particleVertIndex++;
+		particleVertices[particleVertIndex] = 1.f;
+		particleVertIndex++;
+		particleVertices[particleVertIndex] = 0.f;
+		particleVertIndex++;
+		particleVertices[particleVertIndex] = randomValueX;
+		particleVertIndex++;
+		particleVertices[particleVertIndex] = randomValueY;
+		particleVertIndex++;
+		particleVertices[particleVertIndex] = randomValueZ;
+		particleVertIndex++;
+		particleVertices[particleVertIndex] = randomStartTime;
+		particleVertIndex++;
+
+		particleVertices[particleVertIndex] = particleSize / 2.f + particleInitPosX;
+		particleVertIndex++;
+		particleVertices[particleVertIndex] = particleSize / 2.f + particleInitPosY;
+		particleVertIndex++;
+		particleVertices[particleVertIndex] = particleInitPosZ;
+		particleVertIndex++;
+		particleVertices[particleVertIndex] = 1.f;
+		particleVertIndex++;
+		particleVertices[particleVertIndex] = 1.f;
+		particleVertIndex++;
+		particleVertices[particleVertIndex] = randomValueX;
+		particleVertIndex++;
+		particleVertices[particleVertIndex] = randomValueY;
+		particleVertIndex++;
+		particleVertices[particleVertIndex] = randomValueZ;
+		particleVertIndex++;
+		particleVertices[particleVertIndex] = randomStartTime;
+		particleVertIndex++;
+
+		particleVertices[particleVertIndex] = -particleSize / 2.f + particleInitPosX;
+		particleVertIndex++;
+		particleVertices[particleVertIndex] = -particleSize / 2.f + particleInitPosY;
+		particleVertIndex++;
+		particleVertices[particleVertIndex] = particleInitPosZ;
+		particleVertIndex++;
+		particleVertices[particleVertIndex] = 0.f;
+		particleVertIndex++;
+		particleVertices[particleVertIndex] = 0.f;
+		particleVertIndex++;
+		particleVertices[particleVertIndex] = randomValueX;
+		particleVertIndex++;
+		particleVertices[particleVertIndex] = randomValueY;
+		particleVertIndex++;
+		particleVertices[particleVertIndex] = randomValueZ;
+		particleVertIndex++;
+		particleVertices[particleVertIndex] = randomStartTime;
+		particleVertIndex++;
+
+		particleVertices[particleVertIndex] = particleSize / 2.f + particleInitPosX;
+		particleVertIndex++;
+		particleVertices[particleVertIndex] = particleSize / 2.f + particleInitPosY;
+		particleVertIndex++;
+		particleVertices[particleVertIndex] = particleInitPosZ;
+		particleVertIndex++;
+		particleVertices[particleVertIndex] = 1.f;
+		particleVertIndex++;
+		particleVertices[particleVertIndex] = 1.f;
+		particleVertIndex++;
+		particleVertices[particleVertIndex] = randomValueX;
+		particleVertIndex++;
+		particleVertices[particleVertIndex] = randomValueY;
+		particleVertIndex++;
+		particleVertices[particleVertIndex] = randomValueZ;
+		particleVertIndex++;
+		particleVertices[particleVertIndex] = randomStartTime;
+		particleVertIndex++;
+
+		particleVertices[particleVertIndex] = -particleSize / 2.f + particleInitPosX;
+		particleVertIndex++;
+		particleVertices[particleVertIndex] = particleSize / 2.f + particleInitPosY;
+		particleVertIndex++;
+		particleVertices[particleVertIndex] = particleInitPosZ;
+		particleVertIndex++;
+		particleVertices[particleVertIndex] = 0.f;
+		particleVertIndex++;
+		particleVertices[particleVertIndex] = 1.f;
+		particleVertIndex++;
+		particleVertices[particleVertIndex] = randomValueX;
+		particleVertIndex++;
+		particleVertices[particleVertIndex] = randomValueY;
+		particleVertIndex++;
+		particleVertices[particleVertIndex] = randomValueZ;
+		particleVertIndex++;
+		particleVertices[particleVertIndex] = randomStartTime;
+		particleVertIndex++;
+	}
+
+	glGenBuffers(1, &m_VBO_Particle);
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBO_Particle);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float)*particleFloatCount, particleVertices, GL_STATIC_DRAW);
+}
+void Renderer::DrawParticle(float amount) //amount : 0~1, 0->no particles, 1->full particles
+{
 	GLuint shader = m_Shader_Particle;
 
 	glUseProgram(shader);
-	
+
+	glDisable(GL_CULL_FACE);
+
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	
+
 	GLuint samplerTex = glGetUniformLocation(shader, "u_Texture");
 	glUniform1i(samplerTex, 0);
 	glActiveTexture(GL_TEXTURE0);
@@ -1597,6 +1901,9 @@ void Renderer::DrawParticle()
 	GLuint uniformTime = glGetUniformLocation(shader, "u_Time");
 	glUniform1f(uniformTime, g_time);
 	g_time += 0.01;
+
+	GLuint projView = glGetUniformLocation(shader, "u_ProjView");
+	glUniformMatrix4fv(projView, 1, GL_FALSE, &m_m4ProjView[0][0]);
 
 	GLuint attribPos = glGetAttribLocation(shader, "a_Position");
 	GLuint attribTex = glGetAttribLocation(shader, "a_TexPos");
@@ -1607,19 +1914,19 @@ void Renderer::DrawParticle()
 
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBO_Particle);
 
-	glVertexAttribPointer(attribPos, 3, GL_FLOAT, GL_FALSE, sizeof(float)*9, 0);
-	glVertexAttribPointer(attribTex, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 9, (GLvoid*)(sizeof(float)*3));
+	glVertexAttribPointer(attribPos, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 9, 0);
+	glVertexAttribPointer(attribTex, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 9, (GLvoid*)(sizeof(float) * 3));
 	glVertexAttribPointer(attribVel, 4, GL_FLOAT, GL_FALSE, sizeof(float) * 9, (GLvoid*)(sizeof(float) * 5));
 
-	glDrawArrays(GL_TRIANGLES, 0, m_Count_ProxyGeo);
-	
+	float newAmount = std::fminf(1.f, std::fmaxf(amount, 0));
+	glDrawArrays(GL_TRIANGLES, 0, (int)((float)m_Count_Particle*newAmount));
+
 	glDisableVertexAttribArray(attribPos);
 	glDisableVertexAttribArray(attribTex);
 	glDisableVertexAttribArray(attribVel);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
-
 void Renderer::SetRotation(float rX, float rY)
 {
 	m_v3ModelRotation = glm::vec3(rX, rY, 0.f);
@@ -1634,6 +1941,10 @@ void Renderer::SetRotation(float rX, float rY)
 		glm::scale(glm::mat4(1.f), m_v3ModelScaling);
 	m_m4Model
 		= m_m4ModelTranslation*m_m4ModelRotation*m_m4ModelScaling;
+}
+
+void Renderer::DrawIntro(bool Enter) {
+
 }
 
 void Renderer::DrawCube(float x, float y, float z)
@@ -1652,6 +1963,12 @@ void Renderer::DrawCube(float x, float y, float z)
 	GLuint rotation = glGetUniformLocation(shader, "u_Rotation");
 	GLuint light = glGetUniformLocation(shader, "u_LightPos");
 	GLuint camera = glGetUniformLocation(shader, "u_CameraPos");
+	GLuint texture = glGetUniformLocation(shader, "u_Texture");
+
+	glUniform1i(texture, 0);
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, m_Tex_Brick);
 
 	glm::mat4 m4ModelPosition = glm::translate(glm::mat4(1.f), glm::vec3(x, y, z)) * 
 		glm::scale(glm::mat4(1.f), glm::vec3(10.f, 16.f, 10.f));
@@ -1691,7 +2008,7 @@ void Renderer::DrawCube(float x, float y, float z)
 
 void Renderer::DrawCube(float x, float y, float z, float rot_x, float rot_y, float rot_z)
 {
-	printf("DrawCube : [%f, %f, %f] \n", rot_x, rot_y, rot_z);
+	//printf("DrawCube : [%f, %f, %f] \n", rot_x, rot_y, rot_z);
 
 	glm::vec3 v3RotationX(rot_x, 0.f, 0.f);
 	glm::vec3 v3RotationZ(0.f, 0.f, rot_z);
@@ -1754,6 +2071,94 @@ void Renderer::DrawCube(float x, float y, float z, float rot_x, float rot_y, flo
 
 }
 
+void Renderer::DrawUITexture(int i_iTextureId, float i_fStartPosX, float i_fStartPosY, float i_fScaleX, float i_fScaleY)
+{
+	GLuint shader = m_Shader_Test1;
+
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	glUseProgram(shader);
+
+	GLuint tex = glGetUniformLocation(shader, "u_Texture");
+	glUniform1i(tex, 0);
+
+	float pixelSizeInGLX = 1.f / (SCREEN_WIDTH / 2);
+	float pixelSizeInGLY = 1.f / (SCREEN_HEIGHT / 2);
+
+	// UI 이동
+	GLuint trans = glGetUniformLocation(shader, "u_Trans");
+	glUniform2f(trans,
+		-1 + (i_fStartPosX / (SCREEN_WIDTH / 2)),
+		1 - (i_fStartPosY / (SCREEN_HEIGHT / 2)));
+
+	GLuint scale = glGetUniformLocation(shader, "u_Scale");
+	glUniform2f(scale, i_fScaleX * pixelSizeInGLX, i_fScaleY * pixelSizeInGLY);
+
+
+	glActiveTexture(GL_TEXTURE0);
+	switch (i_iTextureId) {
+	case 0:
+		glBindTexture(GL_TEXTURE_2D, m_Tex_Number0);
+		break;
+	case 1:
+		glBindTexture(GL_TEXTURE_2D, m_Tex_Number1);
+		break;
+	case 2:
+		glBindTexture(GL_TEXTURE_2D, m_Tex_Number2);
+		break;
+	case 3:
+		glBindTexture(GL_TEXTURE_2D, m_Tex_Number3);
+		break;
+	case 4:
+		glBindTexture(GL_TEXTURE_2D, m_Tex_Number4);
+		break;
+	case 5:
+		glBindTexture(GL_TEXTURE_2D, m_Tex_Number5);
+		break;
+	case 6:
+		glBindTexture(GL_TEXTURE_2D, m_Tex_Number6);
+		break;
+	case 7:
+		glBindTexture(GL_TEXTURE_2D, m_Tex_Number7);
+		break;
+	case 8:
+		glBindTexture(GL_TEXTURE_2D, m_Tex_Number8);
+		break;
+	case 9:
+		glBindTexture(GL_TEXTURE_2D, m_Tex_Number9);
+		break;
+	case 10:
+		glBindTexture(GL_TEXTURE_2D, m_Tex_Minimap);
+		break;
+	case 11:
+		glBindTexture(GL_TEXTURE_2D, m_Tex_Pin);
+		break;
+	case 12:
+		glBindTexture(GL_TEXTURE_2D, m_Tex_Slash);
+		break;
+	}
+	GLuint pos = glGetAttribLocation(shader, "a_Position");
+	GLuint texPos = glGetAttribLocation(shader, "a_TexPos");
+
+	glEnableVertexAttribArray(pos);
+	glEnableVertexAttribArray(texPos);
+
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBO_Test1);
+
+	glVertexAttribPointer(pos, 3, GL_FLOAT,
+		GL_FALSE, sizeof(float) * 5, 0);
+	glVertexAttribPointer(texPos, 2, GL_FLOAT,
+		GL_FALSE, sizeof(float) * 5,
+		(GLvoid*)(sizeof(float) * 3));
+
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+
+
+	glDisable(GL_BLEND);
+}
+
+
 void Renderer::DrawUITexture()
 {
 	GLuint shader = m_Shader_Test1;
@@ -1762,6 +2167,18 @@ void Renderer::DrawUITexture()
 
 	GLuint tex = glGetUniformLocation(shader, "u_Texture");
 	glUniform1i(tex, 0);
+
+	float pixelSizeInGLX = 1.f / (SCREEN_WIDTH / 2);
+	float pixelSizeInGLY = 1.f / (SCREEN_HEIGHT / 2);
+
+	// UI 이동
+	GLuint trans = glGetUniformLocation(shader, "u_Trans");
+	glUniform2f(trans, 0.f, 1.f);
+
+	// UI 스케일
+	GLuint scale = glGetUniformLocation(shader, "u_Scale");
+	//glUniform2f(scale, 10.f*pixelSizeInGLX, 10.f*pixelSizeInGLY);
+	glUniform2f(scale, (SCREEN_WIDTH / 2) * pixelSizeInGLX, (SCREEN_HEIGHT / 2) * pixelSizeInGLY);
 
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, m_Tex_Twice);
@@ -1853,9 +2270,11 @@ void Renderer::GenFBOs()
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
+
+
 void Renderer::Bogang()
 {
-	DrawParticle();
+	DrawParticle(10.f);
 	BloomPass2(m_Tex_P1_Emissive);
 	BloomPass3(m_Tex_P1_Color, m_Tex_P2_Bloom);
 	DrawTexture(m_Tex_P1_Color, 0, 0, 100, 100);
@@ -2159,6 +2578,16 @@ void Renderer::LoadHeightMapImage(const char* pFileName, int nWidth, int nHeight
 	if (pHeightMapPixels) delete[] pHeightMapPixels;
 }
 
+float Renderer::GetHeightValue(int x, int y)
+{
+	float fHeight0 = m_pHeightMapImage[(int)std::fmax(x - 1, 0) + (y*m_HeightMapImageWidth)];
+	float fHeight1 = m_pHeightMapImage[(int)std::fmin(x + 1, m_HeightMapImageWidth - 1) + (y*m_HeightMapImageWidth)];
+	float fHeight2 = m_pHeightMapImage[x + ((int)std::fmax(y - 1, 0)*m_HeightMapImageWidth)];
+	float fHeight3 = m_pHeightMapImage[x + ((int)std::fmin(y + 1, m_HeightMapImageHeight - 1)*m_HeightMapImageWidth)];
+
+	return (fHeight0 + fHeight1 + fHeight2 + fHeight3) / 4.f;
+}
+
 glm::vec3 Renderer::GetHeightMapNormal(int x, int y)
 {
 	if ((x < 0.0f) || (y < 0.0f) || (x >= m_HeightMapImageWidth) || (y >= m_HeightMapImageHeight))
@@ -2166,15 +2595,20 @@ glm::vec3 Renderer::GetHeightMapNormal(int x, int y)
 		return glm::vec3(0, 0, 0);
 	}
 
-	int nHeightMapIndex = x + (y * m_HeightMapImageWidth);
-	int xHeightMapAdd = (x < (m_HeightMapImageWidth - 1)) ? 1 : -1;
-	int zHeightMapAdd = (y < (m_HeightMapImageHeight - 1)) ? m_HeightMapImageWidth : -m_HeightMapImageWidth;
-	float y1 = (float)m_pHeightMapImage[nHeightMapIndex];
-	float y2 = (float)m_pHeightMapImage[nHeightMapIndex + xHeightMapAdd];
-	float y3 = (float)m_pHeightMapImage[nHeightMapIndex + zHeightMapAdd];
+	int factor = 3.f;
 
-	glm::vec3 edge1 = glm::vec3(0.0f, y3 - y1, 1.f);
-	glm::vec3 edge2 = glm::vec3(1.f, y2 - y1, 0.0f);
+	int nHeightMapIndex = x + (y * m_HeightMapImageWidth);
+	int xHeightMapAdd = (x < (m_HeightMapImageWidth - 1)) ? factor : -factor;
+	int zHeightMapAdd = (y < (m_HeightMapImageHeight - 1)) ? m_HeightMapImageWidth : -m_HeightMapImageWidth;
+	//int zHeightMapAdd = (y < (m_HeightMapImageHeight - 1)) ? 1 : -1;
+	//float y1 = (float)m_pHeightMapImage[nHeightMapIndex];
+	float y2 = GetHeightValue(x - 1, y); 
+	float y3 = GetHeightValue(x + 1, y);
+	float y4 = GetHeightValue(x, y-1);
+	float y5 = GetHeightValue(x, y + 1);
+
+	glm::vec3 edge1 = glm::vec3(1.0f, y3 - y2, 0.f);
+	glm::vec3 edge2 = glm::vec3(0.f, y5 - y4, 1.0f);
 	glm::vec3 normal = glm::cross(edge1, edge2);
 
 	return(normal);
@@ -2194,7 +2628,7 @@ void Renderer::InitializeHeightMapGridMesh(int nWidth, int nHeight)
 	{
 		for (int x = 0; x < nWidth; x++, i++)
 		{
-			fHeight = m_pHeightMapImage[x + (y*nWidth)];
+			fHeight = GetHeightValue(x, y);
 
 			pVertices[i*nStride + 0] = (float)x - (float)nWidth/2.f;
 			pVertices[i*nStride + 1] = fHeight;

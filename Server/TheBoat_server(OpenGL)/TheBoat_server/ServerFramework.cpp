@@ -81,6 +81,8 @@ void ServerFramework::InitServer() {
 		clients[i].z = 0.f;
 		clients[i].y = height_map->GetHeight(clients[i].x + DX12_TO_OPGL, clients[i].z + DX12_TO_OPGL) + PLAYER_HEIGHT;
 		clients[i].hp = 100.f;
+		clients[i].m_CurrentAmmo = 0;
+		clients[i].m_TotalAmmo = 0;
 		for (int j = 0; j < 4; ++j) {
 			clients[i].boat_parts[j] = false;
 		}
@@ -173,7 +175,13 @@ void ServerFramework::AcceptPlayer() {
 	}
 	printf("[%d] 플레이어 입장\n", client_id);
 	clients[client_id].s = client_socket;
-	clients[client_id].ar_ammo = 30;
+
+
+	clients[client_id].m_CurrentAmmo = 30;
+	clients[client_id].m_TotalAmmo = 90;
+
+
+
 	clients[client_id].sub_ammo = 30;
 	clients[client_id].ar_weapons = ARWeapons::NON_AR;
 	clients[client_id].sub_weapons = SubWeapons::NON_SUB;
@@ -207,6 +215,9 @@ void ServerFramework::AcceptPlayer() {
 	packet.x = clients[client_id].x;
 	packet.y = clients[client_id].y;
 	packet.z = clients[client_id].z;
+	packet.m_TotalAmmo = clients[client_id].m_TotalAmmo;
+	packet.m_CurrentAmmo = clients[client_id].m_CurrentAmmo;
+
 	SendPacket(client_id, &packet);
 
 	// 나 제외 플레이어에게 입장정보 전송
@@ -317,84 +328,66 @@ void ServerFramework::ProcessPacket(int cl_id, char* packet) {
 		// AR 장착중인경우
 		if (clients[cl_id].equipted_weapon == 0) {
 			// 장전하려고 보니 결과가 0 이상
-			if (clients[cl_id].ar_ammo - bullet_counter[cl_id] > 0) {
-				clients[cl_id].ar_ammo -= bullet_counter[cl_id];
-				bullet_counter[cl_id] = 0;
-				printf("장전 완료, 남은 탄창 %d \n", clients[cl_id].ar_ammo);
+			if (clients[cl_id].m_TotalAmmo - clients[cl_id].m_CurrentAmmo > 0) {
+				clients[cl_id].m_TotalAmmo -= clients[cl_id].m_CurrentAmmo;
+				clients[cl_id].m_CurrentAmmo = 30;
+				printf("장전 완료, 남은 탄창 %d \n", clients[cl_id].m_TotalAmmo);
 				SC_PACKET_AMMO_O packets;
 				packets.size = sizeof(SC_PACKET_AMMO_O);
 				packets.type = SC_FULLY_AMMO;
-				packets.ammo = bullet_counter[cl_id];
+				packets.ammo = clients[cl_id].m_CurrentAmmo;
+				packets.m_cTotalAmmo = clients[cl_id].m_TotalAmmo;
 				SendPacket(cl_id, &packets);
 			}
 			// 장전하려고 보니 결과가 0 미만
 			else {
-				bullet_counter[cl_id] -= clients[cl_id].ar_ammo;
-				clients[cl_id].ar_ammo = 0;
-				printf("장전 완료, 남은 탄창 %d \n", clients[cl_id].ar_ammo);
+				clients[cl_id].m_CurrentAmmo += clients[cl_id].m_TotalAmmo;
+				clients[cl_id].m_TotalAmmo = 0;
+				printf("장전 완료, 남은 탄창 %d \n", clients[cl_id].m_TotalAmmo);
 				SC_PACKET_AMMO_O packets;
 				packets.size = sizeof(SC_PACKET_AMMO_O);
 				packets.type = SC_FULLY_AMMO;
-				packets.ammo = bullet_counter[cl_id];
+				packets.ammo = clients[cl_id].m_CurrentAmmo;
 				SendPacket(cl_id, &packets);
 
 			}
-			//// 탄창에 30발 미만인경우 다 옮기고 ar_ammo를 0으로 만들어야 한다. 
-			//if (clients[cl_id].ar_ammo <= MAX_AMMO) {
-			//	//bullet_counter[cl_id] -= clients[cl_id].ar_ammo;
-			//	clients[cl_id].ar_ammo -= bullet_counter[cl_id];
-			//	clients[cl_id].ar_ammo = 0;
-			//	printf("장전 완료, 남은 탄창 %d \n", clients[cl_id].ar_ammo);
-			//	SC_PACKET_AMMO_O packets;
-			//	packets.size = sizeof(SC_PACKET_AMMO_O);
-			//	packets.type = SC_FULLY_AMMO;
-			//	packets.ammo = bullet_counter[cl_id];
-			//	SendPacket(cl_id, &packets);
-			//}
-			//// 탄창에 30발 이상 남은경우
-			//else {
-			//	clients[cl_id].ar_ammo -= bullet_counter[cl_id];
-			//	bullet_counter[cl_id] = 0;
-			//	printf("장전 완료, 남은 탄창 %d \n", clients[cl_id].ar_ammo);
-			//	SC_PACKET_AMMO_O packets;
-			//	packets.size = sizeof(SC_PACKET_AMMO_O);
-			//	packets.type = SC_FULLY_AMMO;
-			//	packets.ammo = bullet_counter[cl_id];
-			//	SendPacket(cl_id, &packets);
-			//}
 		}
 		// SUB 장착중인경우
 		else {
-			// 장전하려고 보니 결과가 0 이상
-			if (clients[cl_id].sub_ammo - bullet_counter[cl_id] > 0) {
-				clients[cl_id].sub_ammo -= bullet_counter[cl_id];
-				bullet_counter[cl_id] = 0;
-				printf("장전 완료, 남은 탄창 %d \n", clients[cl_id].sub_ammo);
-				SC_PACKET_AMMO_O packets;
-				packets.size = sizeof(SC_PACKET_AMMO_O);
-				packets.type = SC_FULLY_AMMO;
-				packets.ammo = bullet_counter[cl_id];
-				SendPacket(cl_id, &packets);
-			}
-			// 장전하려고 보니 결과가 0 미만
-			else {
-				bullet_counter[cl_id] -= clients[cl_id].sub_ammo;
-				clients[cl_id].sub_ammo = 0;
-				printf("장전 완료, 남은 탄창 %d \n", clients[cl_id].sub_ammo);
-				SC_PACKET_AMMO_O packets;
-				packets.size = sizeof(SC_PACKET_AMMO_O);
-				packets.type = SC_FULLY_AMMO;
-				packets.ammo = bullet_counter[cl_id];
-				SendPacket(cl_id, &packets);
+			// --------------------------------------------------------------
+			// 2018 07 31 : 해야해요! 보조무기
+			// --------------------------------------------------------------
 
-			}
+			//// 장전하려고 보니 결과가 0 이상
+			//if (clients[cl_id].sub_ammo - bullet_counter[cl_id] > 0) {
+			//	clients[cl_id].sub_ammo -= bullet_counter[cl_id];
+			//	bullet_counter[cl_id] = 0;
+			//	printf("장전 완료, 남은 탄창 %d \n", clients[cl_id].sub_ammo);
+			//	SC_PACKET_AMMO_O packets;
+			//	packets.size = sizeof(SC_PACKET_AMMO_O);
+			//	packets.type = SC_FULLY_AMMO;
+			//	packets.ammo = bullet_counter[cl_id];
+			//	SendPacket(cl_id, &packets);
+			//}
+			//// 장전하려고 보니 결과가 0 미만
+			//else {
+			//	bullet_counter[cl_id] -= clients[cl_id].sub_ammo;
+			//	clients[cl_id].sub_ammo = 0;
+			//	printf("장전 완료, 남은 탄창 %d \n", clients[cl_id].sub_ammo);
+			//	SC_PACKET_AMMO_O packets;
+			//	packets.size = sizeof(SC_PACKET_AMMO_O);
+			//	packets.type = SC_FULLY_AMMO;
+			//	packets.ammo = bullet_counter[cl_id];
+			//	SendPacket(cl_id, &packets);
+
+			//}
 
 		}
 		break;
 	case CS_LEFT_BUTTON_DOWN:
 		// 주무기
 		if (clients[cl_id].equipted_weapon == 0) {
-			if (bullet_counter[cl_id] == MAX_AMMO) {
+			if (clients[cl_id].m_CurrentAmmo == 0) {
 				printf("총알 장전 필요\n");
 				SC_PACKET_AMMO_O packets;
 				packets.size = sizeof(SC_PACKET_AMMO_O);
@@ -411,20 +404,20 @@ void ServerFramework::ProcessPacket(int cl_id, char* packet) {
 		}
 		// 보조무기
 		else if (clients[cl_id].equipted_weapon == 1) {
-			if (bullet_counter[cl_id] == MAX_AMMO) {
-				printf("총알 장전 필요\n");
-				SC_PACKET_AMMO_O packets;
-				packets.size = sizeof(SC_PACKET_AMMO_O);
-				packets.type = SC_OUT_OF_AMMO;
-				SendPacket(cl_id, &packets);
-			}
-			else {
-				clients[cl_id].is_left_click = true;
-				ol_ex[6].evt_type = EVT_BULLET_GENERATE;
-				ol_ex[6].shooter_player_id = cl_id;
-				//ol_ex[6].elapsed_time = elapsed_time.count();
-				PostQueuedCompletionStatus(iocp_handle, 0, 6, reinterpret_cast<WSAOVERLAPPED*>(&ol_ex[6]));
-			}
+			//if (bullet_counter[cl_id] == MAX_AMMO) {
+			//	printf("총알 장전 필요\n");
+			//	SC_PACKET_AMMO_O packets;
+			//	packets.size = sizeof(SC_PACKET_AMMO_O);
+			//	packets.type = SC_OUT_OF_AMMO;
+			//	SendPacket(cl_id, &packets);
+			//}
+			//else {
+			//	clients[cl_id].is_left_click = true;
+			//	ol_ex[6].evt_type = EVT_BULLET_GENERATE;
+			//	ol_ex[6].shooter_player_id = cl_id;
+			//	//ol_ex[6].elapsed_time = elapsed_time.count();
+			//	PostQueuedCompletionStatus(iocp_handle, 0, 6, reinterpret_cast<WSAOVERLAPPED*>(&ol_ex[6]));
+			//}
 		}
 
 		break;
@@ -1044,18 +1037,25 @@ void ServerFramework::WorkerThread() {
 		else if (overlapped_buffer->evt_type == EVT_BULLET_GENERATE) {
 			int shooter_id = overlapped_buffer->shooter_player_id;
 			if (clients[shooter_id].equipted_weapon == 0) {
-				printf("%d가 발사한 총알 : %d\n", shooter_id, bullet_counter[shooter_id]);
-				if (bullet_counter[shooter_id] == MAX_AMMO - 1) {
+				printf("%d가 발사한 총알 : %d\n", shooter_id, clients[shooter_id].m_CurrentAmmo);
+				if (clients[shooter_id].m_CurrentAmmo == 1) {
 					for (int d = 0; d < MAX_AMMO; ++d) {
 						bullets[shooter_id][d].in_use = false;
 					}
 				}
-				bullets[shooter_id][bullet_counter[shooter_id]].x = clients[shooter_id].x;
-				bullets[shooter_id][bullet_counter[shooter_id]].y = clients[shooter_id].y;
-				bullets[shooter_id][bullet_counter[shooter_id]].z = clients[shooter_id].z;
-				bullets[shooter_id][bullet_counter[shooter_id]].look_vec = clients[shooter_id].look_vec;
-				bullets[shooter_id][bullet_counter[shooter_id]].in_use = true;
-				bullet_counter[shooter_id]++;
+				bullets[shooter_id][clients[shooter_id].m_CurrentAmmo].x = clients[shooter_id].x;
+				bullets[shooter_id][clients[shooter_id].m_CurrentAmmo].y = clients[shooter_id].y;
+				bullets[shooter_id][clients[shooter_id].m_CurrentAmmo].z = clients[shooter_id].z;
+				bullets[shooter_id][clients[shooter_id].m_CurrentAmmo].look_vec = clients[shooter_id].look_vec;
+				bullets[shooter_id][clients[shooter_id].m_CurrentAmmo].in_use = true;
+				clients[shooter_id].m_CurrentAmmo--;
+				// 남은 탄창 보내주기 
+				SC_PACKET_AMMO packets;
+				packets.size = sizeof(SC_PACKET_AMMO);
+				packets.type = SC_AMMO;
+				packets.m_CurrentAmmo = clients[shooter_id].m_CurrentAmmo;
+				packets.m_TotalAmmo = clients[shooter_id].m_TotalAmmo;
+				SendPacket(shooter_id, &packets);
 				bullet_times[shooter_id] = 0;
 			}
 			else {
@@ -1089,14 +1089,14 @@ void ServerFramework::WorkerThread() {
 							XMFLOAT3(OBB_SCALE_BULLET_X, OBB_SCALE_BULLET_Y, OBB_SCALE_BULLET_Z),
 							XMFLOAT4(0, 0, 0, 1));
 					}
-					if (bullets[i][j].x >= 4000.f || bullets[i][j].x <= 0) {
+					if (bullets[i][j].x >= -256.f || bullets[i][j].x <= 0) {
 						bullets[i][j].in_use = false;
 						continue;
 					}
-					if (bullets[i][j].y >= 4000.f || bullets[i][j].y <= 0) {
-						bullets[i][j].in_use = false;
-						continue;
-					}
+					//if (bullets[i][j].y >= 4000.f || bullets[i][j].y <= 0) {
+					//	bullets[i][j].in_use = false;
+					//	continue;
+					//}
 					if (bullets[i][j].z >= 4000.f || bullets[i][j].z <= 0) {
 						bullets[i][j].in_use = false;
 						continue;

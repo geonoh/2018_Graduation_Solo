@@ -9,6 +9,7 @@ in float v_Alpha;
 
 void main()
 {
-	FragColor = texture(u_Texture, v_TexPos);
-	FragColor.a = FragColor.a*v_Alpha;
+   FragColor = texture(u_Texture, v_TexPos);
+   FragColor.a = FragColor.a*v_Alpha;
+//FragColor.rgba = vec4(1, 0, 0, 1);
 }

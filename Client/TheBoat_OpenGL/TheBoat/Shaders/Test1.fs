@@ -8,5 +8,5 @@ in vec2 v_TexPos;
 
 void main()
 {
-	FragColor = texture(u_Texture, v_TexPos).bgra;
+	FragColor = texture(u_Texture, vec2(v_TexPos.x, 1.0 - v_TexPos.y)).rgba;
 }

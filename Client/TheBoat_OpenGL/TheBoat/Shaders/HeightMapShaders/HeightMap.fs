@@ -20,7 +20,8 @@ layout(location=1) out vec4 FragEmissive;
 
 void main()
 {
-	vec3 lightDir = normalize(u_LightPos - v_Pos);
+	//vec3 lightDir = normalize(u_LightPos - v_Pos);
+	vec3 lightDir = vec3(1, 0, 0);
 	vec3 viewDir = normalize(u_CameraPos - v_Pos);
 	vec3 reflectDir = reflect(-lightDir, v_Normal);
 
