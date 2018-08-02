@@ -100,63 +100,52 @@ glm::mat4 Renderer::GetViewMatrix() const {
 	return mat_view;
 }
 
-void Renderer::MouseMove(int x, int y, int width, int height) {
-	GLfloat vertMouseSensitivity = 10.0f;
-	GLfloat horizMouseSensitivity = 10.0f;
+void Renderer::MouseMove(int x, int y, int width, int height, bool IsInGame) {
+	// 게임 시작하고나서 
+	if (IsInGame) {
+		GLfloat vertMouseSensitivity = 10.0f;
+		GLfloat horizMouseSensitivity = 10.0f;
 
-	//cout << "Mouse cursor is at position (" << mouseX << ", " << mouseY << endl;
+		//cout << "Mouse cursor is at position (" << mouseX << ", " << mouseY << endl;
 
-	int horizMovement = x - (width / 2);
-	int vertMovement = y - (height / 2);
+		int horizMovement = x - (width / 2);
+		int vertMovement = y - (height / 2);
 
-	m_fCameraRotationX += vertMovement / vertMouseSensitivity;
-	m_fCameraRotationY += horizMovement / horizMouseSensitivity;
+		m_fCameraRotationX += vertMovement / vertMouseSensitivity;
+		m_fCameraRotationY += horizMovement / horizMouseSensitivity;
 
-	// Control looking up and down with the mouse forward/back movement
-	// Limit loking up to vertically up
-	if (m_fCameraRotationX < -90.0f)
-	{
-		m_fCameraRotationX = -90.0f;
+		// Control looking up and down with the mouse forward/back movement
+		// Limit loking up to vertically up
+		if (m_fCameraRotationX < -90.0f)
+		{
+			m_fCameraRotationX = -90.0f;
+		}
+
+		// Limit looking down to vertically down
+		if (m_fCameraRotationX > 90.0f)
+		{
+			m_fCameraRotationX = 90.0f;
+		}
+
+		// Looking left and right. Keep the angles in the range -180.0f (anticlockwise turn looking behind) to 180.0f (clockwise turn looking behind)
+		if (m_fCameraRotationY < -180.0f)
+		{
+			m_fCameraRotationY += 360.0f;
+		}
+
+		if (m_fCameraRotationY > 180.0f)
+		{
+			m_fCameraRotationY -= 360.0f;
+		}
+
+		// Reset the mouse position to the centre of the window each frame
+		glutWarpPointer((width / 2), (height / 2));
+	}
+	// Game시작 전 선택 과정에서 
+	else {
+
 	}
 
-	// Limit looking down to vertically down
-	if (m_fCameraRotationX > 90.0f)
-	{
-		m_fCameraRotationX = 90.0f;
-	}
-
-	// Looking left and right. Keep the angles in the range -180.0f (anticlockwise turn looking behind) to 180.0f (clockwise turn looking behind)
-	if (m_fCameraRotationY < -180.0f)
-	{
-		m_fCameraRotationY += 360.0f;
-	}
-
-	if (m_fCameraRotationY > 180.0f)
-	{
-		m_fCameraRotationY -= 360.0f;
-	}
-
-	// Reset the mouse position to the centre of the window each frame
-	glutWarpPointer((width / 2), (height / 2));
-
-
-	//float end_x = (float)(x - width / 2) / (width / 2);
-	//float end_y = (float)(y - height / 2) / (height / 2);
-
-	////glm::vec2 mouse_delta = glm::vec2((float)x / width, (float)y / height) - mouse_position;
-	//glm::vec2 mouse_delta = glm::vec2(end_x, end_y) - mouse_position;
-
-	//const float mouse_x_sensitivity = 2.25f;
-	//const float mouse_y_sensitivity = 2.25f;
-
-	//yaw += mouse_x_sensitivity * mouse_delta.x;
-	//pitch += mouse_y_sensitivity * mouse_delta.y;
-
-	////yaw += mouse_x_sensitivity * mouse_delta.x;
-	////pitch += mouse_y_sensitivity * mouse_delta.y;
-
-	////mouse_position = glm::vec2((float)x / width, (float)y / height);
-	//mouse_position = glm::vec2(end_x, end_y);
 	UpdateView();
 }
 
@@ -441,6 +430,61 @@ void Renderer::Initialize(int windowSizeX, int windowSizeY)
 	m_Initialized = true;
 }
 
+void Renderer::DrawLobby(int i_iTextureId, float i_fStartPosx, float i_fStartPosY, float i_fScaleX, float i_fScaleY) {
+	GLuint shader = m_Shader_Test1;
+
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glUseProgram(shader);
+	GLuint tex = glGetUniformLocation(shader, "u_Texture");
+	glUniform1i(tex, 0);
+	float pixelSizeInGLX = 1.f / (SCREEN_WIDTH / 2);
+	float pixelSizeInGLY = 1.f / (SCREEN_HEIGHT / 2);
+	GLuint trans = glGetUniformLocation(shader, "u_Trans");
+	glUniform2f(trans,
+		-1 + (i_fStartPosx / (SCREEN_WIDTH / 2)),
+		1 - (i_fStartPosY / (SCREEN_HEIGHT / 2)));
+	GLuint scale = glGetUniformLocation(shader, "u_Scale");
+	glUniform2f(scale, i_fScaleX * pixelSizeInGLX, i_fScaleY * pixelSizeInGLY);
+	glActiveTexture(GL_TEXTURE0);
+
+	switch (i_iTextureId) {
+	case 0:
+		glBindTexture(GL_TEXTURE_2D, m_Tex_Lobby);
+		break;
+	case 1:
+		glBindTexture(GL_TEXTURE_2D, m_Tex_SelectBoxBlue);
+		break;
+	case 2:
+		glBindTexture(GL_TEXTURE_2D, m_Tex_SelectBoxRed);
+		break;
+	case 3:
+		glBindTexture(GL_TEXTURE_2D, m_Tex_SelectBoxMini);
+		break;
+	case 4:
+		glBindTexture(GL_TEXTURE_2D, m_Tex_SelectPlayer);
+		break;
+	case 5:
+		glBindTexture(GL_TEXTURE_2D, m_Tex_PlayerReady);
+		break;
+	}
+
+
+	GLuint pos = glGetAttribLocation(shader, "a_Position");
+	GLuint texPos = glGetAttribLocation(shader, "a_TexPos");
+	glEnableVertexAttribArray(pos);
+	glEnableVertexAttribArray(texPos);
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBO_Test1);
+	glVertexAttribPointer(pos, 3, GL_FLOAT,
+		GL_FALSE, sizeof(float) * 5, 0);
+	glVertexAttribPointer(texPos, 2, GL_FLOAT,
+		GL_FALSE, sizeof(float) * 5,
+		(GLvoid*)(sizeof(float) * 3));
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+	glDisable(GL_BLEND);
+
+}
+
 void Renderer::InitializeTextureImage() {
 	m_Shader_Test1 = CompileShaders("./Shaders/Test1.vs", "./Shaders/Test1.fs");
 
@@ -460,18 +504,21 @@ void Renderer::InitializeTextureImage() {
 
 
 	m_Tex_Pin = CreatePngTexture("./Textures/Pin.png");
-	//m_Tex_Number0 = CreatePngTexture("./Textures/HeightMap/world.png");
-	//m_Tex_Number1 = CreatePngTexture("./Textures/HeightMap/world.png");
-	//m_Tex_Number2 = CreatePngTexture("./Textures/HeightMap/world.png");
-	//m_Tex_Number3 = CreatePngTexture("./Textures/HeightMap/world.png");
-	//m_Tex_Number4 = CreatePngTexture("./Textures/HeightMap/world.png");
-	//m_Tex_Number5 = CreatePngTexture("./Textures/HeightMap/world.png");
-	//m_Tex_Number6 = CreatePngTexture("./Textures/HeightMap/world.png");
-	//m_Tex_Number7 = CreatePngTexture("./Textures/HeightMap/world.png");
-	//m_Tex_Number8 = CreatePngTexture("./Textures/HeightMap/world.png");
-	//m_Tex_Number9 = CreatePngTexture("./Textures/HeightMap/world.png");
 
-	//CreatePngTexture()
+	// Title
+	m_Tex_TitleEnter = CreatePngTexture("./Textures/Title/TitleEnter.png");
+	m_Tex_TitleCredit = CreatePngTexture("./Textures/Title/TitleCredit.png");
+
+	// Credit
+	m_Tex_Credit = CreatePngTexture("./Textures/Credit/Credit.png");
+
+	// Lobby
+	m_Tex_Lobby = CreatePngTexture("./Textures/Lobby/Lobby.png");
+	m_Tex_SelectBoxBlue = CreatePngTexture("./Textures/Lobby/SelectBoxBlue.png");
+	m_Tex_SelectBoxRed = CreatePngTexture("./Textures/Lobby/SelectBoxRed.png");
+	m_Tex_SelectBoxMini = CreatePngTexture("./Textures/Lobby/SelectBoxMini.png");
+	m_Tex_SelectPlayer = CreatePngTexture("./Textures/Lobby/SelectBoxPlayer.png");
+	m_Tex_PlayerReady = CreatePngTexture("./Textures/Lobby/PlayerReady.png");
 }
 
 bool Renderer::IsInitialized()
@@ -1943,7 +1990,107 @@ void Renderer::SetRotation(float rX, float rY)
 		= m_m4ModelTranslation*m_m4ModelRotation*m_m4ModelScaling;
 }
 
+void Renderer::DrawCredit() {
+	GLuint shader = m_Shader_Test1;
+
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	glUseProgram(shader);
+
+	GLuint tex = glGetUniformLocation(shader, "u_Texture");
+	glUniform1i(tex, 0);
+
+	float pixelSizeInGLX = 1.f / (SCREEN_WIDTH / 2);
+	float pixelSizeInGLY = 1.f / (SCREEN_HEIGHT / 2);
+
+	// UI 이동
+	GLuint trans = glGetUniformLocation(shader, "u_Trans");
+	glUniform2f(trans,
+		-1,
+		1);
+
+	GLuint scale = glGetUniformLocation(shader, "u_Scale");
+	glUniform2f(scale, SCREEN_WIDTH * pixelSizeInGLX, SCREEN_HEIGHT * pixelSizeInGLY);
+
+
+	glActiveTexture(GL_TEXTURE0);
+
+	glBindTexture(GL_TEXTURE_2D, m_Tex_Credit);
+	GLuint pos = glGetAttribLocation(shader, "a_Position");
+	GLuint texPos = glGetAttribLocation(shader, "a_TexPos");
+
+	glEnableVertexAttribArray(pos);
+	glEnableVertexAttribArray(texPos);
+
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBO_Test1);
+
+	glVertexAttribPointer(pos, 3, GL_FLOAT,
+		GL_FALSE, sizeof(float) * 5, 0);
+	glVertexAttribPointer(texPos, 2, GL_FLOAT,
+		GL_FALSE, sizeof(float) * 5,
+		(GLvoid*)(sizeof(float) * 3));
+
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+
+
+	glDisable(GL_BLEND);
+
+}
+
 void Renderer::DrawIntro(bool Enter) {
+	GLuint shader = m_Shader_Test1;
+
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	glUseProgram(shader);
+
+	GLuint tex = glGetUniformLocation(shader, "u_Texture");
+	glUniform1i(tex, 0);
+
+	float pixelSizeInGLX = 1.f / (SCREEN_WIDTH / 2);
+	float pixelSizeInGLY = 1.f / (SCREEN_HEIGHT / 2);
+
+	// UI 이동
+	GLuint trans = glGetUniformLocation(shader, "u_Trans");
+	glUniform2f(trans,
+		-1,
+		1);
+
+	GLuint scale = glGetUniformLocation(shader, "u_Scale");
+	glUniform2f(scale, SCREEN_WIDTH * pixelSizeInGLX, SCREEN_HEIGHT * pixelSizeInGLY);
+
+
+	glActiveTexture(GL_TEXTURE0);
+
+	switch (Enter) {
+	case false:
+		glBindTexture(GL_TEXTURE_2D, m_Tex_TitleCredit);
+		break;
+	case true:
+		glBindTexture(GL_TEXTURE_2D, m_Tex_TitleEnter);
+		break;
+
+	}
+	GLuint pos = glGetAttribLocation(shader, "a_Position");
+	GLuint texPos = glGetAttribLocation(shader, "a_TexPos");
+
+	glEnableVertexAttribArray(pos);
+	glEnableVertexAttribArray(texPos);
+
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBO_Test1);
+
+	glVertexAttribPointer(pos, 3, GL_FLOAT,
+		GL_FALSE, sizeof(float) * 5, 0);
+	glVertexAttribPointer(texPos, 2, GL_FLOAT,
+		GL_FALSE, sizeof(float) * 5,
+		(GLvoid*)(sizeof(float) * 3));
+
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+
+
+	glDisable(GL_BLEND);
 
 }
 

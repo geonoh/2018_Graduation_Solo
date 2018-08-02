@@ -51,6 +51,16 @@ public:
 	GLuint m_Tex_Number0 = 0;
 	GLuint m_Tex_Minimap = 0;
 	GLuint m_Tex_Pin = 0;
+	GLuint m_Tex_TitleEnter = 0;
+	GLuint m_Tex_TitleCredit = 0;
+	GLuint m_Tex_Credit = 0;
+	GLuint m_Tex_Lobby = 0;
+	GLuint m_Tex_SelectBoxBlue = 0;
+	GLuint m_Tex_SelectBoxRed = 0;
+	GLuint m_Tex_SelectBoxMini = 0;
+	GLuint m_Tex_SelectPlayer = 0;
+	GLuint m_Tex_PlayerReady = 0;
+
 
 	// Camera Setting 
 	void SetCameraLook(float x, float y, float z);
@@ -66,7 +76,7 @@ public:
 
 	// Degug용 - 카메라 위치 height더해서 
 
-	void MouseMove(int x, int y, int width, int height);
+	void MouseMove(int x, int y, int width, int height, bool IsInGame);
 
 	glm::vec2 mouse_position;
 
@@ -79,10 +89,17 @@ public:
 	// 0 ~ 9 Number
 	// 10 Minimap
 	void DrawUITexture(int i_iTextureId, float i_fStartPosX, float i_fStartPosY, float i_fScaleX, float i_fScaleY);
-
 	void DrawUITexture();
 	void DrawIntro(bool Enter);
+	void DrawCredit();
 
+	// 0 Lobby
+	// 1 SelectBoxBlue
+	// 2 SelectBoxRed
+	// 3 SelectBoxMini
+	// 4 SelectBoxPlayer
+	// 5 ReadyPlayer
+	void DrawLobby(int i_iTextureId, float i_fStartPosx, float i_fStartPosY, float i_fScaleX, float i_fScaleY);
 public:
 	Renderer(int windowSizeX, int windowSizeY);
 	~Renderer();

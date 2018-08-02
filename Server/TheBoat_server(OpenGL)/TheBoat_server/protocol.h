@@ -148,7 +148,7 @@
 
 
 enum GameMode {
-	TEAM_MODE, MELEE
+	e_Team, e_Melee
 };
 enum Team {
 	NON_TEAM = 0, TEAM_1, TEAM_2, TEAM_3, TEAM_4

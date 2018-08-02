@@ -7,6 +7,7 @@ class Player
 	int m_CurrentAmmo;
 	int m_TotalAmmo;
 public:
+	bool m_bReady;
 	float GetHP();
 	void SetHP(float HP);
 
