@@ -25,13 +25,8 @@ class ServerFramework
 	SOCKET listen_socket;
 	SOCKADDR_IN server_addr;
 
-	BOOL mode_selector;	// 
 
-	Client clients[MAX_PLAYER];
-	bool player_entered[4] = { 0 };
-	bool player_ready[4] = { 0 };		// Player_Ready 패킷 도착하면 해당 
-										// Client_ID에 맞는 배열 true
-										// 모두 true가 되면 게임 시작 함수 실행
+	Client g_Clients[MAX_PLAYER];
 	CHeightMapImage* height_map;
 	time_point<system_clock> prev_time = system_clock::now();
 	float sender_time = 0;

@@ -242,7 +242,56 @@ void ServerMgr::ProcessPacket(char* ptr) {
 		printf("½Ã°£Àº : %f\n", world_time);
 		break;
 	}
+	case SC_PLAYER_READY: {
+		SC_PACKET_READY* packets = reinterpret_cast<SC_PACKET_READY*>(ptr);
+		m_bPlayerReady[packets->m_cPlayerNumber] = true;
+		break;
 	}
+	case SC_PLAYER_READY_CANCLE: {
+		SC_PACKET_READY* packets = reinterpret_cast<SC_PACKET_READY*>(ptr);
+		m_bPlayerReady[packets->m_cPlayerNumber] = false;
+		break;
+	}
+	case SC_MODE_TEAM: {
+		m_bGameMode = false;
+		break;
+	}
+	case SC_MODE_MELEE: {
+		m_bGameMode = true;
+		break;
+	}
+	case SC_TEAM_RED: {
+		CS_PACKET_TEAM_SELECT* packets = reinterpret_cast<CS_PACKET_TEAM_SELECT*>(ptr);
+		m_bTeam[packets->m_cID] = false;
+		break;
+	}
+	case SC_TEAM_BLUE: {
+		CS_PACKET_TEAM_SELECT* packets = reinterpret_cast<CS_PACKET_TEAM_SELECT*>(ptr);
+		m_bTeam[packets->m_cID] = true;
+		break;
+	}
+	case SC_GAME_START: {
+		m_bGameStart = true;
+		break;
+	}
+
+	}
+}
+
+bool ServerMgr::GetStart() {
+	return m_bGameStart;
+}
+
+bool* ServerMgr::GetTeam() {
+	return m_bTeam;
+}
+
+bool ServerMgr::GetGameMode() {
+	return m_bGameMode;
+}
+
+bool* ServerMgr::GetPlayerReadyStatus() {
+	return m_bPlayerReady;
 }
 
 bool ServerMgr::GetNeedReload() {
@@ -397,6 +446,23 @@ void ServerMgr::SendPacket(int type) {
 		break;
 	case CS_RELOAD:
 		packet_buffer->type = CS_RELOAD;
+		retval = WSASend(sock, &send_wsabuf, 1, &iobytes, 0, NULL, NULL);
+		break;
+	case CS_TEAM_RED:
+		packet_buffer->type = CS_TEAM_RED;
+		retval = WSASend(sock, &send_wsabuf, 1, &iobytes, 0, NULL, NULL);
+		break;
+	case CS_TEAM_BLUE:
+		packet_buffer->type = CS_TEAM_BLUE;
+		retval = WSASend(sock, &send_wsabuf, 1, &iobytes, 0, NULL, NULL);
+		break;
+
+	case CS_MODE_TEAM:
+		packet_buffer->type = CS_MODE_TEAM;
+		retval = WSASend(sock, &send_wsabuf, 1, &iobytes, 0, NULL, NULL);
+		break;
+	case CS_MODE_MELEE:
+		packet_buffer->type = CS_MODE_MELEE;
 		retval = WSASend(sock, &send_wsabuf, 1, &iobytes, 0, NULL, NULL);
 		break;
 	}

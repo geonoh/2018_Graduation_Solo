@@ -55,7 +55,23 @@ class ServerMgr
 	int m_CurrentAmmo = 0;
 	int m_TotalAmmo = 0;
 	bool m_bNeedReloading;
+	bool m_bPlayerReady[MAX_PLAYER]{ false };
+	// 0 = Team
+	// 1 = Melee
+	bool m_bGameMode = false;
+	// 0 = Red
+	// 1 = Blue
+	bool m_bTeam[4]{ false };
+	bool m_bGameStart = false;
 public:
+	// 0 = Team
+	// 1 = Melee
+	bool GetGameMode();
+	// 0 = Red
+	// 1 = Blue
+	bool* GetTeam();
+	bool* GetPlayerReadyStatus();
+	bool GetStart();
 	bool GetNeedReload();
 	void SetNeedReload(bool i_Need);
 	void IPInput();

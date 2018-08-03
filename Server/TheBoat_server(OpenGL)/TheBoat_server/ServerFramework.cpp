@@ -77,21 +77,21 @@ void ServerFramework::InitServer() {
 
 	client_lock.lock();
 	for (int i = 0; i < MAX_PLAYER; ++i) {
-		clients[i].x = 0.f;
-		clients[i].z = 0.f;
-		clients[i].y = height_map->GetHeight(clients[i].x + DX12_TO_OPGL, clients[i].z + DX12_TO_OPGL) + PLAYER_HEIGHT;
-		clients[i].hp = 100.f;
-		clients[i].m_CurrentAmmo = 0;
-		clients[i].m_TotalAmmo = 0;
+		g_Clients[i].x = 0.f;
+		g_Clients[i].z = 0.f;
+		g_Clients[i].y = height_map->GetHeight(g_Clients[i].x + DX12_TO_OPGL, g_Clients[i].z + DX12_TO_OPGL) + PLAYER_HEIGHT;
+		g_Clients[i].hp = 100.f;
+		g_Clients[i].m_CurrentAmmo = 0;
+		g_Clients[i].m_TotalAmmo = 0;
 		for (int j = 0; j < 4; ++j) {
-			clients[i].boat_parts[j] = false;
+			g_Clients[i].boat_parts[j] = false;
 		}
 	}
 	client_lock.unlock();
 
 	for (int i = 0; i < MAX_PLAYER; ++i) {
-		clients[i].SetOOBB(XMFLOAT3(clients[i].x, clients[i].y, clients[i].z), XMFLOAT3(OBB_SCALE_PLAYER_X, OBB_SCALE_PLAYER_Y, OBB_SCALE_PLAYER_Z), XMFLOAT4(0, 0, 0, 1));
-		clients[i].bounding_box.Center;
+		g_Clients[i].SetOOBB(XMFLOAT3(g_Clients[i].x, g_Clients[i].y, g_Clients[i].z), XMFLOAT3(OBB_SCALE_PLAYER_X, OBB_SCALE_PLAYER_Y, OBB_SCALE_PLAYER_Z), XMFLOAT4(0, 0, 0, 1));
+		g_Clients[i].bounding_box.Center;
 	}
 
 	for (int j = 0; j < MAX_PLAYER; ++j) {
@@ -165,7 +165,7 @@ void ServerFramework::AcceptPlayer() {
 
 	int client_id = -1;
 	for (int i = 0; i < MAX_PLAYER; ++i) {
-		if (clients[i].in_use == false) {
+		if (g_Clients[i].in_use == false) {
 			client_id = i;
 			break;
 		}
@@ -174,36 +174,35 @@ void ServerFramework::AcceptPlayer() {
 		printf("최대 유저 초과\n");
 	}
 	printf("[%d] 플레이어 입장\n", client_id);
-	clients[client_id].s = client_socket;
+	g_Clients[client_id].s = client_socket;
 
 
-	clients[client_id].m_CurrentAmmo = 30;
-	clients[client_id].m_TotalAmmo = 90;
+	g_Clients[client_id].m_CurrentAmmo = 30;
+	g_Clients[client_id].m_TotalAmmo = 90;
 
 
 
-	clients[client_id].sub_ammo = 30;
-	clients[client_id].ar_weapons = ARWeapons::NON_AR;
-	clients[client_id].sub_weapons = SubWeapons::NON_SUB;
-	clients[client_id].is_ready = false;
-	clients[client_id].is_running = false;
-	ZeroMemory(&clients[client_id].overlapped_ex.wsa_over, sizeof(WSAOVERLAPPED));
-	//clients[client_id].overlapped_ex.is_recv = true;
-	clients[client_id].overlapped_ex.evt_type = EVT_RECV_PACKET;
-	clients[client_id].overlapped_ex.wsabuf.buf = clients[client_id].overlapped_ex.io_buffer;
-	clients[client_id].overlapped_ex.wsabuf.len = sizeof(clients[client_id].overlapped_ex.io_buffer);
-	clients[client_id].packet_size = 0;
-	clients[client_id].prev_packet_size = 0;
-	clients[client_id].team = Team::NON_TEAM;
+	g_Clients[client_id].sub_ammo = 30;
+	g_Clients[client_id].ar_weapons = ARWeapons::NON_AR;
+	g_Clients[client_id].sub_weapons = SubWeapons::NON_SUB;
+	g_Clients[client_id].is_ready = false;
+	g_Clients[client_id].is_running = false;
+	ZeroMemory(&g_Clients[client_id].overlapped_ex.wsa_over, sizeof(WSAOVERLAPPED));
+	//g_Clients[client_id].overlapped_ex.is_recv = true;
+	g_Clients[client_id].overlapped_ex.evt_type = EVT_RECV_PACKET;
+	g_Clients[client_id].overlapped_ex.wsabuf.buf = g_Clients[client_id].overlapped_ex.io_buffer;
+	g_Clients[client_id].overlapped_ex.wsabuf.len = sizeof(g_Clients[client_id].overlapped_ex.io_buffer);
+	g_Clients[client_id].packet_size = 0;
+	g_Clients[client_id].prev_packet_size = 0;
+	g_Clients[client_id].team = e_NoTeam;
 	// 플레이어 입장 표시
-	player_entered[client_id] = true;
-	clients[client_id].in_use = true;
+	g_Clients[client_id].in_use = true;
 
 	CreateIoCompletionPort(reinterpret_cast<HANDLE>(client_socket),
 		iocp_handle, client_id, 0);
 	unsigned long flag = 0;
-	WSARecv(client_socket, &clients[client_id].overlapped_ex.wsabuf, 1, NULL,
-		&flag, &clients[client_id].overlapped_ex.wsa_over, NULL);
+	WSARecv(client_socket, &g_Clients[client_id].overlapped_ex.wsabuf, 1, NULL,
+		&flag, &g_Clients[client_id].overlapped_ex.wsa_over, NULL);
 
 	// 플레이어 입장했다고 패킷 보내줘야함.
 	// 이 정보에는 플레이어의 초기 위치정보도 포함되어야 한다. 
@@ -211,18 +210,18 @@ void ServerFramework::AcceptPlayer() {
 	packet.id = client_id;
 	packet.size = sizeof(SC_PACKET_ENTER_PLAYER);
 	packet.type = SC_ENTER_PLAYER;
-	packet.hp = clients[client_id].hp;
-	packet.x = clients[client_id].x;
-	packet.y = clients[client_id].y;
-	packet.z = clients[client_id].z;
-	packet.m_TotalAmmo = clients[client_id].m_TotalAmmo;
-	packet.m_CurrentAmmo = clients[client_id].m_CurrentAmmo;
+	packet.hp = g_Clients[client_id].hp;
+	packet.x = g_Clients[client_id].x;
+	packet.y = g_Clients[client_id].y;
+	packet.z = g_Clients[client_id].z;
+	packet.m_TotalAmmo = g_Clients[client_id].m_TotalAmmo;
+	packet.m_CurrentAmmo = g_Clients[client_id].m_CurrentAmmo;
 
 	SendPacket(client_id, &packet);
 
 	// 나 제외 플레이어에게 입장정보 전송
 	for (int i = 0; i < MAX_PLAYER; ++i) {
-		if (clients[i].in_use && (client_id != i)) {
+		if (g_Clients[i].in_use && (client_id != i)) {
 			printf("%d에게 %d의 정보를 보낸다\n", i, client_id);
 			SendPacket(i, &packet);
 		}
@@ -247,14 +246,14 @@ void ServerFramework::AcceptPlayer() {
 	for (int i = 0; i < MAX_PLAYER; ++i) {
 		ZeroMemory(&packet, sizeof(packet));
 		if (i != client_id) {
-			if (clients[i].in_use == true) {
+			if (g_Clients[i].in_use == true) {
 				packet.id = i;
 				packet.size = sizeof(SC_PACKET_ENTER_PLAYER);
 				packet.type = SC_ENTER_PLAYER;
-				clients[i].y = height_map->GetHeight(clients[i].x + DX12_TO_OPGL, clients[i].z + DX12_TO_OPGL) + PLAYER_HEIGHT;
-				packet.x = clients[i].x;
-				packet.y = clients[i].y;
-				packet.z = clients[i].z;
+				g_Clients[i].y = height_map->GetHeight(g_Clients[i].x + DX12_TO_OPGL, g_Clients[i].z + DX12_TO_OPGL) + PLAYER_HEIGHT;
+				packet.x = g_Clients[i].x;
+				packet.y = g_Clients[i].y;
+				packet.z = g_Clients[i].z;
 				SendPacket(client_id, &packet);
 				printf("%d에게 %d의 정보를 보낸다\n", client_id, i);
 			}
@@ -268,86 +267,86 @@ void ServerFramework::ProcessPacket(int cl_id, char* packet) {
 
 	switch (packet_buffer->type) {
 	case CS_KEY_PRESS_UP:
-		clients[cl_id].is_move_foward = true;
+		g_Clients[cl_id].is_move_foward = true;
 		break;
 	case CS_KEY_PRESS_DOWN:
 		printf("%d 클라에서 아래 가는거 눌렸음\n", cl_id);
-		clients[cl_id].is_move_backward = true;
+		g_Clients[cl_id].is_move_backward = true;
 		break;
 	case CS_KEY_PRESS_LEFT:
-		clients[cl_id].is_move_left = true;
+		g_Clients[cl_id].is_move_left = true;
 		break;
 	case CS_KEY_PRESS_RIGHT:
-		clients[cl_id].is_move_right = true;
+		g_Clients[cl_id].is_move_right = true;
 		break;
 
 	case CS_KEY_PRESS_1:
 		printf("[ProcessPacket] :: AR 무기 선택\n");
-		clients[cl_id].equipted_weapon = 0;
+		g_Clients[cl_id].equipted_weapon = 0;
 		break;
 	case CS_KEY_PRESS_2:
 		printf("[ProcessPacket] :: 권총 무기 선택\n");
-		clients[cl_id].equipted_weapon = 1;
+		g_Clients[cl_id].equipted_weapon = 1;
 		break;
 
 	case CS_KEY_PRESS_SHIFT:
-		clients[cl_id].is_running = true;
+		g_Clients[cl_id].is_running = true;
 		break;
 	case CS_KEY_PRESS_SPACE:
 		break;
 
 	case CS_KEY_RELEASE_UP:
-		clients[cl_id].is_move_foward = false;
+		g_Clients[cl_id].is_move_foward = false;
 		break;
 	case CS_KEY_RELEASE_DOWN:
-		clients[cl_id].is_move_backward = false;
+		g_Clients[cl_id].is_move_backward = false;
 		break;
 	case CS_KEY_RELEASE_LEFT:
-		clients[cl_id].is_move_left = false;
+		g_Clients[cl_id].is_move_left = false;
 		break;
 	case CS_KEY_RELEASE_RIGHT:
-		clients[cl_id].is_move_right = false;
+		g_Clients[cl_id].is_move_right = false;
 		break;
 	case CS_KEY_RELEASE_1:
 		break;
 	case CS_KEY_RELEASE_2:
 		break;
 	case CS_KEY_RELEASE_SHIFT:
-		clients[cl_id].is_running = false;
+		g_Clients[cl_id].is_running = false;
 		break;
 	case CS_KEY_RELEASE_SPACE:
 		break;
 
 	case CS_RIGHT_BUTTON_DOWN:
-		clients[cl_id].is_right_click = true;
+		g_Clients[cl_id].is_right_click = true;
 		break;
 	case CS_RIGHT_BUTTON_UP:
-		clients[cl_id].is_right_click = false;
+		g_Clients[cl_id].is_right_click = false;
 		break;
 	case CS_RELOAD:
 		// AR 장착중인경우
-		if (clients[cl_id].equipted_weapon == 0) {
+		if (g_Clients[cl_id].equipted_weapon == 0) {
 			// 장전하려고 보니 결과가 0 이상
-			if (clients[cl_id].m_TotalAmmo - clients[cl_id].m_CurrentAmmo > 0) {
-				clients[cl_id].m_TotalAmmo -= clients[cl_id].m_CurrentAmmo;
-				clients[cl_id].m_CurrentAmmo = 30;
-				printf("장전 완료, 남은 탄창 %d \n", clients[cl_id].m_TotalAmmo);
+			if (g_Clients[cl_id].m_TotalAmmo - g_Clients[cl_id].m_CurrentAmmo > 0) {
+				g_Clients[cl_id].m_TotalAmmo -= g_Clients[cl_id].m_CurrentAmmo;
+				g_Clients[cl_id].m_CurrentAmmo = 30;
+				printf("장전 완료, 남은 탄창 %d \n", g_Clients[cl_id].m_TotalAmmo);
 				SC_PACKET_AMMO_O packets;
 				packets.size = sizeof(SC_PACKET_AMMO_O);
 				packets.type = SC_FULLY_AMMO;
-				packets.ammo = clients[cl_id].m_CurrentAmmo;
-				packets.m_cTotalAmmo = clients[cl_id].m_TotalAmmo;
+				packets.ammo = g_Clients[cl_id].m_CurrentAmmo;
+				packets.m_cTotalAmmo = g_Clients[cl_id].m_TotalAmmo;
 				SendPacket(cl_id, &packets);
 			}
 			// 장전하려고 보니 결과가 0 미만
 			else {
-				clients[cl_id].m_CurrentAmmo += clients[cl_id].m_TotalAmmo;
-				clients[cl_id].m_TotalAmmo = 0;
-				printf("장전 완료, 남은 탄창 %d \n", clients[cl_id].m_TotalAmmo);
+				g_Clients[cl_id].m_CurrentAmmo += g_Clients[cl_id].m_TotalAmmo;
+				g_Clients[cl_id].m_TotalAmmo = 0;
+				printf("장전 완료, 남은 탄창 %d \n", g_Clients[cl_id].m_TotalAmmo);
 				SC_PACKET_AMMO_O packets;
 				packets.size = sizeof(SC_PACKET_AMMO_O);
 				packets.type = SC_FULLY_AMMO;
-				packets.ammo = clients[cl_id].m_CurrentAmmo;
+				packets.ammo = g_Clients[cl_id].m_CurrentAmmo;
 				SendPacket(cl_id, &packets);
 
 			}
@@ -359,10 +358,10 @@ void ServerFramework::ProcessPacket(int cl_id, char* packet) {
 			// --------------------------------------------------------------
 
 			//// 장전하려고 보니 결과가 0 이상
-			//if (clients[cl_id].sub_ammo - bullet_counter[cl_id] > 0) {
-			//	clients[cl_id].sub_ammo -= bullet_counter[cl_id];
+			//if (g_Clients[cl_id].sub_ammo - bullet_counter[cl_id] > 0) {
+			//	g_Clients[cl_id].sub_ammo -= bullet_counter[cl_id];
 			//	bullet_counter[cl_id] = 0;
-			//	printf("장전 완료, 남은 탄창 %d \n", clients[cl_id].sub_ammo);
+			//	printf("장전 완료, 남은 탄창 %d \n", g_Clients[cl_id].sub_ammo);
 			//	SC_PACKET_AMMO_O packets;
 			//	packets.size = sizeof(SC_PACKET_AMMO_O);
 			//	packets.type = SC_FULLY_AMMO;
@@ -371,9 +370,9 @@ void ServerFramework::ProcessPacket(int cl_id, char* packet) {
 			//}
 			//// 장전하려고 보니 결과가 0 미만
 			//else {
-			//	bullet_counter[cl_id] -= clients[cl_id].sub_ammo;
-			//	clients[cl_id].sub_ammo = 0;
-			//	printf("장전 완료, 남은 탄창 %d \n", clients[cl_id].sub_ammo);
+			//	bullet_counter[cl_id] -= g_Clients[cl_id].sub_ammo;
+			//	g_Clients[cl_id].sub_ammo = 0;
+			//	printf("장전 완료, 남은 탄창 %d \n", g_Clients[cl_id].sub_ammo);
 			//	SC_PACKET_AMMO_O packets;
 			//	packets.size = sizeof(SC_PACKET_AMMO_O);
 			//	packets.type = SC_FULLY_AMMO;
@@ -386,8 +385,8 @@ void ServerFramework::ProcessPacket(int cl_id, char* packet) {
 		break;
 	case CS_LEFT_BUTTON_DOWN:
 		// 주무기
-		if (clients[cl_id].equipted_weapon == 0) {
-			if (clients[cl_id].m_CurrentAmmo == 0) {
+		if (g_Clients[cl_id].equipted_weapon == 0) {
+			if (g_Clients[cl_id].m_CurrentAmmo == 0) {
 				printf("총알 장전 필요\n");
 				SC_PACKET_AMMO_O packets;
 				packets.size = sizeof(SC_PACKET_AMMO_O);
@@ -395,7 +394,7 @@ void ServerFramework::ProcessPacket(int cl_id, char* packet) {
 				SendPacket(cl_id, &packets);
 			}
 			else {
-				clients[cl_id].is_left_click = true;
+				g_Clients[cl_id].is_left_click = true;
 				ol_ex[6].evt_type = EVT_BULLET_GENERATE;
 				ol_ex[6].shooter_player_id = cl_id;
 				//ol_ex[6].elapsed_time = elapsed_time.count();
@@ -403,7 +402,7 @@ void ServerFramework::ProcessPacket(int cl_id, char* packet) {
 			}
 		}
 		// 보조무기
-		else if (clients[cl_id].equipted_weapon == 1) {
+		else if (g_Clients[cl_id].equipted_weapon == 1) {
 			//if (bullet_counter[cl_id] == MAX_AMMO) {
 			//	printf("총알 장전 필요\n");
 			//	SC_PACKET_AMMO_O packets;
@@ -412,7 +411,7 @@ void ServerFramework::ProcessPacket(int cl_id, char* packet) {
 			//	SendPacket(cl_id, &packets);
 			//}
 			//else {
-			//	clients[cl_id].is_left_click = true;
+			//	g_Clients[cl_id].is_left_click = true;
 			//	ol_ex[6].evt_type = EVT_BULLET_GENERATE;
 			//	ol_ex[6].shooter_player_id = cl_id;
 			//	//ol_ex[6].elapsed_time = elapsed_time.count();
@@ -422,44 +421,44 @@ void ServerFramework::ProcessPacket(int cl_id, char* packet) {
 
 		break;
 	case CS_LEFT_BUTTON_UP:
-		clients[cl_id].is_left_click = false;
+		g_Clients[cl_id].is_left_click = false;
 		break;
 
 	case CS_MOUSE_MOVE: {
-		clients[cl_id].look_vec.x = packet_buffer->look_vec.x;
-		clients[cl_id].look_vec.y = packet_buffer->look_vec.y;
-		clients[cl_id].look_vec.z = packet_buffer->look_vec.z;
+		g_Clients[cl_id].look_vec.x = packet_buffer->look_vec.x;
+		g_Clients[cl_id].look_vec.y = packet_buffer->look_vec.y;
+		g_Clients[cl_id].look_vec.z = packet_buffer->look_vec.z;
 		SC_PACKET_LOOCVEC packets;
 		packets.id = cl_id;
 		packets.size = sizeof(SC_PACKET_LOOCVEC);
 		packets.type = SC_PLAYER_LOOKVEC;
-		packets.look_vec.x = clients[cl_id].look_vec.x;
-		packets.look_vec.y = clients[cl_id].look_vec.y;
-		packets.look_vec.z = clients[cl_id].look_vec.z;
+		packets.look_vec.x = g_Clients[cl_id].look_vec.x;
+		packets.look_vec.y = g_Clients[cl_id].look_vec.y;
+		packets.look_vec.z = g_Clients[cl_id].look_vec.z;
 		// 플레이어가 뒤는 상황
 
-		//if (clients[cl_id].is_left_click) {
+		//if (g_Clients[cl_id].is_left_click) {
 		//	packets.player_status = 3;
 		//}
-		//else if (clients[cl_id].is_running) {
+		//else if (g_Clients[cl_id].is_running) {
 		//	packets.player_status = 2;
 		//}
 		// 걷지도 뛰지도 않는 상황
 
-		if (clients[cl_id].is_left_click) {
+		if (g_Clients[cl_id].is_left_click) {
 			packets.player_status = 2;
 		}
-		else if (clients[cl_id].is_move_backward == false && clients[cl_id].is_move_foward == false &&
-			clients[cl_id].is_move_left == false && clients[cl_id].is_move_right == false) {
+		else if (g_Clients[cl_id].is_move_backward == false && g_Clients[cl_id].is_move_foward == false &&
+			g_Clients[cl_id].is_move_left == false && g_Clients[cl_id].is_move_right == false) {
 			packets.player_status = 0;
 		}
 		// 걷는 상황
-		else if ((clients[cl_id].is_move_foward || clients[cl_id].is_move_left || clients[cl_id].is_move_right || clients[cl_id].is_move_backward)) {
+		else if ((g_Clients[cl_id].is_move_foward || g_Clients[cl_id].is_move_left || g_Clients[cl_id].is_move_right || g_Clients[cl_id].is_move_backward)) {
 			packets.player_status = 1;
 		}
 		
 		for (int i = 0; i < MAX_PLAYER; ++i) {
-			if (clients[i].in_use == true) {
+			if (g_Clients[i].in_use == true) {
 				SendPacket(i, &packets);
 			}
 		}
@@ -468,29 +467,99 @@ void ServerFramework::ProcessPacket(int cl_id, char* packet) {
 	case CS_PLAYER_READY: {
 		int ready_count = 0;
 		printf("%d 플레이어 레디\n", cl_id);
-		player_ready[cl_id] = true;
-		for (int i = 0; i < MAX_PLAYER; ++i) {
-			if (player_ready[i]) {
-				ready_count++;
-			}
-		}
-		if (ready_count == MAX_PLAYER) {
+		g_Clients[cl_id].is_ready = true;
+		//if (g_Clients[0].is_ready && g_Clients[1].is_ready && g_Clients[2].is_ready && g_Clients[3].is_ready) {
+		//	GameStart();
+		//}
+		if (g_Clients[0].is_ready && g_Clients[1].is_ready) {
 			GameStart();
+		}
+		SC_PACKET_READY packets;
+		packets.size = sizeof(SC_PACKET_READY);
+		packets.type = SC_PLAYER_READY;
+		packets.m_cPlayerNumber = cl_id;
+
+		for (int i = 0; i < MAX_PLAYER; ++i) {
+			SendPacket(i, &packets);
+		}
+
+		break;
+	}
+	case CS_PLAYER_READY_CANCLE: {
+		printf("%d 플레이어 레디취소\n", cl_id);
+		g_Clients[cl_id].is_ready = false;
+		SC_PACKET_READY packets;
+		packets.size = sizeof(SC_PACKET_READY);
+		packets.type = SC_PLAYER_READY_CANCLE;
+		packets.m_cPlayerNumber = cl_id;
+
+		for (int i = 0; i < MAX_PLAYER; ++i) {
+			SendPacket(i, &packets);
+		}
+
+		break;
+	}
+	case CS_TEAM_RED:
+		g_Clients[cl_id].team = e_TeamRed;
+		printf("%d 플레이어는 Team : %d \n", cl_id, g_Clients[cl_id].team);
+		CS_PACKET_TEAM_SELECT packets;
+		packets.size = sizeof(CS_PACKET_TEAM_SELECT);
+		packets.type = SC_TEAM_RED;
+		packets.m_cID = cl_id;
+		for (int i = 0; i < MAX_PLAYER; ++i) {
+			SendPacket(i, &packets);
+		}
+		break;
+	case CS_TEAM_BLUE: {
+		g_Clients[cl_id].team = e_TeamBlue;
+		printf("%d 플레이어는 Team : %d \n", cl_id, g_Clients[cl_id].team);
+		CS_PACKET_TEAM_SELECT packets;
+		packets.size = sizeof(CS_PACKET_TEAM_SELECT);
+		packets.type = SC_TEAM_BLUE;
+		packets.m_cID = cl_id;
+		for (int i = 0; i < MAX_PLAYER; ++i) {
+			SendPacket(i, &packets);
+		}
+	}
+		break;
+	case CS_MODE_TEAM: {
+		printf("팀 패킷 도착\n");
+		SC_PACKET_GAMEMODE packets;
+		packets.size = sizeof(SC_PACKET_GAMEMODE);
+		packets.type = SC_MODE_TEAM;
+		for (int i = 0; i < MAX_PLAYER; ++i) {
+			if (g_Clients[i].in_use) {
+				SendPacket(i, &packets);
+			}
 		}
 		break;
 	}
-	case CS_PLAYER_READY_CANCLE:
-		printf("%d 플레이어 레디취소\n", cl_id);
-		player_ready[cl_id] = false;
+	case CS_MODE_MELEE: {
+		printf("Melee 패킷 도착\n");
+		SC_PACKET_GAMEMODE packets;
+		packets.size = sizeof(SC_PACKET_GAMEMODE);
+		packets.type = SC_MODE_MELEE;
+		for (int i = 0; i < MAX_PLAYER; ++i) {
+			if (g_Clients[i].in_use) {
+				SendPacket(i, &packets);
+			}
+		}
 		break;
-	case CS_PLAYER_TEAM_SELECT:
-		break;
+	}
 	}
 
 }
 
 void ServerFramework::GameStart() {
 	printf("게임 시작\n");
+	SC_PACKET_START packets;
+	packets.size = sizeof(SC_PACKET_START);
+	packets.type = SC_GAME_START;
+	for (int i = 0; i < MAX_PLAYER; ++i) {
+		SendPacket(i, &packets);
+	}
+
+
 
 	// 플레이어  위치 섞기
 	for (int i = 0; i < MAX_PLAYER; ++i) {
@@ -498,33 +567,33 @@ void ServerFramework::GameStart() {
 		switch (dice) {
 		case MAP_AREA_1:
 			printf("[%d] 플레이어 Area 1\n", i);
-			clients[i].x = rand() % 1500;
-			clients[i].z = rand() % 800 + 3000;
+			//g_Clients[i].x = rand() % 1500;
+			//g_Clients[i].z = rand() % 800 + 3000;
 			break;
 		case MAP_AREA_2:
 			printf("[%d] 플레이어 Area 2\n", i);
-			clients[i].x = rand() % 800 + 2000;
-			clients[i].z = rand() % 1000 + 2200;
+			//g_Clients[i].x = rand() % 800 + 2000;
+			//g_Clients[i].z = rand() % 1000 + 2200;
 			break;
 		case MAP_AREA_3:
 			printf("[%d] 플레이어 Area 3\n", i);
-			clients[i].x = rand() % 1500 + 1500;
-			clients[i].z = rand() % 1500 + 400;
+			//g_Clients[i].x = rand() % 1500 + 1500;
+			//g_Clients[i].z = rand() % 1500 + 400;
 			break;
 		case MAP_AREA_4:
 			printf("[%d] 플레이어 Area 4\n", i);
-			clients[i].x = rand() % 1500 + 100;
-			clients[i].z = rand() % 1500 + 400;
+			//g_Clients[i].x = rand() % 1500 + 100;
+			//g_Clients[i].z = rand() % 1500 + 400;
 			break;
 		}
-		clients[i].y = height_map->GetHeight(clients[i].x + DX12_TO_OPGL, clients[i].z + DX12_TO_OPGL) + PLAYER_HEIGHT;
-		clients[i].hp = 100.f;
+		//g_Clients[i].y = height_map->GetHeight(g_Clients[i].x + DX12_TO_OPGL, g_Clients[i].z + DX12_TO_OPGL) + PLAYER_HEIGHT;
+		g_Clients[i].hp = 100.f;
 	}
 
 	// OOBB 셋
 	for (int i = 0; i < MAX_PLAYER; ++i) {
-		//clients[i].SetOOBB(XMFLOAT3(0, 0, 0), XMFLOAT3(10.f, 10.f, 10.f), XMFLOAT4(0, 0, 0, 1));
-		clients[i].SetOOBB(XMFLOAT3(clients[i].x, clients[i].y, clients[i].z), XMFLOAT3(OBB_SCALE_PLAYER_X, OBB_SCALE_PLAYER_Y, OBB_SCALE_PLAYER_Z), XMFLOAT4(0, 0, 0, 1));
+		//g_Clients[i].SetOOBB(XMFLOAT3(0, 0, 0), XMFLOAT3(10.f, 10.f, 10.f), XMFLOAT4(0, 0, 0, 1));
+		g_Clients[i].SetOOBB(XMFLOAT3(g_Clients[i].x, g_Clients[i].y, g_Clients[i].z), XMFLOAT3(OBB_SCALE_PLAYER_X, OBB_SCALE_PLAYER_Y, OBB_SCALE_PLAYER_Z), XMFLOAT4(0, 0, 0, 1));
 	}
 
 	// Bullet의 OBB
@@ -540,18 +609,6 @@ void ServerFramework::GameStart() {
 		PostQueuedCompletionStatus(iocp_handle, 0, i, reinterpret_cast<WSAOVERLAPPED*>(&ol_ex[i]));
 	}
 
-	//SC_PACKET_START packets;
-	//packets.size = sizeof(SC_PACKET_START);
-	//packets.type = SC_ITEM_GEN;
-	//for (int i = 0; i < MAX_PLAYER; ++i) {
-	//	if (clients[i].in_use == true) {
-	//		SendPacket(i, &packets);
-	//	}
-	//}
-
-	//ol_ex[9].evt_type = EVT_SEND_TIME;
-	//ol_ex[9].world_time = world_time;
-	//PostQueuedCompletionStatus(iocp_handle, 0, 9, reinterpret_cast<WSAOVERLAPPED*>(&ol_ex[9]));
 
 	is_boat_item_gen = true;
 	is_game_start = true;
@@ -581,22 +638,22 @@ void ServerFramework::WorkerThread() {
 			int recved_size = data_size;
 			char* ptr = overlapped_buffer->io_buffer;
 			while (recved_size > 0) {
-				if (clients[client_id].packet_size == 0) {
-					clients[client_id].packet_size = ptr[0];
+				if (g_Clients[client_id].packet_size == 0) {
+					g_Clients[client_id].packet_size = ptr[0];
 				}
-				int remain = clients[client_id].packet_size - clients[client_id].prev_packet_size;
+				int remain = g_Clients[client_id].packet_size - g_Clients[client_id].prev_packet_size;
 				if (remain <= recved_size) {
-					memcpy(clients[client_id].prev_packet + clients[client_id].prev_packet_size,
+					memcpy(g_Clients[client_id].prev_packet + g_Clients[client_id].prev_packet_size,
 						ptr,
 						remain);
-					ProcessPacket(static_cast<int>(client_id), clients[client_id].prev_packet);
+					ProcessPacket(static_cast<int>(client_id), g_Clients[client_id].prev_packet);
 					recved_size -= remain;
 					ptr += remain;
-					clients[client_id].packet_size = 0;
-					clients[client_id].prev_packet_size = 0;
+					g_Clients[client_id].packet_size = 0;
+					g_Clients[client_id].prev_packet_size = 0;
 				}
 				else {
-					memcpy(clients[client_id].prev_packet + clients[client_id].prev_packet_size,
+					memcpy(g_Clients[client_id].prev_packet + g_Clients[client_id].prev_packet_size,
 						ptr,
 						recved_size);
 					recved_size -= recved_size;
@@ -606,7 +663,7 @@ void ServerFramework::WorkerThread() {
 
 			unsigned long rflag = 0;
 			ZeroMemory(&overlapped_buffer->wsa_over, sizeof(WSAOVERLAPPED));
-			int retval = WSARecv(clients[client_id].s, &overlapped_buffer->wsabuf, 1, NULL, &rflag, &overlapped_buffer->wsa_over, NULL);
+			int retval = WSARecv(g_Clients[client_id].s, &overlapped_buffer->wsabuf, 1, NULL, &rflag, &overlapped_buffer->wsa_over, NULL);
 			if (retval != 0) {
 				int err_no = WSAGetLastError();
 				if (err_no != WSA_IO_PENDING) {
@@ -658,7 +715,7 @@ void ServerFramework::WorkerThread() {
 				// 부품의 타입도 정해야한다. 
 				printf("[아이템 생성 : Type %d] : %f %f %f \n", items[dice]->GetItemType(), packets.x, packets.y, packets.z);
 				for (int i = 0; i < MAX_PLAYER; ++i) {
-					if (clients[i].in_use == true) {
+					if (g_Clients[i].in_use == true) {
 						SendPacket(i, &packets);
 					}
 				}
@@ -697,7 +754,7 @@ void ServerFramework::WorkerThread() {
 				// 부품의 타입도 정해야한다. 
 				printf("[아이템 생성 : Type %d] : %f %f %f \n", items[dice]->GetItemType(), packets.x, packets.y, packets.z);
 				for (int i = 0; i < MAX_PLAYER; ++i) {
-					if (clients[i].in_use == true) {
+					if (g_Clients[i].in_use == true) {
 						SendPacket(i, &packets);
 					}
 				}
@@ -711,81 +768,81 @@ void ServerFramework::WorkerThread() {
 		else if (overlapped_buffer->evt_type == EVT_PLAYER_POS_SEND) {
 			for (int i = 0; i < MAX_PLAYER; ++i) {
 				//client_lock.lock();
-				clients[i].client_lock.lock();
-				if (clients[i].is_move_foward) {
-					if (clients[i].is_running) {
-						clients[i].z += (-1) * METER_PER_PIXEL * clients[i].look_vec.z * (RUN_SPEED * overlapped_buffer->elapsed_time);
-						clients[i].x += (-1) * METER_PER_PIXEL * clients[i].look_vec.x * (RUN_SPEED * overlapped_buffer->elapsed_time);
+				g_Clients[i].client_lock.lock();
+				if (g_Clients[i].is_move_foward) {
+					if (g_Clients[i].is_running) {
+						g_Clients[i].z += (-1) * METER_PER_PIXEL * g_Clients[i].look_vec.z * (RUN_SPEED * overlapped_buffer->elapsed_time);
+						g_Clients[i].x += (-1) * METER_PER_PIXEL * g_Clients[i].look_vec.x * (RUN_SPEED * overlapped_buffer->elapsed_time);
 					}
 					else {
-						clients[i].z += (-1) * METER_PER_PIXEL * clients[i].look_vec.z * (WALK_SPEED * overlapped_buffer->elapsed_time);
-						clients[i].x += (-1) * METER_PER_PIXEL * clients[i].look_vec.x * (WALK_SPEED * overlapped_buffer->elapsed_time);
+						g_Clients[i].z += (-1) * METER_PER_PIXEL * g_Clients[i].look_vec.z * (WALK_SPEED * overlapped_buffer->elapsed_time);
+						g_Clients[i].x += (-1) * METER_PER_PIXEL * g_Clients[i].look_vec.x * (WALK_SPEED * overlapped_buffer->elapsed_time);
 					}
 				}
-				if (clients[i].is_move_backward) {
-					if (clients[i].is_running) {
-						clients[i].z += METER_PER_PIXEL * clients[i].look_vec.z * (RUN_SPEED * overlapped_buffer->elapsed_time);
-						clients[i].x += METER_PER_PIXEL * clients[i].look_vec.x * (RUN_SPEED * overlapped_buffer->elapsed_time);
+				if (g_Clients[i].is_move_backward) {
+					if (g_Clients[i].is_running) {
+						g_Clients[i].z += METER_PER_PIXEL * g_Clients[i].look_vec.z * (RUN_SPEED * overlapped_buffer->elapsed_time);
+						g_Clients[i].x += METER_PER_PIXEL * g_Clients[i].look_vec.x * (RUN_SPEED * overlapped_buffer->elapsed_time);
 					}
 					else {
 						//printf("%d플레이어 걷기 POS [%f, %f, %f] LV [%f, %f, %f]\n",
-						//	i, clients[i].x, clients[i].y, clients[i].z,
-						//	clients[i].look_vec.x, clients[i].look_vec.y, clients[i].look_vec.z);
-						clients[i].z += METER_PER_PIXEL * clients[i].look_vec.z * (WALK_SPEED * overlapped_buffer->elapsed_time);
-						clients[i].x += METER_PER_PIXEL * clients[i].look_vec.x * (WALK_SPEED * overlapped_buffer->elapsed_time);
+						//	i, g_Clients[i].x, g_Clients[i].y, g_Clients[i].z,
+						//	g_Clients[i].look_vec.x, g_Clients[i].look_vec.y, g_Clients[i].look_vec.z);
+						g_Clients[i].z += METER_PER_PIXEL * g_Clients[i].look_vec.z * (WALK_SPEED * overlapped_buffer->elapsed_time);
+						g_Clients[i].x += METER_PER_PIXEL * g_Clients[i].look_vec.x * (WALK_SPEED * overlapped_buffer->elapsed_time);
 					}
 
 				}
-				if (clients[i].is_move_left) {
-					if (clients[i].is_running) {
-						clients[i].z += METER_PER_PIXEL * clients[i].look_vec.x * (RUN_SPEED * overlapped_buffer->elapsed_time);
-						clients[i].x += (-1) * METER_PER_PIXEL * clients[i].look_vec.z * (RUN_SPEED * overlapped_buffer->elapsed_time);
+				if (g_Clients[i].is_move_left) {
+					if (g_Clients[i].is_running) {
+						g_Clients[i].z += METER_PER_PIXEL * g_Clients[i].look_vec.x * (RUN_SPEED * overlapped_buffer->elapsed_time);
+						g_Clients[i].x += (-1) * METER_PER_PIXEL * g_Clients[i].look_vec.z * (RUN_SPEED * overlapped_buffer->elapsed_time);
 					}
 					else {
-						clients[i].z += METER_PER_PIXEL * clients[i].look_vec.x * (WALK_SPEED * overlapped_buffer->elapsed_time);
-						clients[i].x += (-1) * METER_PER_PIXEL * clients[i].look_vec.z * (WALK_SPEED * overlapped_buffer->elapsed_time);
+						g_Clients[i].z += METER_PER_PIXEL * g_Clients[i].look_vec.x * (WALK_SPEED * overlapped_buffer->elapsed_time);
+						g_Clients[i].x += (-1) * METER_PER_PIXEL * g_Clients[i].look_vec.z * (WALK_SPEED * overlapped_buffer->elapsed_time);
 					}
 				}
-				if (clients[i].is_move_right) {
-					if (clients[i].is_running) {
-						clients[i].z += (-1) * METER_PER_PIXEL * clients[i].look_vec.x * (RUN_SPEED * overlapped_buffer->elapsed_time);
-						clients[i].x += METER_PER_PIXEL * clients[i].look_vec.z * (RUN_SPEED * overlapped_buffer->elapsed_time);
+				if (g_Clients[i].is_move_right) {
+					if (g_Clients[i].is_running) {
+						g_Clients[i].z += (-1) * METER_PER_PIXEL * g_Clients[i].look_vec.x * (RUN_SPEED * overlapped_buffer->elapsed_time);
+						g_Clients[i].x += METER_PER_PIXEL * g_Clients[i].look_vec.z * (RUN_SPEED * overlapped_buffer->elapsed_time);
 					}
 					else {
-						clients[i].z += (-1) * METER_PER_PIXEL * clients[i].look_vec.x * (WALK_SPEED * overlapped_buffer->elapsed_time);
-						clients[i].x += METER_PER_PIXEL * clients[i].look_vec.z * (WALK_SPEED * overlapped_buffer->elapsed_time);
+						g_Clients[i].z += (-1) * METER_PER_PIXEL * g_Clients[i].look_vec.x * (WALK_SPEED * overlapped_buffer->elapsed_time);
+						g_Clients[i].x += METER_PER_PIXEL * g_Clients[i].look_vec.z * (WALK_SPEED * overlapped_buffer->elapsed_time);
 					}
 				}
-				clients[i].client_lock.unlock();
-				clients[i].SetOOBB(XMFLOAT3(clients[i].x, clients[i].y, clients[i].z), XMFLOAT3(OBB_SCALE_PLAYER_X, OBB_SCALE_PLAYER_Y, OBB_SCALE_PLAYER_Z), XMFLOAT4(0, 0, 0, 1));
+				g_Clients[i].client_lock.unlock();
+				g_Clients[i].SetOOBB(XMFLOAT3(g_Clients[i].x, g_Clients[i].y, g_Clients[i].z), XMFLOAT3(OBB_SCALE_PLAYER_X, OBB_SCALE_PLAYER_Y, OBB_SCALE_PLAYER_Z), XMFLOAT4(0, 0, 0, 1));
 
 			}
 
-			if (clients[client_id].in_use) {
+			if (g_Clients[client_id].in_use) {
 				SC_PACKET_POS packets;
 				packets.id = client_id;
 				packets.size = sizeof(SC_PACKET_POS);
 				packets.type = SC_POS;
-				clients[client_id].y = height_map->GetHeight(clients[client_id].x + DX12_TO_OPGL, clients[client_id].z + DX12_TO_OPGL) + PLAYER_HEIGHT;
-				packets.x = clients[client_id].x;
-				packets.y = clients[client_id].y;
-				packets.z = clients[client_id].z;
+				g_Clients[client_id].y = height_map->GetHeight(g_Clients[client_id].x + DX12_TO_OPGL, g_Clients[client_id].z + DX12_TO_OPGL) + PLAYER_HEIGHT;
+				packets.x = g_Clients[client_id].x;
+				packets.y = g_Clients[client_id].y;
+				packets.z = g_Clients[client_id].z;
 
-				if (clients[client_id].is_left_click) {
+				if (g_Clients[client_id].is_left_click) {
 					packets.player_status = 2;
 				}
-				else if (clients[client_id].is_move_backward == false && clients[client_id].is_move_foward == false &&
-					clients[client_id].is_move_left == false && clients[client_id].is_move_right == false) {
+				else if (g_Clients[client_id].is_move_backward == false && g_Clients[client_id].is_move_foward == false &&
+					g_Clients[client_id].is_move_left == false && g_Clients[client_id].is_move_right == false) {
 					packets.player_status = 0;
 				}
 				// 걷는 상황
-				else if ((clients[client_id].is_move_foward || clients[client_id].is_move_left || clients[client_id].is_move_right || clients[client_id].is_move_backward)) {
+				else if ((g_Clients[client_id].is_move_foward || g_Clients[client_id].is_move_left || g_Clients[client_id].is_move_right || g_Clients[client_id].is_move_backward)) {
 					packets.player_status = 1;
 				}
-				//packets.player_status = clients[client_id].is_running;
-				//printf("높이 : %f\n", clients[client_id].y);
+				//packets.player_status = g_Clients[client_id].is_running;
+				//printf("높이 : %f\n", g_Clients[client_id].y);
 				for (int i = 0; i < MAX_PLAYER; ++i) {
-					if (clients[i].in_use == true) {
+					if (g_Clients[i].in_use == true) {
 						SendPacket(i, &packets);
 					}
 				}
@@ -795,16 +852,16 @@ void ServerFramework::WorkerThread() {
 		else if (overlapped_buffer->evt_type == EVT_COLLISION) {
 			for (int i = 0; i < MAX_PLAYER; ++i) {
 				for (int j = 0; j < MAX_BOAT_ITEM; ++j) {
-					if (clients[i].in_use&&items[j]->in_use) {
-						ContainmentType contain_type = clients[i].bounding_box.Contains(items[j]->bounding_box);
+					if (g_Clients[i].in_use&&items[j]->in_use) {
+						ContainmentType contain_type = g_Clients[i].bounding_box.Contains(items[j]->bounding_box);
 						//printf("items[%d]->bounding_box.center = [%lf, %lf, %lf] \n", j, items[j]->bounding_box.Center.x, items[j]->bounding_box.Center.y, items[j]->bounding_box.Center.z);
 						switch (contain_type) {
 						case INTERSECTS: {
 							printf("얏 박앗당\n");
-							clients[i].boat_parts[j] = true;
+							g_Clients[i].boat_parts[j] = true;
 							int num_item_have = 0;
 							for (int k = 0; k < 4; ++k) {
-								if (clients[i].boat_parts[k]) {
+								if (g_Clients[i].boat_parts[k]) {
 									num_item_have++;
 								}
 							}
@@ -815,7 +872,7 @@ void ServerFramework::WorkerThread() {
 						}
 						case CONTAINS:
 							printf("얏 포함됫당\n");
-							clients[i].boat_parts[j] = true;
+							g_Clients[i].boat_parts[j] = true;
 							break;
 						}
 					}
@@ -838,16 +895,16 @@ void ServerFramework::WorkerThread() {
 			//					SC_PACKET_COLLISION packets;
 			//					packets.size = sizeof(SC_PACKET_COLLISION);
 			//					packets.type = SC_COLLSION_BB;
-			//					packets.x = clients[j].bounding_box.Center.x;
+			//					packets.x = g_Clients[j].bounding_box.Center.x;
 			//					// 플레이어의 키 만큼 반영해서
-			//					packets.y = clients[j].bounding_box.Center.y;
-			//					packets.z = clients[j].bounding_box.Center.z;
+			//					packets.y = g_Clients[j].bounding_box.Center.y;
+			//					packets.z = g_Clients[j].bounding_box.Center.z;
 			//					packets.client_id = j;
 			//					//
 			//					// 플레이어 체력은 안깎아도 됭
-			//					//clients[j].hp -= 25.f;
+			//					//g_Clients[j].hp -= 25.f;
 			//					//
-			//					packets.hp = clients[j].hp;
+			//					packets.hp = g_Clients[j].hp;
 
 			//					SendPacket(j, &packets);
 			//					SendPacket(j + 1, &packets);
@@ -859,14 +916,14 @@ void ServerFramework::WorkerThread() {
 			//					SC_PACKET_COLLISION packets;
 			//					packets.size = sizeof(SC_PACKET_COLLISION);
 			//					packets.type = SC_COLLSION_BB;
-			//					packets.x = clients[j].bounding_box.Center.x;
-			//					packets.y = clients[j].bounding_box.Center.y;
-			//					packets.z = clients[j].bounding_box.Center.z;
+			//					packets.x = g_Clients[j].bounding_box.Center.x;
+			//					packets.y = g_Clients[j].bounding_box.Center.y;
+			//					packets.z = g_Clients[j].bounding_box.Center.z;
 			//					packets.client_id = j;
 
 			//					// 플레이어 체력은 안깎아도 됨
-			//					//clients[j].hp -= 25.f;
-			//					packets.hp = clients[j].hp;
+			//					//g_Clients[j].hp -= 25.f;
+			//					packets.hp = g_Clients[j].hp;
 
 			//					SendPacket(j, &packets);
 			//					SendPacket(j + 1, &packets);
@@ -883,8 +940,8 @@ void ServerFramework::WorkerThread() {
 			for (int j = 0; (j < MAX_PLAYER - 1); ++j) {
 				// 
 				//for (int k = 0; k < OBJECT_BUILDING; ++k) {
-				//	if (clients[j].in_use && clients[j + 1].in_use) {
-				//		ContainmentType contain_type = building[k]->bounding_box.Contains(clients[j].bounding_box);
+				//	if (g_Clients[j].in_use && g_Clients[j + 1].in_use) {
+				//		ContainmentType contain_type = building[k]->bounding_box.Contains(g_Clients[j].bounding_box);
 				//		switch (contain_type) {
 				//		case DISJOINT:
 				//			break;
@@ -892,16 +949,16 @@ void ServerFramework::WorkerThread() {
 				//			SC_PACKET_COLLISION packets;
 				//			packets.size = sizeof(SC_PACKET_COLLISION);
 				//			packets.type = SC_COLLSION_BDP;
-				//			packets.x = clients[j].bounding_box.Center.x;
+				//			packets.x = g_Clients[j].bounding_box.Center.x;
 				//			// 플레이어의 키 만큼 반영해서
-				//			packets.y = clients[j].bounding_box.Center.y;
-				//			packets.z = clients[j].bounding_box.Center.z;
+				//			packets.y = g_Clients[j].bounding_box.Center.y;
+				//			packets.z = g_Clients[j].bounding_box.Center.z;
 				//			packets.client_id = j;
 				//			//
 				//			// 플레이어 체력은 안깎아도 됭
-				//			//clients[j].hp -= 25.f;
+				//			//g_Clients[j].hp -= 25.f;
 				//			//
-				//			packets.hp = clients[j].hp;
+				//			packets.hp = g_Clients[j].hp;
 
 				//			SendPacket(j, &packets);
 				//			SendPacket(j + 1, &packets);
@@ -911,14 +968,14 @@ void ServerFramework::WorkerThread() {
 				//			SC_PACKET_COLLISION packets;
 				//			packets.size = sizeof(SC_PACKET_COLLISION);
 				//			packets.type = SC_COLLSION_BDP;
-				//			packets.x = clients[j].bounding_box.Center.x;
-				//			packets.y = clients[j].bounding_box.Center.y;
-				//			packets.z = clients[j].bounding_box.Center.z;
+				//			packets.x = g_Clients[j].bounding_box.Center.x;
+				//			packets.y = g_Clients[j].bounding_box.Center.y;
+				//			packets.z = g_Clients[j].bounding_box.Center.z;
 				//			packets.client_id = j;
 
 				//			// 플레이어 체력은 안깎아도 됨
-				//			//clients[j].hp -= 25.f;
-				//			packets.hp = clients[j].hp;
+				//			//g_Clients[j].hp -= 25.f;
+				//			packets.hp = g_Clients[j].hp;
 
 				//			SendPacket(j, &packets);
 				//			SendPacket(j + 1, &packets);
@@ -930,8 +987,8 @@ void ServerFramework::WorkerThread() {
 				//}
 				// 
 				for (int i = 0; i < MAX_AMMO; ++i) {
-					if (bullets[j + 1][i].in_use && clients[j].in_use) {
-						ContainmentType containType = clients[j].bounding_box.Contains(bullets[j + 1][i].bounding_box);
+					if (bullets[j + 1][i].in_use && g_Clients[j].in_use) {
+						ContainmentType containType = g_Clients[j].bounding_box.Contains(bullets[j + 1][i].bounding_box);
 						switch (containType)
 						{
 						case DISJOINT:
@@ -943,15 +1000,15 @@ void ServerFramework::WorkerThread() {
 							SC_PACKET_COLLISION packets;
 							packets.size = sizeof(SC_PACKET_COLLISION);
 							packets.type = SC_COLLSION_PB;
-							packets.x = clients[j].bounding_box.Center.x;
+							packets.x = g_Clients[j].bounding_box.Center.x;
 							// 플레이어의 키 만큼 반영해서
-							packets.y = clients[j].bounding_box.Center.y;
-							packets.z = clients[j].bounding_box.Center.z;
+							packets.y = g_Clients[j].bounding_box.Center.y;
+							packets.z = g_Clients[j].bounding_box.Center.z;
 							packets.client_id = j;
 							//
-							clients[j].hp -= 25.f;
+							g_Clients[j].hp -= 25.f;
 							//
-							packets.hp = clients[j].hp;
+							packets.hp = g_Clients[j].hp;
 
 							SendPacket(j, &packets);
 							SendPacket(j + 1, &packets);
@@ -963,14 +1020,14 @@ void ServerFramework::WorkerThread() {
 							SC_PACKET_COLLISION packets;
 							packets.size = sizeof(SC_PACKET_COLLISION);
 							packets.type = SC_COLLSION_PB;
-							packets.x = clients[j].bounding_box.Center.x;
-							packets.y = clients[j].bounding_box.Center.y;
-							packets.z = clients[j].bounding_box.Center.z;
+							packets.x = g_Clients[j].bounding_box.Center.x;
+							packets.y = g_Clients[j].bounding_box.Center.y;
+							packets.z = g_Clients[j].bounding_box.Center.z;
 							packets.client_id = j;
 							//
-							clients[j].hp -= 25.f;
+							g_Clients[j].hp -= 25.f;
 							//
-							packets.hp = clients[j].hp;
+							packets.hp = g_Clients[j].hp;
 
 							SendPacket(j, &packets);
 							SendPacket(j + 1, &packets);
@@ -980,8 +1037,8 @@ void ServerFramework::WorkerThread() {
 						}
 					}
 					if (bullets[j][i].in_use) {
-						//ContainmentType containType_rev = clients[j].bounding_box.Contains(bullets[j + 1][i].bounding_box);
-						ContainmentType containType_rev = bullets[j][i].bounding_box.Contains(clients[j + 1].bounding_box);
+						//ContainmentType containType_rev = g_Clients[j].bounding_box.Contains(bullets[j + 1][i].bounding_box);
+						ContainmentType containType_rev = bullets[j][i].bounding_box.Contains(g_Clients[j + 1].bounding_box);
 						switch (containType_rev)
 						{
 						case DISJOINT:
@@ -994,14 +1051,14 @@ void ServerFramework::WorkerThread() {
 							SC_PACKET_COLLISION packets;
 							packets.size = sizeof(SC_PACKET_COLLISION);
 							packets.type = SC_COLLSION_PB;
-							packets.x = clients[j + 1].bounding_box.Center.x;
-							packets.y = clients[j + 1].bounding_box.Center.y;
-							packets.z = clients[j + 1].bounding_box.Center.z;
+							packets.x = g_Clients[j + 1].bounding_box.Center.x;
+							packets.y = g_Clients[j + 1].bounding_box.Center.y;
+							packets.z = g_Clients[j + 1].bounding_box.Center.z;
 							packets.client_id = j + 1;
 							//
-							clients[j + 1].hp -= 25.f;
+							g_Clients[j + 1].hp -= 25.f;
 							//
-							packets.hp = clients[j + 1].hp;
+							packets.hp = g_Clients[j + 1].hp;
 
 
 							SendPacket(j, &packets);
@@ -1014,14 +1071,14 @@ void ServerFramework::WorkerThread() {
 							SC_PACKET_COLLISION packets;
 							packets.size = sizeof(SC_PACKET_COLLISION);
 							packets.type = SC_COLLSION_PB;
-							packets.x = clients[j + 1].bounding_box.Center.x;
-							packets.y = clients[j + 1].bounding_box.Center.y;
-							packets.z = clients[j + 1].bounding_box.Center.z;
+							packets.x = g_Clients[j + 1].bounding_box.Center.x;
+							packets.y = g_Clients[j + 1].bounding_box.Center.y;
+							packets.z = g_Clients[j + 1].bounding_box.Center.z;
 							packets.client_id = j + 1;
 							//
-							clients[j + 1].hp -= 25.f;
+							g_Clients[j + 1].hp -= 25.f;
 							//
-							packets.hp = clients[j + 1].hp;
+							packets.hp = g_Clients[j + 1].hp;
 
 							SendPacket(j, &packets);
 							SendPacket(j + 1, &packets);
@@ -1036,25 +1093,25 @@ void ServerFramework::WorkerThread() {
 		//}
 		else if (overlapped_buffer->evt_type == EVT_BULLET_GENERATE) {
 			int shooter_id = overlapped_buffer->shooter_player_id;
-			if (clients[shooter_id].equipted_weapon == 0) {
-				printf("%d가 발사한 총알 : %d\n", shooter_id, clients[shooter_id].m_CurrentAmmo);
-				if (clients[shooter_id].m_CurrentAmmo == 1) {
+			if (g_Clients[shooter_id].equipted_weapon == 0) {
+				printf("%d가 발사한 총알 : %d\n", shooter_id, g_Clients[shooter_id].m_CurrentAmmo);
+				if (g_Clients[shooter_id].m_CurrentAmmo == 1) {
 					for (int d = 0; d < MAX_AMMO; ++d) {
 						bullets[shooter_id][d].in_use = false;
 					}
 				}
-				bullets[shooter_id][clients[shooter_id].m_CurrentAmmo].x = clients[shooter_id].x;
-				bullets[shooter_id][clients[shooter_id].m_CurrentAmmo].y = clients[shooter_id].y;
-				bullets[shooter_id][clients[shooter_id].m_CurrentAmmo].z = clients[shooter_id].z;
-				bullets[shooter_id][clients[shooter_id].m_CurrentAmmo].look_vec = clients[shooter_id].look_vec;
-				bullets[shooter_id][clients[shooter_id].m_CurrentAmmo].in_use = true;
-				clients[shooter_id].m_CurrentAmmo--;
+				bullets[shooter_id][g_Clients[shooter_id].m_CurrentAmmo].x = g_Clients[shooter_id].x;
+				bullets[shooter_id][g_Clients[shooter_id].m_CurrentAmmo].y = g_Clients[shooter_id].y;
+				bullets[shooter_id][g_Clients[shooter_id].m_CurrentAmmo].z = g_Clients[shooter_id].z;
+				bullets[shooter_id][g_Clients[shooter_id].m_CurrentAmmo].look_vec = g_Clients[shooter_id].look_vec;
+				bullets[shooter_id][g_Clients[shooter_id].m_CurrentAmmo].in_use = true;
+				g_Clients[shooter_id].m_CurrentAmmo--;
 				// 남은 탄창 보내주기 
 				SC_PACKET_AMMO packets;
 				packets.size = sizeof(SC_PACKET_AMMO);
 				packets.type = SC_AMMO;
-				packets.m_CurrentAmmo = clients[shooter_id].m_CurrentAmmo;
-				packets.m_TotalAmmo = clients[shooter_id].m_TotalAmmo;
+				packets.m_CurrentAmmo = g_Clients[shooter_id].m_CurrentAmmo;
+				packets.m_TotalAmmo = g_Clients[shooter_id].m_TotalAmmo;
 				SendPacket(shooter_id, &packets);
 				bullet_times[shooter_id] = 0;
 			}
@@ -1070,7 +1127,7 @@ void ServerFramework::WorkerThread() {
 			printf("시간 보냄 %f \n", packets.world_time);
 
 			for (int i = 0; i < MAX_PLAYER; ++i) {
-				if (clients[i].in_use)
+				if (g_Clients[i].in_use)
 					SendPacket(i, &packets);
 			}
 		}
@@ -1135,7 +1192,7 @@ void ServerFramework::SendPacket(int cl_id, void* packet) {
 	overlapped->wsabuf.len = send_buffer[0];
 	ZeroMemory(&overlapped->wsa_over, sizeof(WSAOVERLAPPED));
 	unsigned long flag = 0;
-	int retval = WSASend(clients[cl_id].s, &overlapped->wsabuf, 1, NULL, 0,
+	int retval = WSASend(g_Clients[cl_id].s, &overlapped->wsabuf, 1, NULL, 0,
 		&overlapped->wsa_over, NULL);
 
 	if (retval != 0) {
@@ -1148,8 +1205,8 @@ void ServerFramework::SendPacket(int cl_id, void* packet) {
 
 void ServerFramework::DisconnectPlayer(int cl_id) {
 	// 플레이어 접속 끊기
-	closesocket(clients[cl_id].s);
-	clients[cl_id].in_use = false;
+	closesocket(g_Clients[cl_id].s);
+	g_Clients[cl_id].in_use = false;
 	printf("[DisconnectPlayer] ClientID : %d\n", cl_id);
 	SC_PACKET_REMOVE_PLAYER packet;
 	packet.client_id = cl_id;
@@ -1158,7 +1215,7 @@ void ServerFramework::DisconnectPlayer(int cl_id) {
 
 	// 플레이어가 나갔다는 정보를 모든 클라이언트에 뿌려준다.
 	for (int i = 0; i < MAX_PLAYER; ++i) {
-		if (clients[i].in_use == true) {
+		if (g_Clients[i].in_use == true) {
 			SendPacket(i, &packet);
 		}
 	}
@@ -1184,7 +1241,7 @@ void ServerFramework::Update(duration<float>& elapsed_time) {
 	sender_time += elapsed_time.count();
 	if (sender_time >= UPDATE_TIME) {   // 1/60 초마다 데이터 송신
 		for (int i = 0; i < MAX_PLAYER; ++i) {
-			if (clients[i].is_move_backward || clients[i].is_move_foward || clients[i].is_move_left || clients[i].is_move_right) {
+			if (g_Clients[i].is_move_backward || g_Clients[i].is_move_foward || g_Clients[i].is_move_left || g_Clients[i].is_move_right) {
 				ol_ex[i].evt_type = EVT_PLAYER_POS_SEND;
 				ol_ex[i].elapsed_time = elapsed_time.count() + sender_time;
 				PostQueuedCompletionStatus(iocp_handle, 0, i, reinterpret_cast<WSAOVERLAPPED*>(&ol_ex[i]));

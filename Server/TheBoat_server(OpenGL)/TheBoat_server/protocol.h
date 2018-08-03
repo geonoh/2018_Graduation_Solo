@@ -54,6 +54,12 @@
 #define SC_FULLY_AMMO			13
 #define SC_WORLD_TIME			14
 #define SC_AMMO					24
+#define SC_PLAYER_READY			25
+#define SC_PLAYER_READY_CANCLE	26
+#define SC_MODE_TEAM			27
+#define SC_MODE_MELEE			28
+#define SC_TEAM_RED				29
+#define SC_TEAM_BLUE			30
 ///////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////
@@ -96,8 +102,12 @@
 #define CS_RIGHT_BUTTON_UP			22
 #define CS_MOUSE_MOVE				23
 #define CS_RELOAD					24
-#define CS_PLAYER_TEAM_SELECT		25
 
+#define CS_TEAM_RED					26
+#define CS_TEAM_BLUE				27
+
+#define CS_MODE_TEAM				28
+#define CS_MODE_MELEE				29
 ///////////////////////////////////////////////////
 
 
@@ -151,7 +161,7 @@ enum GameMode {
 	e_Team, e_Melee
 };
 enum Team {
-	NON_TEAM = 0, TEAM_1, TEAM_2, TEAM_3, TEAM_4
+	e_NoTeam, e_TeamRed, e_TeamBlue
 };
 enum ARWeapons {
 	NON_AR = 0
@@ -249,6 +259,11 @@ struct SC_PACKET_TIME {
 	float world_time;
 };
 
+struct SC_PACKET_GAMEMODE {
+	BYTE size;
+	BYTE type;
+
+};
 
 // 클라->서버
 struct CS_PACKET_BIGGEST {
@@ -303,9 +318,10 @@ struct CS_PACKET_LEFTBUTTON {
 	BYTE type;
 };
 
-struct CS_PACKET_READY {
+struct SC_PACKET_READY {
 	BYTE size;
 	BYTE type;
+	char m_cPlayerNumber;
 };
 struct CS_PACKET_MODE_SELECT {
 	BYTE size;
@@ -316,7 +332,7 @@ struct CS_PACKET_MODE_SELECT {
 struct CS_PACKET_TEAM_SELECT {
 	BYTE size;
 	BYTE type;
-	Team team;
+	BYTE m_cID;
 };
 
 struct CS_PACKET_LOOK_VECTOR {

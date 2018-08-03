@@ -8,6 +8,9 @@ class Player
 	int m_TotalAmmo;
 public:
 	bool m_bReady;
+	// 0 : Red
+	// 1 : Blue
+	bool m_bTeam;
 	float GetHP();
 	void SetHP(float HP);
 
