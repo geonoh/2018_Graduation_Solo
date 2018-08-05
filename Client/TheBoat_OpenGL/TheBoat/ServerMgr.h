@@ -50,7 +50,7 @@ class ServerMgr
 
 	// ½Ã°£
 	//time_point<system_clock> world_time;
-	float world_time;
+	float m_fWorldTime;
 
 	int m_CurrentAmmo = 0;
 	int m_TotalAmmo = 0;
@@ -71,6 +71,7 @@ public:
 	// 1 = Blue
 	bool* GetTeam();
 	bool* GetPlayerReadyStatus();
+	float GetTime();
 	bool GetStart();
 	bool GetNeedReload();
 	void SetNeedReload(bool i_Need);

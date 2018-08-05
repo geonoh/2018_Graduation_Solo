@@ -238,8 +238,8 @@ void ServerMgr::ProcessPacket(char* ptr) {
 	}
 	case SC_WORLD_TIME: {
 		SC_PACKET_TIME* packets = reinterpret_cast<SC_PACKET_TIME*>(ptr);
-		world_time = packets->world_time;
-		printf("시간은 : %f\n", world_time);
+		m_fWorldTime = packets->world_time;
+		printf("시간은 : %f\n", m_fWorldTime);
 		break;
 	}
 	case SC_PLAYER_READY: {
@@ -276,6 +276,10 @@ void ServerMgr::ProcessPacket(char* ptr) {
 	}
 
 	}
+}
+
+float ServerMgr::GetTime() {
+	return m_fWorldTime;
 }
 
 bool ServerMgr::GetStart() {

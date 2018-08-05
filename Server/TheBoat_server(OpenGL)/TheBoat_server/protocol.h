@@ -37,6 +37,11 @@
 // DirectX12 -> OpenGL 상수
 #define DX12_TO_OPGL			256.f
 
+// Boat 아이템 생성 시간.
+#define ITEM_BOAT_GEN_TIME			120.f
+#define ITEM_AMMO_GEN_TIME			2.f
+
+
 ///////////////////////////////////////////////////
 // Server To Client
 #define SC_ENTER_PLAYER			1

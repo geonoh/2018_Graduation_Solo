@@ -471,7 +471,13 @@ void ServerFramework::ProcessPacket(int cl_id, char* packet) {
 		//if (g_Clients[0].is_ready && g_Clients[1].is_ready && g_Clients[2].is_ready && g_Clients[3].is_ready) {
 		//	GameStart();
 		//}
-		if (g_Clients[0].is_ready && g_Clients[1].is_ready) {
+		int iReadyCounter = 0;
+		for (int i = 0; i < MAX_PLAYER; ++i) {
+			if (g_Clients[i].in_use && g_Clients[i].is_ready) {
+				iReadyCounter++;
+			}
+		}
+		if (iReadyCounter == MAX_PLAYER) {
 			GameStart();
 		}
 		SC_PACKET_READY packets;

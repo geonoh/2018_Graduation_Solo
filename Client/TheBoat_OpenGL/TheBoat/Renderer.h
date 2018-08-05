@@ -60,6 +60,8 @@ public:
 	GLuint m_Tex_SelectBoxMini = 0;
 	GLuint m_Tex_SelectPlayer = 0;
 	GLuint m_Tex_PlayerReady = 0;
+	GLuint m_Tex_TimerBar = 0;
+	GLuint m_Tex_Progress = 0;
 
 
 	// Camera Setting 
