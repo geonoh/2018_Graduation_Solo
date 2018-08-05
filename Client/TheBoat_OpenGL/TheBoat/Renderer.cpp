@@ -504,9 +504,9 @@ void Renderer::InitializeTextureImage() {
 	m_Tex_Number9 = CreatePngTexture("./Textures/Numbers/Num9.png");
 	m_Tex_TimerBar = CreatePngTexture("./Textures/ProgressBar.png");
 	m_Tex_Progress = CreatePngTexture("./Textures/ProgressBarProcess.png");
-
 	m_Tex_Pin = CreatePngTexture("./Textures/Pin.png");
-
+	m_Tex_Scope = CreatePngTexture("./Textures/Scope.png");
+	m_Tex_CrossHair = CreatePngTexture("./Textures/Crosshair.png");
 	// Title
 	m_Tex_TitleEnter = CreatePngTexture("./Textures/Title/TitleEnter.png");
 	m_Tex_TitleCredit = CreatePngTexture("./Textures/Title/TitleCredit.png");
@@ -2096,6 +2096,62 @@ void Renderer::DrawIntro(bool Enter) {
 
 }
 
+void Renderer::DrawBullet(float x, float y, float z) {
+	GLuint shader = m_Shader_Proj;
+
+	glUseProgram(shader);
+
+	glEnable(GL_CULL_FACE);
+
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LEQUAL);
+
+	GLuint projView = glGetUniformLocation(shader, "u_ProjView");
+	GLuint model = glGetUniformLocation(shader, "u_Model");
+	GLuint rotation = glGetUniformLocation(shader, "u_Rotation");
+	GLuint light = glGetUniformLocation(shader, "u_LightPos");
+	GLuint camera = glGetUniformLocation(shader, "u_CameraPos");
+	GLuint texture = glGetUniformLocation(shader, "u_Texture");
+
+	glUniform1i(texture, 0);
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, m_Tex_Brick);
+
+	glm::mat4 m4ModelPosition = glm::translate(glm::mat4(1.f), glm::vec3(x, y, z)) *
+		glm::scale(glm::mat4(1.f), glm::vec3(1.f, 1.f, 1.f));
+	m4ModelPosition *= m_m4Model;
+	//m_m4ModelTranslation
+	glUniformMatrix4fv(projView, 1, GL_FALSE, &m_m4ProjView[0][0]);
+	glUniformMatrix4fv(model, 1, GL_FALSE, &m4ModelPosition[0][0]);
+	glUniformMatrix4fv(rotation, 1, GL_FALSE, &m_m4ModelRotation[0][0]);
+	glUniform3f(light, 2, 0, 0);
+	glUniform3f(camera, m_v3Camera_Position.x,
+		m_v3Camera_Position.y,
+		m_v3Camera_Position.z);
+
+	int attribPosition = glGetAttribLocation(shader, "a_Position");
+	int attribNormal = glGetAttribLocation(shader, "a_Normal");
+	int attribColor = glGetAttribLocation(shader, "a_Color");
+
+	glEnableVertexAttribArray(attribPosition);
+	glEnableVertexAttribArray(attribNormal);
+	glEnableVertexAttribArray(attribColor);
+
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBO_Cube);
+
+	glVertexAttribPointer(attribPosition, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 10, 0);
+	glVertexAttribPointer(attribNormal, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 10, (GLvoid*)(sizeof(float) * 3));
+	glVertexAttribPointer(attribColor, 4, GL_FLOAT, GL_FALSE, sizeof(float) * 10, (GLvoid*)(sizeof(float) * 6));
+
+	glDrawArrays(GL_TRIANGLES, 0, 36);
+
+	glDisableVertexAttribArray(attribPosition);
+	glDisableVertexAttribArray(attribNormal);
+	glDisableVertexAttribArray(attribColor);
+
+}
+
 void Renderer::DrawCube(float x, float y, float z)
 {
 	GLuint shader = m_Shader_Proj;
@@ -2178,7 +2234,12 @@ void Renderer::DrawCube(float x, float y, float z, float rot_x, float rot_y, flo
 	GLuint rotation = glGetUniformLocation(shader, "u_Rotation");
 	GLuint light = glGetUniformLocation(shader, "u_LightPos");
 	GLuint camera = glGetUniformLocation(shader, "u_CameraPos");
+	GLuint texture = glGetUniformLocation(shader, "u_Texture");
 
+	glUniform1i(texture, 0);
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, m_Tex_Brick);
 	//glm::mat4 m4ModelPosition = glm::translate(glm::mat4(1.f), glm::vec3(x, y, z)) * glm::eulerAngleXYZ(rot_x, rot_y, rot_z) *
 	//	glm::scale(glm::mat4(1.f), glm::vec3(10.f, 16.f, 10.f));
 	//glm::mat4 m4Rot = glm::eulerAngleXYZ(rot_x, rot_y, rot_z);
@@ -2292,6 +2353,13 @@ void Renderer::DrawUITexture(int i_iTextureId, float i_fStartPosX, float i_fStar
 	case 14:
 		glBindTexture(GL_TEXTURE_2D, m_Tex_Progress);
 		break;
+	case 15:
+		glBindTexture(GL_TEXTURE_2D, m_Tex_Scope);
+		break;
+	case 16:
+		glBindTexture(GL_TEXTURE_2D, m_Tex_CrossHair);
+		break;
+
 	}
 	GLuint pos = glGetAttribLocation(shader, "a_Position");
 	GLuint texPos = glGetAttribLocation(shader, "a_TexPos");

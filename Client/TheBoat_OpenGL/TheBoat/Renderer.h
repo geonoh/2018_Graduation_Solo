@@ -62,7 +62,8 @@ public:
 	GLuint m_Tex_PlayerReady = 0;
 	GLuint m_Tex_TimerBar = 0;
 	GLuint m_Tex_Progress = 0;
-
+	GLuint m_Tex_Scope = 0;
+	GLuint m_Tex_CrossHair = 0;
 
 	// Camera Setting 
 	void SetCameraLook(float x, float y, float z);
@@ -129,6 +130,7 @@ public:
 
 
 	void DrawCube(float x, float y, float z);
+	void DrawBullet(float x, float y, float z);
 	void DrawCube(float x, float y, float z, float rot_x, float rot_y, float rot_z);
 
 	float m_targetPointX, m_targetPointY;

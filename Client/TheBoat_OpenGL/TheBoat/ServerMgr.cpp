@@ -105,9 +105,16 @@ void ServerMgr::ReadPacket() {
 
 	}
 }
-Bullet ServerMgr::GetBullet() {
-	return bullets[recvd_bullet_id];
+//Bullet ServerMgr::GetBullet() {
+//	return bullets[recvd_bullet_id];
+//}
+
+Bullet ServerMgr::GetBullet(int i_Player, int i_Bullet) {
+	return m_Bullets[i_Player][i_Bullet];
 }
+
+
+
 int ServerMgr::GetClientID() {
 	return clients_id;
 }
@@ -174,13 +181,11 @@ void ServerMgr::ProcessPacket(char* ptr) {
 	case SC_BULLET_POS: {
 		SC_PACKET_BULLET* packets = reinterpret_cast<SC_PACKET_BULLET*>(ptr);
 		clients_id = packets->id;
-		recvd_bullet_id = packets->bullet_id;
-		bullets[packets->bullet_id].id = packets->bullet_id;
-		bullets[packets->bullet_id].x = packets->x;
-		bullets[packets->bullet_id].y = packets->y;
-		bullets[packets->bullet_id].z = packets->z;
-
-		printf("[Bullet] %d 플레이어 총알 ID[%d] \n", clients_id, packets->bullet_id);
+		m_Bullets[clients_id][packets->bullet_id].id = packets->bullet_id;
+		m_Bullets[clients_id][packets->bullet_id].x = packets->x;
+		m_Bullets[clients_id][packets->bullet_id].y = packets->y;
+		m_Bullets[clients_id][packets->bullet_id].z = packets->z;
+		m_Bullets[clients_id][packets->bullet_id].in_use = packets->m_bInUse;
 		break;
 	}
 	case SC_COLLSION_PB: {

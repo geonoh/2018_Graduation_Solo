@@ -16,8 +16,6 @@ class ServerMgr
 	WSABUF recv_wsabuf;
 	int clients_id = 0;
 
-	Bullet bullets[MAX_AMMO] = { 0 };
-	int recvd_bullet_id = 0;
 
 	bool first_set_id = true;
 
@@ -48,6 +46,7 @@ class ServerMgr
 
 	bool s_is_collide = false;
 
+	Bullet m_Bullets[MAX_PLAYER][MAX_AMMO] = { 0 };
 	// ½Ã°£
 	//time_point<system_clock> world_time;
 	float m_fWorldTime;
@@ -77,6 +76,7 @@ public:
 	void SetNeedReload(bool i_Need);
 	void IPInput();
 	void IPInput(string);
+	Bullet GetBullet(int i_Player, int i_Bullet);
 
 	bool Initialize(HWND& hwnd);
 	void ClientError();
@@ -90,7 +90,7 @@ public:
 	void DecreaseAmmo();
 	int GetClientID();
 	int ReturnCameraID();
-	Bullet GetBullet();
+	//Bullet GetBullet();
 	SPlayer ReturnPlayerPosStatus(int client_id);
 	glm::vec3 ReturnLookVector(int client_id);
 	glm::vec3 ReturnCollsionPosition(bool* is_collide);

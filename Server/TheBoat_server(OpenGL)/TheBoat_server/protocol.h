@@ -1,7 +1,7 @@
 #pragma once
 
 #define SERVER_IP			127.0.0.1
-#define SERVER_PORT			4000
+#define SERVER_PORT			9000
 #define MAX_BUFFER_SIZE		4000
 #define MAX_PACKET_SIZE		256
 #define MAX_PLAYER		2
@@ -236,6 +236,7 @@ struct SC_PACKET_BULLET {
 	//glm::vec3 pos;
 	glm::vec3 pos;
 	float x, y, z;
+	bool m_bInUse;
 };
 
 struct SC_PACKET_START {

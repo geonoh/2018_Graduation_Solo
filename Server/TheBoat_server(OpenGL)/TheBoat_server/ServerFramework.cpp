@@ -1152,31 +1152,24 @@ void ServerFramework::WorkerThread() {
 							XMFLOAT3(OBB_SCALE_BULLET_X, OBB_SCALE_BULLET_Y, OBB_SCALE_BULLET_Z),
 							XMFLOAT4(0, 0, 0, 1));
 					}
-					if (bullets[i][j].x >= -256.f || bullets[i][j].x <= 0) {
+					if (bullets[i][j].x >= 256.f || bullets[i][j].x <= -256) {
 						bullets[i][j].in_use = false;
-						continue;
 					}
-					//if (bullets[i][j].y >= 4000.f || bullets[i][j].y <= 0) {
-					//	bullets[i][j].in_use = false;
-					//	continue;
-					//}
-					if (bullets[i][j].z >= 4000.f || bullets[i][j].z <= 0) {
+					if (bullets[i][j].z >= 256.f || bullets[i][j].z <= -256.f) {
 						bullets[i][j].in_use = false;
-						continue;
 					}
 
-					if (bullets[i][j].in_use) {
-						SC_PACKET_BULLET packets;
-						packets.id = i;
-						packets.size = sizeof(SC_PACKET_BULLET);
-						packets.type = SC_BULLET_POS;
-						packets.bullet_id = j;
-						packets.x = bullets[i][j].x;
-						packets.y = bullets[i][j].y;
-						packets.z = bullets[i][j].z;
-						// 해당 플레이어에게만 보내야함
-						SendPacket(i, &packets);
-					}
+					SC_PACKET_BULLET packets;
+					packets.id = i;
+					packets.size = sizeof(SC_PACKET_BULLET);
+					packets.type = SC_BULLET_POS;
+					packets.bullet_id = j;
+					packets.m_bInUse = bullets[i][j].in_use;
+					packets.x = bullets[i][j].x;
+					packets.y = bullets[i][j].y;
+					packets.z = bullets[i][j].z;
+					// 해당 플레이어에게만 보내야함
+					SendPacket(i, &packets);
 				}
 			}
 
