@@ -227,20 +227,6 @@ void ServerFramework::AcceptPlayer() {
 		}
 	}
 
-	// 건물 정보 보내주기
-	for (int j = 0; j < OBJECT_BUILDING; ++j) {
-		SC_PACKET_ENTER_PLAYER packet_b;
-		packet_b.id = j;
-		packet_b.size = sizeof(SC_PACKET_ENTER_PLAYER);
-		packet_b.type = SC_BUILDING_GEN;
-		packet_b.x = building[j]->GetPosition().x;
-		packet_b.y = building[j]->GetPosition().y;
-		packet_b.z = building[j]->GetPosition().z;
-		packet_b.size_x = building[j]->GetExtents().x;
-		packet_b.size_y = building[j]->GetExtents().y;
-		packet_b.size_z = building[j]->GetExtents().z;
-		SendPacket(client_id, &packet_b);
-	}
 
 	// 다른 클라이언트의 위치 보내주기
 	for (int i = 0; i < MAX_PLAYER; ++i) {
@@ -1142,34 +1128,36 @@ void ServerFramework::WorkerThread() {
 			// j 가 플레이어가 발사한 총알
 			for (int i = 0; i < MAX_PLAYER; ++i) {
 				for (int j = 0; j < MAX_AMMO; ++j) {
-					if (bullets[i][j].in_use) {
-						bullets[i][j].x += METER_PER_PIXEL * bullets[i][j].look_vec.x * (AR_SPEED * overlapped_buffer->elapsed_time);
-						bullets[i][j].y += METER_PER_PIXEL * bullets[i][j].look_vec.y * (AR_SPEED * overlapped_buffer->elapsed_time);
-						bullets[i][j].z += METER_PER_PIXEL * bullets[i][j].look_vec.z * (AR_SPEED * overlapped_buffer->elapsed_time);
+					if (g_Clients[i].in_use) {
+						if (bullets[i][j].in_use) {
+							bullets[i][j].x += METER_PER_PIXEL * bullets[i][j].look_vec.x * (AR_SPEED * overlapped_buffer->elapsed_time);
+							bullets[i][j].y += METER_PER_PIXEL * bullets[i][j].look_vec.y * (AR_SPEED * overlapped_buffer->elapsed_time);
+							bullets[i][j].z += METER_PER_PIXEL * bullets[i][j].look_vec.z * (AR_SPEED * overlapped_buffer->elapsed_time);
 
-						bullets[i][j].SetOOBB(
-							XMFLOAT3(bullets[i][j].x, bullets[i][j].y, bullets[i][j].z),
-							XMFLOAT3(OBB_SCALE_BULLET_X, OBB_SCALE_BULLET_Y, OBB_SCALE_BULLET_Z),
-							XMFLOAT4(0, 0, 0, 1));
-					}
-					if (bullets[i][j].x >= 256.f || bullets[i][j].x <= -256) {
-						bullets[i][j].in_use = false;
-					}
-					if (bullets[i][j].z >= 256.f || bullets[i][j].z <= -256.f) {
-						bullets[i][j].in_use = false;
-					}
+							bullets[i][j].SetOOBB(
+								XMFLOAT3(bullets[i][j].x, bullets[i][j].y, bullets[i][j].z),
+								XMFLOAT3(OBB_SCALE_BULLET_X, OBB_SCALE_BULLET_Y, OBB_SCALE_BULLET_Z),
+								XMFLOAT4(0, 0, 0, 1));
+						}
+						if (bullets[i][j].x >= 256.f || bullets[i][j].x <= -256) {
+							bullets[i][j].in_use = false;
+						}
+						if (bullets[i][j].z >= 256.f || bullets[i][j].z <= -256.f) {
+							bullets[i][j].in_use = false;
+						}
 
-					SC_PACKET_BULLET packets;
-					packets.id = i;
-					packets.size = sizeof(SC_PACKET_BULLET);
-					packets.type = SC_BULLET_POS;
-					packets.bullet_id = j;
-					packets.m_bInUse = bullets[i][j].in_use;
-					packets.x = bullets[i][j].x;
-					packets.y = bullets[i][j].y;
-					packets.z = bullets[i][j].z;
-					// 해당 플레이어에게만 보내야함
-					SendPacket(i, &packets);
+						SC_PACKET_BULLET packets;
+						packets.id = i;
+						packets.size = sizeof(SC_PACKET_BULLET);
+						packets.type = SC_BULLET_POS;
+						packets.bullet_id = j;
+						packets.m_bInUse = bullets[i][j].in_use;
+						packets.x = bullets[i][j].x;
+						packets.y = bullets[i][j].y;
+						packets.z = bullets[i][j].z;
+						// 해당 플레이어에게만 보내야함
+						SendPacket(i, &packets);
+					}
 				}
 			}
 
