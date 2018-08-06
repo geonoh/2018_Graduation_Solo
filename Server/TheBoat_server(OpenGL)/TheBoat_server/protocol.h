@@ -181,7 +181,6 @@ struct SC_PACKET_ENTER_PLAYER {
 	BYTE type;
 	WORD id;
 	float x, y, z;
-	// 건물 크기 보낼 때만 사용
 	float hp;
 	float size_x, size_y, size_z;
 	int m_CurrentAmmo;
@@ -192,17 +191,13 @@ struct SC_PACKET_LOOCVEC {
 	BYTE size;
 	BYTE type;
 	WORD id;
-	//glm::vec3 look_vec;
-	//DirectX::XMFLOAT3 look_vec;
 	glm::vec3 look_vec;
-	int player_status;
 };
 
 struct SC_PACKET_POS {
 	BYTE size;
 	BYTE type;
 	WORD id;
-	int player_status;
 	float x, y, z;
 };
 

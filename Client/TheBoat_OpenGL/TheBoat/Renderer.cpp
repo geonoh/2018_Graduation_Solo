@@ -490,7 +490,7 @@ void Renderer::InitializeTextureImage() {
 	m_Shader_Test1 = CompileShaders("./Shaders/Test1.vs", "./Shaders/Test1.fs");
 
 
-	m_Tex_Minimap = CreatePngTexture("./Textures/HeightMap/world.png");
+	m_Tex_Minimap = CreatePngTexture("./Textures/Minimap.png");
 	m_Tex_Slash = CreatePngTexture("./Textures/Numbers/Slash.png");
 	m_Tex_Number0 = CreatePngTexture("./Textures/Numbers/Num0.png");
 	m_Tex_Number1 = CreatePngTexture("./Textures/Numbers/Num1.png");

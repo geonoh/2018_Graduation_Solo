@@ -11,12 +11,12 @@ struct Event {
 	int target;
 };
 
-class Comp {
-public:
-	bool operator() (const Event& left, const Event& right) {
-		return (left.time > right.time);
-	}
-};
+//class Comp {
+//public:
+//	bool operator() (const Event& left, const Event& right) {
+//		return (left.time > right.time);
+//	}
+//};
 
 class ServerFramework
 {
@@ -31,25 +31,18 @@ class ServerFramework
 	time_point<system_clock> prev_time = system_clock::now();
 	float sender_time = 0;
 
-	// 보트 아이템 생성 시간
-	float item_boat_gen_timer = 0.f;
-	// 탄창 아이템 생성 시간
-	float item_ammo_gen_timer = 0.f;
+	float m_fBoatGenTime = 0.f;
+	float m_fAmmoGenTime = 0.f;
+	float m_fTimeSend = 0.f;
+	bool m_bIsBoatGen = false;
+	bool m_bIsAmmoGen = false;
+	bool m_bGameStart = false;
 
-	// "시간" 보내는 시간
-	float time_sender_time = 0.f;
+	bool m_bShootStart = false;
 
-	// 보트 아이템 생성
-	bool is_boat_item_gen = false;
-	// 탄창 아이템 생성
-	bool is_ammo_item_gen = false;
-
-	// 게임이 시작되면 카운트 다운을 시작한다. 
-	bool is_game_start = false;
-	// 게임이 시작된 최초 시각 저장
-	float time_game_start = 0.f;
-
-	mutex client_lock;
+	float m_fStartGameTime = 0.f;
+	mutex m_mutexBulletLock[MAX_PLAYER];
+	mutex m_mutexServerLock;
 
 	// Timer전용 OverlappedExtensionSetd
 	// 4는 플레이어 위치 업데이트 전용

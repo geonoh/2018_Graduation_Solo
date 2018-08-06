@@ -63,6 +63,9 @@ class ServerMgr
 	bool m_bTeam[4]{ false };
 	bool m_bGameStart = false;
 public:
+	int GetCurrentAmmo();
+	int GetTotalAmmo();
+
 	// 0 = Team
 	// 1 = Melee
 	bool GetGameMode();
@@ -85,8 +88,6 @@ public:
 	void SendPacket(int type, glm::vec3 xmvector);
 	void ProcessPacket(char* ptr);
 	void ErrorDisplay(const char* msg, int err_no);
-	int GetCurrentAmmo();
-	int GetTotalAmmo();
 	void DecreaseAmmo();
 	int GetClientID();
 	int ReturnCameraID();

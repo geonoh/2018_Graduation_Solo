@@ -38,7 +38,7 @@ void ServerFramework::InitServer() {
 	printf("---------------------------------\n");
 	printf("- 개발모드\n");
 	printf("---------------------------------\n");
-	is_game_start = true;
+	m_bGameStart = true;
 #endif
 	wcout.imbue(locale("korean"));
 
@@ -75,7 +75,7 @@ void ServerFramework::InitServer() {
 	LPCTSTR file_name = _T("height_map.raw");
 	height_map = new CHeightMapImage(file_name, 513, 513, xmf3Scale);
 
-	client_lock.lock();
+	m_mutexServerLock.lock();
 	for (int i = 0; i < MAX_PLAYER; ++i) {
 		g_Clients[i].x = 0.f;
 		g_Clients[i].z = 0.f;
@@ -87,62 +87,62 @@ void ServerFramework::InitServer() {
 			g_Clients[i].boat_parts[j] = false;
 		}
 	}
-	client_lock.unlock();
+	m_mutexServerLock.unlock();
 
-	for (int i = 0; i < MAX_PLAYER; ++i) {
-		g_Clients[i].SetOOBB(XMFLOAT3(g_Clients[i].x, g_Clients[i].y, g_Clients[i].z), XMFLOAT3(OBB_SCALE_PLAYER_X, OBB_SCALE_PLAYER_Y, OBB_SCALE_PLAYER_Z), XMFLOAT4(0, 0, 0, 1));
-		g_Clients[i].bounding_box.Center;
-	}
+	//for (int i = 0; i < MAX_PLAYER; ++i) {
+	//	g_Clients[i].SetOOBB(XMFLOAT3(g_Clients[i].x, g_Clients[i].y, g_Clients[i].z), XMFLOAT3(OBB_SCALE_PLAYER_X, OBB_SCALE_PLAYER_Y, OBB_SCALE_PLAYER_Z), XMFLOAT4(0, 0, 0, 1));
+	//	g_Clients[i].bounding_box.Center;
+	//}
 
-	for (int j = 0; j < MAX_PLAYER; ++j) {
-		for (int i = 0; i < MAX_AMMO; ++i) {
-			bullets[j][i].SetOOBB(XMFLOAT3(bullets[j][i].x, bullets[j][i].y, bullets[j][i].z),
-				XMFLOAT3(OBB_SCALE_BULLET_X, OBB_SCALE_BULLET_Y, OBB_SCALE_BULLET_Z),
-				XMFLOAT4(0, 0, 0, 1)); 
-		}
-	}
+	//for (int j = 0; j < MAX_PLAYER; ++j) {
+	//	for (int i = 0; i < MAX_AMMO; ++i) {
+	//		bullets[j][i].SetOOBB(XMFLOAT3(bullets[j][i].x, bullets[j][i].y, bullets[j][i].z),
+	//			XMFLOAT3(OBB_SCALE_BULLET_X, OBB_SCALE_BULLET_Y, OBB_SCALE_BULLET_Z),
+	//			XMFLOAT4(0, 0, 0, 1)); 
+	//	}
+	//}
 
-	XMFLOAT3 input_buffer[10];
-	XMFLOAT3 input_extents[10];
+	//XMFLOAT3 input_buffer[10];
+	//XMFLOAT3 input_extents[10];
 
-	input_buffer[0] = XMFLOAT3{ 594.f,height_map->GetHeight(594.f,556.f) ,556.f };
-	input_buffer[1] = XMFLOAT3{ 922.f,height_map->GetHeight(922.f,519.f) ,519.f };
-	input_buffer[2] = XMFLOAT3{ 1152.f,height_map->GetHeight(1152.f,911.f) ,911.f };
-	input_buffer[3] = XMFLOAT3{ 2168.f,height_map->GetHeight(2168.f,741.f) ,741.f };
-	input_buffer[4] = XMFLOAT3{ 594.f,height_map->GetHeight(594.f,556.f) ,556.f };
-	input_buffer[5] = XMFLOAT3{ 739.f,height_map->GetHeight(739.f,3526.f) ,3526.f };
+	//input_buffer[0] = XMFLOAT3{ 594.f,height_map->GetHeight(594.f,556.f) ,556.f };
+	//input_buffer[1] = XMFLOAT3{ 922.f,height_map->GetHeight(922.f,519.f) ,519.f };
+	//input_buffer[2] = XMFLOAT3{ 1152.f,height_map->GetHeight(1152.f,911.f) ,911.f };
+	//input_buffer[3] = XMFLOAT3{ 2168.f,height_map->GetHeight(2168.f,741.f) ,741.f };
+	//input_buffer[4] = XMFLOAT3{ 594.f,height_map->GetHeight(594.f,556.f) ,556.f };
+	//input_buffer[5] = XMFLOAT3{ 739.f,height_map->GetHeight(739.f,3526.f) ,3526.f };
 
-	input_buffer[6] = XMFLOAT3{ 2516.f,height_map->GetHeight(2516.f,1589.f) ,1589.f };
-	input_buffer[7] = XMFLOAT3{ 3071.f,height_map->GetHeight(3071.f,1906.f) ,1906.f };
-	input_buffer[8] = XMFLOAT3{ 3251.f,height_map->GetHeight(3251.f,2721.f) ,2721.f };
-	input_buffer[9] = XMFLOAT3{ 2106.f,height_map->GetHeight(2106.f,3322.f) ,3322.f };
+	//input_buffer[6] = XMFLOAT3{ 2516.f,height_map->GetHeight(2516.f,1589.f) ,1589.f };
+	//input_buffer[7] = XMFLOAT3{ 3071.f,height_map->GetHeight(3071.f,1906.f) ,1906.f };
+	//input_buffer[8] = XMFLOAT3{ 3251.f,height_map->GetHeight(3251.f,2721.f) ,2721.f };
+	//input_buffer[9] = XMFLOAT3{ 2106.f,height_map->GetHeight(2106.f,3322.f) ,3322.f };
 
-	input_extents[0] = XMFLOAT3{ 100,100,100 };
-	input_extents[1] = XMFLOAT3{ 100,100,100 };
-	input_extents[2] = XMFLOAT3{ 100,100,100 };
-	input_extents[3] = XMFLOAT3{ 100,100,100 };
-	input_extents[4] = XMFLOAT3{ 100,100,100 };
-	input_extents[5] = XMFLOAT3{ 100,100,100 };
-	input_extents[6] = XMFLOAT3{ 100,100,100 };
-	input_extents[7] = XMFLOAT3{ 100,100,100 };
-	input_extents[8] = XMFLOAT3{ 100,100,100 };
-	input_extents[9] = XMFLOAT3{ 100,100,100 };
+	//input_extents[0] = XMFLOAT3{ 100,100,100 };
+	//input_extents[1] = XMFLOAT3{ 100,100,100 };
+	//input_extents[2] = XMFLOAT3{ 100,100,100 };
+	//input_extents[3] = XMFLOAT3{ 100,100,100 };
+	//input_extents[4] = XMFLOAT3{ 100,100,100 };
+	//input_extents[5] = XMFLOAT3{ 100,100,100 };
+	//input_extents[6] = XMFLOAT3{ 100,100,100 };
+	//input_extents[7] = XMFLOAT3{ 100,100,100 };
+	//input_extents[8] = XMFLOAT3{ 100,100,100 };
+	//input_extents[9] = XMFLOAT3{ 100,100,100 };
 
 
-	for (int i = 0; i < OBJECT_BUILDING; ++i) {
-		input_extents[0] = XMFLOAT3{ 100,100,100 };
-		building[i] = new Building;
-		building[i]->SetOBB(input_buffer[i], input_extents[i]);
-	}
+	//for (int i = 0; i < OBJECT_BUILDING; ++i) {
+	//	input_extents[0] = XMFLOAT3{ 100,100,100 };
+	//	building[i] = new Building;
+	//	building[i]->SetOBB(input_buffer[i], input_extents[i]);
+	//}
 
-	// 이건 됨
-	XMFLOAT3 items_extents = XMFLOAT3{ 10.f,10.f,10.f };
-	XMFLOAT3 init_item_pos = XMFLOAT3{ 0.f,0.f,0.f };
-	for (int i = 0; i < MAX_ITEM; ++i) {
-		items[i] = new Item;
-		items[i]->in_use = false;
-		items[i]->SetOBB(init_item_pos, items_extents);
-	}
+	//// 이건 됨
+	//XMFLOAT3 items_extents = XMFLOAT3{ 10.f,10.f,10.f };
+	//XMFLOAT3 init_item_pos = XMFLOAT3{ 0.f,0.f,0.f };
+	//for (int i = 0; i < MAX_ITEM; ++i) {
+	//	items[i] = new Item;
+	//	items[i]->in_use = false;
+	//	items[i]->SetOBB(init_item_pos, items_extents);
+	//}
 
 }
 
@@ -337,7 +337,7 @@ void ServerFramework::ProcessPacket(int cl_id, char* packet) {
 		if (g_Clients[cl_id].equipted_weapon == 0) {
 			// 장전하려고 보니 결과가 0 이상
 			if (g_Clients[cl_id].m_TotalAmmo - g_Clients[cl_id].m_CurrentAmmo > 0) {
-				g_Clients[cl_id].m_TotalAmmo -= g_Clients[cl_id].m_CurrentAmmo;
+				g_Clients[cl_id].m_TotalAmmo -= (30 - g_Clients[cl_id].m_CurrentAmmo);
 				g_Clients[cl_id].m_CurrentAmmo = 30;
 				printf("장전 완료, 남은 탄창 %d \n", g_Clients[cl_id].m_TotalAmmo);
 				SC_PACKET_AMMO_O packets;
@@ -347,8 +347,7 @@ void ServerFramework::ProcessPacket(int cl_id, char* packet) {
 				packets.m_cTotalAmmo = g_Clients[cl_id].m_TotalAmmo;
 				SendPacket(cl_id, &packets);
 			}
-			// 장전하려고 보니 결과가 0 미만
-			else {
+			if (g_Clients[cl_id].m_TotalAmmo - g_Clients[cl_id].m_CurrentAmmo <= 0) {
 				g_Clients[cl_id].m_CurrentAmmo += g_Clients[cl_id].m_TotalAmmo;
 				g_Clients[cl_id].m_TotalAmmo = 0;
 				printf("장전 완료, 남은 탄창 %d \n", g_Clients[cl_id].m_TotalAmmo);
@@ -456,17 +455,6 @@ void ServerFramework::ProcessPacket(int cl_id, char* packet) {
 		//}
 		// 걷지도 뛰지도 않는 상황
 
-		if (g_Clients[cl_id].is_left_click) {
-			packets.player_status = 2;
-		}
-		else if (g_Clients[cl_id].is_move_backward == false && g_Clients[cl_id].is_move_foward == false &&
-			g_Clients[cl_id].is_move_left == false && g_Clients[cl_id].is_move_right == false) {
-			packets.player_status = 0;
-		}
-		// 걷는 상황
-		else if ((g_Clients[cl_id].is_move_foward || g_Clients[cl_id].is_move_left || g_Clients[cl_id].is_move_right || g_Clients[cl_id].is_move_backward)) {
-			packets.player_status = 1;
-		}
 		
 		for (int i = 0; i < MAX_PLAYER; ++i) {
 			if (g_Clients[i].in_use == true) {
@@ -612,31 +600,31 @@ void ServerFramework::GameStart() {
 		g_Clients[i].hp = 100.f;
 	}
 
-	// OOBB 셋
-	for (int i = 0; i < MAX_PLAYER; ++i) {
-		//g_Clients[i].SetOOBB(XMFLOAT3(0, 0, 0), XMFLOAT3(10.f, 10.f, 10.f), XMFLOAT4(0, 0, 0, 1));
-		g_Clients[i].SetOOBB(XMFLOAT3(g_Clients[i].x, g_Clients[i].y, g_Clients[i].z), XMFLOAT3(OBB_SCALE_PLAYER_X, OBB_SCALE_PLAYER_Y, OBB_SCALE_PLAYER_Z), XMFLOAT4(0, 0, 0, 1));
-	}
+	//// OOBB 셋
+	//for (int i = 0; i < MAX_PLAYER; ++i) {
+	//	//g_Clients[i].SetOOBB(XMFLOAT3(0, 0, 0), XMFLOAT3(10.f, 10.f, 10.f), XMFLOAT4(0, 0, 0, 1));
+	//	g_Clients[i].SetOOBB(XMFLOAT3(g_Clients[i].x, g_Clients[i].y, g_Clients[i].z), XMFLOAT3(OBB_SCALE_PLAYER_X, OBB_SCALE_PLAYER_Y, OBB_SCALE_PLAYER_Z), XMFLOAT4(0, 0, 0, 1));
+	//}
 
-	// Bullet의 OBB
-	for (int j = 0; j < MAX_PLAYER; ++j) {
-		for (int i = 0; i < MAX_AMMO; ++i) {
-			bullets[j][i].SetOOBB(XMFLOAT3(bullets[j][i].x, bullets[j][i].y, bullets[j][i].z),
-				XMFLOAT3(OBB_SCALE_BULLET_X, OBB_SCALE_BULLET_Y, OBB_SCALE_BULLET_Z),
-				XMFLOAT4(0, 0, 0, 1));
-		}
-	}
+	//// Bullet의 OBB
+	//for (int j = 0; j < MAX_PLAYER; ++j) {
+	//	for (int i = 0; i < MAX_AMMO; ++i) {
+	//		bullets[j][i].SetOOBB(XMFLOAT3(bullets[j][i].x, bullets[j][i].y, bullets[j][i].z),
+	//			XMFLOAT3(OBB_SCALE_BULLET_X, OBB_SCALE_BULLET_Y, OBB_SCALE_BULLET_Z),
+	//			XMFLOAT4(0, 0, 0, 1));
+	//	}
+	//}
 	for (int i = 0; i < MAX_PLAYER; ++i) {
 		ol_ex[i].evt_type = EVT_PLAYER_POS_SEND;
 		PostQueuedCompletionStatus(iocp_handle, 0, i, reinterpret_cast<WSAOVERLAPPED*>(&ol_ex[i]));
 	}
 
 
-	is_boat_item_gen = true;
-	is_game_start = true;
-	is_ammo_item_gen = true;
+	m_bIsBoatGen = true;
+	m_bGameStart = true;
+	m_bIsAmmoGen = true;
 
-	time_game_start = GetTickCount();
+	m_fStartGameTime = GetTickCount();
 }
 
 void ServerFramework::WorkerThread() {
@@ -741,7 +729,7 @@ void ServerFramework::WorkerThread() {
 						SendPacket(i, &packets);
 					}
 				}
-				is_ammo_item_gen = true;
+				m_bIsAmmoGen = true;
 			}
 		}
 		else if (overlapped_buffer->evt_type == EVT_BOAT_ITEM_GEN) {
@@ -781,7 +769,7 @@ void ServerFramework::WorkerThread() {
 					}
 				}
 
-				is_boat_item_gen = true;
+				m_bIsBoatGen = true;
 			}
 
 		}
@@ -789,8 +777,8 @@ void ServerFramework::WorkerThread() {
 		// 1/20 마다 모든 플레이어에게 정보 전송
 		else if (overlapped_buffer->evt_type == EVT_PLAYER_POS_SEND) {
 			for (int i = 0; i < MAX_PLAYER; ++i) {
-				//client_lock.lock();
-				g_Clients[i].client_lock.lock();
+				//m_mutexServerLock.lock();
+				g_Clients[i].m_mutexServerLock.lock();
 				if (g_Clients[i].is_move_foward) {
 					if (g_Clients[i].is_running) {
 						g_Clients[i].z += (-1) * METER_PER_PIXEL * g_Clients[i].look_vec.z * (RUN_SPEED * overlapped_buffer->elapsed_time);
@@ -807,9 +795,6 @@ void ServerFramework::WorkerThread() {
 						g_Clients[i].x += METER_PER_PIXEL * g_Clients[i].look_vec.x * (RUN_SPEED * overlapped_buffer->elapsed_time);
 					}
 					else {
-						//printf("%d플레이어 걷기 POS [%f, %f, %f] LV [%f, %f, %f]\n",
-						//	i, g_Clients[i].x, g_Clients[i].y, g_Clients[i].z,
-						//	g_Clients[i].look_vec.x, g_Clients[i].look_vec.y, g_Clients[i].look_vec.z);
 						g_Clients[i].z += METER_PER_PIXEL * g_Clients[i].look_vec.z * (WALK_SPEED * overlapped_buffer->elapsed_time);
 						g_Clients[i].x += METER_PER_PIXEL * g_Clients[i].look_vec.x * (WALK_SPEED * overlapped_buffer->elapsed_time);
 					}
@@ -835,9 +820,7 @@ void ServerFramework::WorkerThread() {
 						g_Clients[i].x += METER_PER_PIXEL * g_Clients[i].look_vec.z * (WALK_SPEED * overlapped_buffer->elapsed_time);
 					}
 				}
-				g_Clients[i].client_lock.unlock();
-				g_Clients[i].SetOOBB(XMFLOAT3(g_Clients[i].x, g_Clients[i].y, g_Clients[i].z), XMFLOAT3(OBB_SCALE_PLAYER_X, OBB_SCALE_PLAYER_Y, OBB_SCALE_PLAYER_Z), XMFLOAT4(0, 0, 0, 1));
-
+				g_Clients[i].m_mutexServerLock.unlock();
 			}
 
 			if (g_Clients[client_id].in_use) {
@@ -850,19 +833,6 @@ void ServerFramework::WorkerThread() {
 				packets.y = g_Clients[client_id].y;
 				packets.z = g_Clients[client_id].z;
 
-				if (g_Clients[client_id].is_left_click) {
-					packets.player_status = 2;
-				}
-				else if (g_Clients[client_id].is_move_backward == false && g_Clients[client_id].is_move_foward == false &&
-					g_Clients[client_id].is_move_left == false && g_Clients[client_id].is_move_right == false) {
-					packets.player_status = 0;
-				}
-				// 걷는 상황
-				else if ((g_Clients[client_id].is_move_foward || g_Clients[client_id].is_move_left || g_Clients[client_id].is_move_right || g_Clients[client_id].is_move_backward)) {
-					packets.player_status = 1;
-				}
-				//packets.player_status = g_Clients[client_id].is_running;
-				//printf("높이 : %f\n", g_Clients[client_id].y);
 				for (int i = 0; i < MAX_PLAYER; ++i) {
 					if (g_Clients[i].in_use == true) {
 						SendPacket(i, &packets);
@@ -872,156 +842,23 @@ void ServerFramework::WorkerThread() {
 			}
 		}
 		else if (overlapped_buffer->evt_type == EVT_COLLISION) {
-			for (int i = 0; i < MAX_PLAYER; ++i) {
-				for (int j = 0; j < MAX_BOAT_ITEM; ++j) {
-					if (g_Clients[i].in_use&&items[j]->in_use) {
-						ContainmentType contain_type = g_Clients[i].bounding_box.Contains(items[j]->bounding_box);
-						//printf("items[%d]->bounding_box.center = [%lf, %lf, %lf] \n", j, items[j]->bounding_box.Center.x, items[j]->bounding_box.Center.y, items[j]->bounding_box.Center.z);
-						switch (contain_type) {
-						case INTERSECTS: {
-							printf("얏 박앗당\n");
-							g_Clients[i].boat_parts[j] = true;
-							int num_item_have = 0;
-							for (int k = 0; k < 4; ++k) {
-								if (g_Clients[i].boat_parts[k]) {
-									num_item_have++;
-								}
-							}
-							if (num_item_have == 4) {
-								printf("%d 플레이어의 승리\n", i);
-							}
-							break;
-						}
-						case CONTAINS:
-							printf("얏 포함됫당\n");
-							g_Clients[i].boat_parts[j] = true;
-							break;
-						}
-					}
-				}
-				for (int j = MAX_BOAT_ITEM; j < MAX_ITEM; ++j) {
-					// 탄창 아이템 습득 
-				}
-			}
-			for (int j = 0; (j < MAX_PLAYER - 1); ++j) {
-				for (int i = 0; i < MAX_AMMO; ++i) {
-					if (bullets[j + 1][i].in_use && g_Clients[j].in_use && g_Clients[j + 1].in_use) {
-						ContainmentType containType = g_Clients[j].bounding_box.Contains(bullets[j + 1][i].bounding_box);
-						switch (containType)
-						{
-						case DISJOINT:
-						{
-							break;
-						}
-						case INTERSECTS:
-						{
-							SC_PACKET_COLLISION packets;
-							packets.size = sizeof(SC_PACKET_COLLISION);
-							packets.type = SC_COLLSION_PB;
-							packets.x = g_Clients[j].bounding_box.Center.x;
-							// 플레이어의 키 만큼 반영해서
-							packets.y = g_Clients[j].bounding_box.Center.y;
-							packets.z = g_Clients[j].bounding_box.Center.z;
-							packets.client_id = j;
-							//
-							g_Clients[j].hp -= 25.f;
-							//
-							packets.hp = g_Clients[j].hp;
 
-							SendPacket(j, &packets);
-							SendPacket(j + 1, &packets);
-							printf("충돌 시작\n");
-							bullets[j + 1][i].in_use = false;
-							break;
-						}
-						case CONTAINS:
-							SC_PACKET_COLLISION packets;
-							packets.size = sizeof(SC_PACKET_COLLISION);
-							packets.type = SC_COLLSION_PB;
-							packets.x = g_Clients[j].bounding_box.Center.x;
-							packets.y = g_Clients[j].bounding_box.Center.y;
-							packets.z = g_Clients[j].bounding_box.Center.z;
-							packets.client_id = j;
-							//
-							g_Clients[j].hp -= 25.f;
-							//
-							packets.hp = g_Clients[j].hp;
-
-							SendPacket(j, &packets);
-							SendPacket(j + 1, &packets);
-							printf("충돌!!!!\n");
-							bullets[j + 1][i].in_use = false;
-							break;
-						}
-					}
-					if (bullets[j][i].in_use && g_Clients[j].in_use && g_Clients[j + 1].in_use) {
-						//ContainmentType containType_rev = g_Clients[j].bounding_box.Contains(bullets[j + 1][i].bounding_box);
-						ContainmentType containType_rev = bullets[j][i].bounding_box.Contains(g_Clients[j + 1].bounding_box);
-						switch (containType_rev)
-						{
-						case DISJOINT:
-						{
-							//printf("충돌 안함ㅠ\n");
-							break;
-						}
-						case INTERSECTS:
-						{
-							SC_PACKET_COLLISION packets;
-							packets.size = sizeof(SC_PACKET_COLLISION);
-							packets.type = SC_COLLSION_PB;
-							packets.x = g_Clients[j + 1].bounding_box.Center.x;
-							packets.y = g_Clients[j + 1].bounding_box.Center.y;
-							packets.z = g_Clients[j + 1].bounding_box.Center.z;
-							packets.client_id = j + 1;
-							//
-							g_Clients[j + 1].hp -= 25.f;
-							//
-							packets.hp = g_Clients[j + 1].hp;
-
-
-							SendPacket(j, &packets);
-							SendPacket(j + 1, &packets);
-							bullets[j][i].in_use = false;
-							printf("충돌 시작\n");
-							break;
-						}
-						case CONTAINS:
-							SC_PACKET_COLLISION packets;
-							packets.size = sizeof(SC_PACKET_COLLISION);
-							packets.type = SC_COLLSION_PB;
-							packets.x = g_Clients[j + 1].bounding_box.Center.x;
-							packets.y = g_Clients[j + 1].bounding_box.Center.y;
-							packets.z = g_Clients[j + 1].bounding_box.Center.z;
-							packets.client_id = j + 1;
-							//
-							g_Clients[j + 1].hp -= 25.f;
-							//
-							packets.hp = g_Clients[j + 1].hp;
-
-							SendPacket(j, &packets);
-							SendPacket(j + 1, &packets);
-							bullets[j][i].in_use = false;
-							printf("충돌!!!!\n");
-							break;
-						}
-					}
-				}
-			}
 		}
-		//}
 		else if (overlapped_buffer->evt_type == EVT_BULLET_GENERATE) {
 			int shooter_id = overlapped_buffer->shooter_player_id;
 			if (g_Clients[shooter_id].equipted_weapon == 0 && g_Clients[shooter_id].in_use) {
 				printf("%d가 발사한 총알 : %d\n", shooter_id, g_Clients[shooter_id].m_CurrentAmmo);
 				if (g_Clients[shooter_id].m_CurrentAmmo == 1) {
-					for (int d = 0; d < MAX_AMMO; ++d) {
+					for (int d = 1; d <= MAX_AMMO; ++d) {
 						bullets[shooter_id][d].in_use = false;
 					}
 				}
 				bullets[shooter_id][g_Clients[shooter_id].m_CurrentAmmo].x = g_Clients[shooter_id].x;
-				bullets[shooter_id][g_Clients[shooter_id].m_CurrentAmmo].y = g_Clients[shooter_id].y;
+				bullets[shooter_id][g_Clients[shooter_id].m_CurrentAmmo].y = g_Clients[shooter_id].y - 5.f;
 				bullets[shooter_id][g_Clients[shooter_id].m_CurrentAmmo].z = g_Clients[shooter_id].z;
-				bullets[shooter_id][g_Clients[shooter_id].m_CurrentAmmo].look_vec = g_Clients[shooter_id].look_vec;
+				bullets[shooter_id][g_Clients[shooter_id].m_CurrentAmmo].look_vec.x = g_Clients[shooter_id].look_vec.x;
+				bullets[shooter_id][g_Clients[shooter_id].m_CurrentAmmo].look_vec.y = g_Clients[shooter_id].look_vec.y;
+				bullets[shooter_id][g_Clients[shooter_id].m_CurrentAmmo].look_vec.z = g_Clients[shooter_id].look_vec.z;
 				bullets[shooter_id][g_Clients[shooter_id].m_CurrentAmmo].in_use = true;
 				g_Clients[shooter_id].m_CurrentAmmo--;
 				// 남은 탄창 보내주기 
@@ -1053,17 +890,17 @@ void ServerFramework::WorkerThread() {
 			// i 가 플레이어
 			// j 가 플레이어가 발사한 총알
 			for (int i = 0; i < MAX_PLAYER; ++i) {
-				for (int j = 0; j < MAX_AMMO; ++j) {
+				for (int j = 1; j <= MAX_AMMO; ++j) {
 					if (g_Clients[i].in_use) {
 						if (bullets[i][j].in_use) {
-							bullets[i][j].x += METER_PER_PIXEL * bullets[i][j].look_vec.x * (AR_SPEED * overlapped_buffer->elapsed_time);
+							bullets[i][j].x += (-1) * METER_PER_PIXEL * bullets[i][j].look_vec.x * (AR_SPEED * overlapped_buffer->elapsed_time);
 							bullets[i][j].y += METER_PER_PIXEL * bullets[i][j].look_vec.y * (AR_SPEED * overlapped_buffer->elapsed_time);
-							bullets[i][j].z += METER_PER_PIXEL * bullets[i][j].look_vec.z * (AR_SPEED * overlapped_buffer->elapsed_time);
+							bullets[i][j].z += (-1) * METER_PER_PIXEL * bullets[i][j].look_vec.z * (AR_SPEED * overlapped_buffer->elapsed_time);
 
-							bullets[i][j].SetOOBB(
-								XMFLOAT3(bullets[i][j].x, bullets[i][j].y, bullets[i][j].z),
-								XMFLOAT3(OBB_SCALE_BULLET_X, OBB_SCALE_BULLET_Y, OBB_SCALE_BULLET_Z),
-								XMFLOAT4(0, 0, 0, 1));
+							//bullets[i][j].SetOOBB(
+							//	XMFLOAT3(bullets[i][j].x, bullets[i][j].y, bullets[i][j].z),
+							//	XMFLOAT3(OBB_SCALE_BULLET_X, OBB_SCALE_BULLET_Y, OBB_SCALE_BULLET_Z),
+							//	XMFLOAT4(0, 0, 0, 1));
 						}
 						if (bullets[i][j].x >= 256.f || bullets[i][j].x <= -256) {
 							bullets[i][j].in_use = false;
@@ -1164,38 +1001,38 @@ void ServerFramework::Update(duration<float>& elapsed_time) {
 		sender_time = 0.f;
 	}
 
-	if (is_game_start) {
-		time_sender_time += elapsed_time.count();
-		if (time_sender_time >= TIME_SEND_TIME) {
+	if (m_bGameStart) {
+		m_fTimeSend += elapsed_time.count();
+		if (m_fTimeSend >= TIME_SEND_TIME) {
 			ol_ex[9].evt_type = EVT_SEND_TIME;
 			// chrono count의 경우 초 단위이므로 GetTickCount의 단위 (ms)를
 			// 맞춰주기 위해서 1000을 곱해줘야한다. 
-			if (ITEM_BOAT_GEN_TIME * 1000 - (GetTickCount() - time_game_start) < 0) {
-				time_game_start = GetTickCount();
+			if (ITEM_BOAT_GEN_TIME * 1000 - (GetTickCount() - m_fStartGameTime) < 0) {
+				m_fStartGameTime = GetTickCount();
 			}
-			ol_ex[9].world_time = ITEM_BOAT_GEN_TIME * 1000 - (GetTickCount() - time_game_start);
+			ol_ex[9].world_time = ITEM_BOAT_GEN_TIME * 1000 - (GetTickCount() - m_fStartGameTime);
 			PostQueuedCompletionStatus(iocp_handle, 0, 9, reinterpret_cast<WSAOVERLAPPED*>(&ol_ex[9]));
-			time_sender_time = 0.f;
+			m_fTimeSend = 0.f;
 		}
 	}
 
-	if (is_boat_item_gen) {
-		item_boat_gen_timer += elapsed_time.count();
-		if (item_boat_gen_timer >= ITEM_BOAT_GEN_TIME) {
+	if (m_bIsBoatGen) {
+		m_fBoatGenTime += elapsed_time.count();
+		if (m_fBoatGenTime >= ITEM_BOAT_GEN_TIME) {
 			ol_ex[8].evt_type = EVT_BOAT_ITEM_GEN;
 			PostQueuedCompletionStatus(iocp_handle, 0, 0, reinterpret_cast<WSAOVERLAPPED*>(&ol_ex[8]));
-			item_boat_gen_timer = 0.f;
-			is_boat_item_gen = false;
+			m_fBoatGenTime = 0.f;
+			m_bIsBoatGen = false;
 		}
 	}
 
-	if (is_ammo_item_gen) {
-		item_ammo_gen_timer += elapsed_time.count();
-		if (item_ammo_gen_timer >= ITEM_AMMO_GEN_TIME) {
+	if (m_bIsAmmoGen) {
+		m_fAmmoGenTime += elapsed_time.count();
+		if (m_fAmmoGenTime >= ITEM_AMMO_GEN_TIME) {
 			ol_ex[10].evt_type = EVT_AMMO_ITEM_GEN;
 			PostQueuedCompletionStatus(iocp_handle, 0, 0, reinterpret_cast<WSAOVERLAPPED*>(&ol_ex[10]));
-			item_ammo_gen_timer = 0.f;
-			is_ammo_item_gen = false;
+			m_fAmmoGenTime = 0.f;
+			m_bIsAmmoGen = false;
 		}
 
 	}
