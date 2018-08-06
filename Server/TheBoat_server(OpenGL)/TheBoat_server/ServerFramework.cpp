@@ -250,19 +250,30 @@ void ServerFramework::AcceptPlayer() {
 
 void ServerFramework::ProcessPacket(int cl_id, char* packet) {
 	CS_PACKET_KEYUP* packet_buffer = reinterpret_cast<CS_PACKET_KEYUP*>(packet);
-
+	//printf("[받음-----] %d Pakcet을 %d\n", packet_buffer->type, cl_id);
 	switch (packet_buffer->type) {
 	case CS_KEY_PRESS_UP:
+		g_Clients[cl_id].look_vec.x = packet_buffer->look_vec.x;
+		g_Clients[cl_id].look_vec.y = packet_buffer->look_vec.y;
+		g_Clients[cl_id].look_vec.z = packet_buffer->look_vec.z;
 		g_Clients[cl_id].is_move_foward = true;
 		break;
 	case CS_KEY_PRESS_DOWN:
-		printf("%d 클라에서 아래 가는거 눌렸음\n", cl_id);
+		g_Clients[cl_id].look_vec.x = packet_buffer->look_vec.x;
+		g_Clients[cl_id].look_vec.y = packet_buffer->look_vec.y;
+		g_Clients[cl_id].look_vec.z = packet_buffer->look_vec.z;
 		g_Clients[cl_id].is_move_backward = true;
 		break;
 	case CS_KEY_PRESS_LEFT:
+		g_Clients[cl_id].look_vec.x = packet_buffer->look_vec.x;
+		g_Clients[cl_id].look_vec.y = packet_buffer->look_vec.y;
+		g_Clients[cl_id].look_vec.z = packet_buffer->look_vec.z;
 		g_Clients[cl_id].is_move_left = true;
 		break;
 	case CS_KEY_PRESS_RIGHT:
+		g_Clients[cl_id].look_vec.x = packet_buffer->look_vec.x;
+		g_Clients[cl_id].look_vec.y = packet_buffer->look_vec.y;
+		g_Clients[cl_id].look_vec.z = packet_buffer->look_vec.z;
 		g_Clients[cl_id].is_move_right = true;
 		break;
 
@@ -282,15 +293,27 @@ void ServerFramework::ProcessPacket(int cl_id, char* packet) {
 		break;
 
 	case CS_KEY_RELEASE_UP:
+		g_Clients[cl_id].look_vec.x = packet_buffer->look_vec.x;
+		g_Clients[cl_id].look_vec.y = packet_buffer->look_vec.y;
+		g_Clients[cl_id].look_vec.z = packet_buffer->look_vec.z;
 		g_Clients[cl_id].is_move_foward = false;
 		break;
 	case CS_KEY_RELEASE_DOWN:
+		g_Clients[cl_id].look_vec.x = packet_buffer->look_vec.x;
+		g_Clients[cl_id].look_vec.y = packet_buffer->look_vec.y;
+		g_Clients[cl_id].look_vec.z = packet_buffer->look_vec.z;
 		g_Clients[cl_id].is_move_backward = false;
 		break;
 	case CS_KEY_RELEASE_LEFT:
+		g_Clients[cl_id].look_vec.x = packet_buffer->look_vec.x;
+		g_Clients[cl_id].look_vec.y = packet_buffer->look_vec.y;
+		g_Clients[cl_id].look_vec.z = packet_buffer->look_vec.z;
 		g_Clients[cl_id].is_move_left = false;
 		break;
 	case CS_KEY_RELEASE_RIGHT:
+		g_Clients[cl_id].look_vec.x = packet_buffer->look_vec.x;
+		g_Clients[cl_id].look_vec.y = packet_buffer->look_vec.y;
+		g_Clients[cl_id].look_vec.z = packet_buffer->look_vec.z;
 		g_Clients[cl_id].is_move_right = false;
 		break;
 	case CS_KEY_RELEASE_1:
@@ -370,7 +393,9 @@ void ServerFramework::ProcessPacket(int cl_id, char* packet) {
 		}
 		break;
 	case CS_LEFT_BUTTON_DOWN:
-		// 주무기
+		g_Clients[cl_id].look_vec.x = packet_buffer->look_vec.x;
+		g_Clients[cl_id].look_vec.y = packet_buffer->look_vec.y;
+		g_Clients[cl_id].look_vec.z = packet_buffer->look_vec.z;
 		if (g_Clients[cl_id].equipted_weapon == 0) {
 			if (g_Clients[cl_id].m_CurrentAmmo == 0) {
 				printf("총알 장전 필요\n");
@@ -472,7 +497,8 @@ void ServerFramework::ProcessPacket(int cl_id, char* packet) {
 		packets.m_cPlayerNumber = cl_id;
 
 		for (int i = 0; i < MAX_PLAYER; ++i) {
-			SendPacket(i, &packets);
+			if (g_Clients[i].in_use)
+				SendPacket(i, &packets);
 		}
 
 		break;
@@ -486,7 +512,8 @@ void ServerFramework::ProcessPacket(int cl_id, char* packet) {
 		packets.m_cPlayerNumber = cl_id;
 
 		for (int i = 0; i < MAX_PLAYER; ++i) {
-			SendPacket(i, &packets);
+			if (g_Clients[i].in_use)
+				SendPacket(i, &packets);
 		}
 
 		break;
@@ -499,7 +526,8 @@ void ServerFramework::ProcessPacket(int cl_id, char* packet) {
 		packets.type = SC_TEAM_RED;
 		packets.m_cID = cl_id;
 		for (int i = 0; i < MAX_PLAYER; ++i) {
-			SendPacket(i, &packets);
+			if (g_Clients[i].in_use)
+				SendPacket(i, &packets);
 		}
 		break;
 	case CS_TEAM_BLUE: {
@@ -510,7 +538,8 @@ void ServerFramework::ProcessPacket(int cl_id, char* packet) {
 		packets.type = SC_TEAM_BLUE;
 		packets.m_cID = cl_id;
 		for (int i = 0; i < MAX_PLAYER; ++i) {
-			SendPacket(i, &packets);
+			if (g_Clients[i].in_use)
+				SendPacket(i, &packets);
 		}
 	}
 		break;
@@ -548,7 +577,8 @@ void ServerFramework::GameStart() {
 	packets.size = sizeof(SC_PACKET_START);
 	packets.type = SC_GAME_START;
 	for (int i = 0; i < MAX_PLAYER; ++i) {
-		SendPacket(i, &packets);
+		if (g_Clients[i].in_use)
+			SendPacket(i, &packets);
 	}
 
 
@@ -873,113 +903,9 @@ void ServerFramework::WorkerThread() {
 					// 탄창 아이템 습득 
 				}
 			}
-
-			// OBB 충돌체크 
-			//for (int i = 0; i < OBJECT_BUILDING; ++i) {
-			//	for (int j = 0; j < MAX_AMMO; ++j) {
-			//		for (int k = 0; (k < MAX_PLAYER); ++k) {
-			//			if (bullets[k][j].in_use) {
-			//				ContainmentType contain_type = building[i]->bounding_box.Contains(bullets[k][j].bounding_box);
-			//				switch (contain_type) {
-			//				case DISJOINT:
-			//					break;
-			//				case INTERSECTS:
-			//					SC_PACKET_COLLISION packets;
-			//					packets.size = sizeof(SC_PACKET_COLLISION);
-			//					packets.type = SC_COLLSION_BB;
-			//					packets.x = g_Clients[j].bounding_box.Center.x;
-			//					// 플레이어의 키 만큼 반영해서
-			//					packets.y = g_Clients[j].bounding_box.Center.y;
-			//					packets.z = g_Clients[j].bounding_box.Center.z;
-			//					packets.client_id = j;
-			//					//
-			//					// 플레이어 체력은 안깎아도 됭
-			//					//g_Clients[j].hp -= 25.f;
-			//					//
-			//					packets.hp = g_Clients[j].hp;
-
-			//					SendPacket(j, &packets);
-			//					SendPacket(j + 1, &packets);
-			//					bullets[k][j].in_use = false;
-
-			//					printf("건물 총알 충돌 시작\n");
-			//					break;
-			//				case CONTAINS: {
-			//					SC_PACKET_COLLISION packets;
-			//					packets.size = sizeof(SC_PACKET_COLLISION);
-			//					packets.type = SC_COLLSION_BB;
-			//					packets.x = g_Clients[j].bounding_box.Center.x;
-			//					packets.y = g_Clients[j].bounding_box.Center.y;
-			//					packets.z = g_Clients[j].bounding_box.Center.z;
-			//					packets.client_id = j;
-
-			//					// 플레이어 체력은 안깎아도 됨
-			//					//g_Clients[j].hp -= 25.f;
-			//					packets.hp = g_Clients[j].hp;
-
-			//					SendPacket(j, &packets);
-			//					SendPacket(j + 1, &packets);
-			//					bullets[k][j].in_use = false;
-
-			//					printf("건물 총알 충돌 !!!!!!!!!!!!!!\n");
-			//					break;
-			//				}
-			//				}
-			//			}
-			//		}
-			//	}
-			//}
 			for (int j = 0; (j < MAX_PLAYER - 1); ++j) {
-				// 
-				//for (int k = 0; k < OBJECT_BUILDING; ++k) {
-				//	if (g_Clients[j].in_use && g_Clients[j + 1].in_use) {
-				//		ContainmentType contain_type = building[k]->bounding_box.Contains(g_Clients[j].bounding_box);
-				//		switch (contain_type) {
-				//		case DISJOINT:
-				//			break;
-				//		case INTERSECTS:
-				//			SC_PACKET_COLLISION packets;
-				//			packets.size = sizeof(SC_PACKET_COLLISION);
-				//			packets.type = SC_COLLSION_BDP;
-				//			packets.x = g_Clients[j].bounding_box.Center.x;
-				//			// 플레이어의 키 만큼 반영해서
-				//			packets.y = g_Clients[j].bounding_box.Center.y;
-				//			packets.z = g_Clients[j].bounding_box.Center.z;
-				//			packets.client_id = j;
-				//			//
-				//			// 플레이어 체력은 안깎아도 됭
-				//			//g_Clients[j].hp -= 25.f;
-				//			//
-				//			packets.hp = g_Clients[j].hp;
-
-				//			SendPacket(j, &packets);
-				//			SendPacket(j + 1, &packets);
-				//			printf("건물과 충돌 시작\n");
-				//			break;
-				//		case CONTAINS: {
-				//			SC_PACKET_COLLISION packets;
-				//			packets.size = sizeof(SC_PACKET_COLLISION);
-				//			packets.type = SC_COLLSION_BDP;
-				//			packets.x = g_Clients[j].bounding_box.Center.x;
-				//			packets.y = g_Clients[j].bounding_box.Center.y;
-				//			packets.z = g_Clients[j].bounding_box.Center.z;
-				//			packets.client_id = j;
-
-				//			// 플레이어 체력은 안깎아도 됨
-				//			//g_Clients[j].hp -= 25.f;
-				//			packets.hp = g_Clients[j].hp;
-
-				//			SendPacket(j, &packets);
-				//			SendPacket(j + 1, &packets);
-				//			printf("건물과 충돌!!!!\n");
-				//			break;
-				//		}
-				//		}
-				//	}
-				//}
-				// 
 				for (int i = 0; i < MAX_AMMO; ++i) {
-					if (bullets[j + 1][i].in_use && g_Clients[j].in_use) {
+					if (bullets[j + 1][i].in_use && g_Clients[j].in_use && g_Clients[j + 1].in_use) {
 						ContainmentType containType = g_Clients[j].bounding_box.Contains(bullets[j + 1][i].bounding_box);
 						switch (containType)
 						{
@@ -1028,7 +954,7 @@ void ServerFramework::WorkerThread() {
 							break;
 						}
 					}
-					if (bullets[j][i].in_use) {
+					if (bullets[j][i].in_use && g_Clients[j].in_use && g_Clients[j + 1].in_use) {
 						//ContainmentType containType_rev = g_Clients[j].bounding_box.Contains(bullets[j + 1][i].bounding_box);
 						ContainmentType containType_rev = bullets[j][i].bounding_box.Contains(g_Clients[j + 1].bounding_box);
 						switch (containType_rev)
@@ -1085,7 +1011,7 @@ void ServerFramework::WorkerThread() {
 		//}
 		else if (overlapped_buffer->evt_type == EVT_BULLET_GENERATE) {
 			int shooter_id = overlapped_buffer->shooter_player_id;
-			if (g_Clients[shooter_id].equipted_weapon == 0) {
+			if (g_Clients[shooter_id].equipted_weapon == 0 && g_Clients[shooter_id].in_use) {
 				printf("%d가 발사한 총알 : %d\n", shooter_id, g_Clients[shooter_id].m_CurrentAmmo);
 				if (g_Clients[shooter_id].m_CurrentAmmo == 1) {
 					for (int d = 0; d < MAX_AMMO; ++d) {
@@ -1116,7 +1042,7 @@ void ServerFramework::WorkerThread() {
 			packets.size = sizeof(SC_PACKET_TIME);
 			packets.type = SC_WORLD_TIME;
 			packets.world_time = overlapped_buffer->world_time;
-			printf("시간 보냄 %f \n", packets.world_time);
+			//printf("시간 보냄 %f \n", packets.world_time);
 
 			for (int i = 0; i < MAX_PLAYER; ++i) {
 				if (g_Clients[i].in_use)
@@ -1145,18 +1071,19 @@ void ServerFramework::WorkerThread() {
 						if (bullets[i][j].z >= 256.f || bullets[i][j].z <= -256.f) {
 							bullets[i][j].in_use = false;
 						}
-
-						SC_PACKET_BULLET packets;
-						packets.id = i;
-						packets.size = sizeof(SC_PACKET_BULLET);
-						packets.type = SC_BULLET_POS;
-						packets.bullet_id = j;
-						packets.m_bInUse = bullets[i][j].in_use;
-						packets.x = bullets[i][j].x;
-						packets.y = bullets[i][j].y;
-						packets.z = bullets[i][j].z;
-						// 해당 플레이어에게만 보내야함
-						SendPacket(i, &packets);
+						if (bullets[i][j].in_use) {
+							SC_PACKET_BULLET packets;
+							packets.id = i;
+							packets.size = sizeof(SC_PACKET_BULLET);
+							packets.type = SC_BULLET_POS;
+							packets.bullet_id = j;
+							packets.m_bInUse = bullets[i][j].in_use;
+							packets.x = bullets[i][j].x;
+							packets.y = bullets[i][j].y;
+							packets.z = bullets[i][j].z;
+							// 해당 플레이어에게만 보내야함
+							SendPacket(i, &packets);
+						}
 					}
 				}
 			}
@@ -1172,7 +1099,7 @@ void ServerFramework::WorkerThread() {
 void ServerFramework::SendPacket(int cl_id, void* packet) {
 	OverlappedExtensionSet* overlapped = new OverlappedExtensionSet;
 	char* send_buffer = reinterpret_cast<char*>(packet);
-
+	//printf("[보냄] %d Pakcet을 %d\n", send_buffer[1], cl_id);
 	memcpy(&overlapped->io_buffer, packet, send_buffer[0]);
 	overlapped->evt_type = EVT_SEND_PACKET;
 	overlapped->wsabuf.buf = overlapped->io_buffer;
