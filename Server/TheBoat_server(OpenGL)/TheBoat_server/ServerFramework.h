@@ -26,7 +26,7 @@ class ServerFramework
 	SOCKADDR_IN server_addr;
 
 
-	Client g_Clients[MAX_PLAYER];
+	Client m_Clients[MAX_PLAYER];
 	CHeightMapImage* height_map;
 	time_point<system_clock> prev_time = system_clock::now();
 	float sender_time = 0;
@@ -42,6 +42,7 @@ class ServerFramework
 
 	float m_fStartGameTime = 0.f;
 	mutex m_mutexBulletLock[MAX_PLAYER];
+	mutex m_mutexAmmoLock[MAX_PLAYER];
 	mutex m_mutexServerLock;
 
 	// TimerÀü¿ë OverlappedExtensionSetd

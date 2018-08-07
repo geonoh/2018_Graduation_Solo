@@ -180,6 +180,8 @@ void ServerMgr::ProcessPacket(char* ptr) {
 		m_Bullets[clients_id][packets->bullet_id].y = packets->y;
 		m_Bullets[clients_id][packets->bullet_id].z = packets->z;
 		m_Bullets[clients_id][packets->bullet_id].in_use = packets->m_bInUse;
+		//printf("%d Bullet ID %d Pos [%f, %f, %f]\n", packets->id, packets->bullet_id,
+		//	packets->x, packets->y, packets->z);
 		break;
 	}
 	case SC_COLLSION_PB: {
@@ -192,6 +194,12 @@ void ServerMgr::ProcessPacket(char* ptr) {
 		printf("%d 플레이어의 충돌지점 x : %f, y : %f, z : %f, 체력 : %f \n", packets->client_id, collision_pos.x,
 			collision_pos.y, collision_pos.z, client_hp[packets->client_id]);
 
+		break;
+	}
+	case SC_COLLSION_TB: {
+		SC_PACKET_COLLSION_TB* packets = reinterpret_cast<SC_PACKET_COLLSION_TB*>(ptr);
+		m_Bullets[packets->m_cPlayerID][packets->m_cBulletID].in_use = false;
+		printf("꺄 사라짐 \n");
 		break;
 	}
 	case SC_COLLSION_BDP: {	// building to player

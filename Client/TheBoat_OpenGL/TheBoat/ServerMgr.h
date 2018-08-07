@@ -45,8 +45,7 @@ class ServerMgr
 
 
 	bool s_is_collide = false;
-
-	Bullet m_Bullets[MAX_PLAYER][MAX_AMMO] = { 0 };
+	Bullet m_Bullets[MAX_PLAYER][MAX_AMMO + 1] = { 0 };
 	// ½Ã°£
 	//time_point<system_clock> world_time;
 	float m_fWorldTime;
@@ -63,6 +62,7 @@ class ServerMgr
 	bool m_bTeam[4]{ false };
 	bool m_bGameStart = false;
 public:
+	mutex m_mutexBulletLock[MAX_PLAYER];
 	int GetCurrentAmmo();
 	int GetTotalAmmo();
 
