@@ -66,6 +66,8 @@ public:
 	GLuint m_Tex_CrossHair = 0;
 	GLuint m_Tex_HpBackground = 0;
 	GLuint m_Tex_HpBar = 0;
+	GLuint m_Tex_TimerComment = 0;
+
 
 	// Camera Setting 
 	void SetCameraLook(float x, float y, float z);

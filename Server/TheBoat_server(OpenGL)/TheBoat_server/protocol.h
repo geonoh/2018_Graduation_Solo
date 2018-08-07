@@ -114,6 +114,7 @@
 
 #define CS_MODE_TEAM				28
 #define CS_MODE_MELEE				29
+#define CS_DEBUG_TIME				30
 ///////////////////////////////////////////////////
 
 

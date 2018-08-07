@@ -275,7 +275,11 @@ void ServerFramework::ProcessPacket(int cl_id, char* packet) {
 		m_Clients[cl_id].look_vec.z = packet_buffer->look_vec.z;
 		m_Clients[cl_id].is_move_right = true;
 		break;
-
+		// 디버그 용임-> 시간 빨리 깎기
+	case CS_DEBUG_TIME:
+		m_fBoatGenTime += 10;
+		
+		break;
 	case CS_KEY_PRESS_1:
 		printf("[ProcessPacket] :: AR 무기 선택\n");
 		m_Clients[cl_id].equipted_weapon = 0;
@@ -845,13 +849,30 @@ void ServerFramework::WorkerThread() {
 			}
 		}
 		else if (overlapped_buffer->evt_type == EVT_COLLISION) {
+			// 아이템과 플레이어
+
+
+			// 총알과 플레이어
+			for (int i = 0; i < MAX_PLAYER - 1; ++i) {
+				m_mutexBulletLock[i].lock();
+				m_mutexBulletLock[i + 1].lock();
+				for (int j = 1; j <= MAX_AMMO; ++j) {
+					if (m_Clients[i].in_use && bullets[i + 1][j].in_use) {
+						bullets[i + 1][j].look_vec;
+						continue;
+					}
+					else if (m_Clients[i + 1].in_use && bullets[i][j].in_use) {
+						continue;
+					}
+				}
+				m_mutexBulletLock[i].unlock();
+				m_mutexBulletLock[i + 1].unlock();
+			}
+
+			// 지면과 충돌
 			for (int i = 0; i < MAX_PLAYER; ++i) {
 				m_mutexBulletLock[i].lock();
-				for (int j = 1; j <= MAX_AMMO + 1; ++j) {
-					// 사람과 충돌
-					//if(m_Clients)
-
-					// 지면과 충돌
+				for (int j = 1; j <= MAX_AMMO; ++j) {
 					if (bullets[i][j].in_use) {
 						if (bullets[i][j].y < height_map->GetHeight(bullets[i][j].x + DX12_TO_OPGL, bullets[i][j].z + DX12_TO_OPGL)) {
 							if (m_Clients[i].in_use) {
@@ -1029,6 +1050,7 @@ void ServerFramework::Update(duration<float>& elapsed_time) {
 		sender_time = 0.f;
 	}
 
+	// 월드 타임..?
 	if (m_bGameStart) {
 		m_fTimeSend += elapsed_time.count();
 		if (m_fTimeSend >= TIME_SEND_TIME) {
@@ -1038,31 +1060,34 @@ void ServerFramework::Update(duration<float>& elapsed_time) {
 			if (ITEM_BOAT_GEN_TIME * 1000 - (GetTickCount() - m_fStartGameTime) < 0) {
 				m_fStartGameTime = GetTickCount();
 			}
-			ol_ex[9].world_time = ITEM_BOAT_GEN_TIME * 1000 - (GetTickCount() - m_fStartGameTime);
+			//ol_ex[9].world_time = ITEM_BOAT_GEN_TIME * 1000 - (GetTickCount() - m_fStartGameTime);
+
+			// 아 이게 남은시간이구나
+			ol_ex[9].world_time = m_fBoatGenTime;
 			PostQueuedCompletionStatus(iocp_handle, 0, 9, reinterpret_cast<WSAOVERLAPPED*>(&ol_ex[9]));
 			m_fTimeSend = 0.f;
 		}
-	}
 
-	if (m_bIsBoatGen) {
-		m_fBoatGenTime += elapsed_time.count();
-		if (m_fBoatGenTime >= ITEM_BOAT_GEN_TIME) {
-			ol_ex[8].evt_type = EVT_BOAT_ITEM_GEN;
-			PostQueuedCompletionStatus(iocp_handle, 0, 0, reinterpret_cast<WSAOVERLAPPED*>(&ol_ex[8]));
-			m_fBoatGenTime = 0.f;
-			m_bIsBoatGen = false;
+		if (m_bIsBoatGen) {
+			m_fBoatGenTime += elapsed_time.count();
+			if (m_fBoatGenTime >= ITEM_BOAT_GEN_TIME) {
+				ol_ex[8].evt_type = EVT_BOAT_ITEM_GEN;
+				PostQueuedCompletionStatus(iocp_handle, 0, 0, reinterpret_cast<WSAOVERLAPPED*>(&ol_ex[8]));
+				m_fBoatGenTime = 0.f;
+				m_bIsBoatGen = false;
+			}
+		}
+
+		if (m_bIsAmmoGen) {
+			m_fAmmoGenTime += elapsed_time.count();
+			if (m_fAmmoGenTime >= ITEM_AMMO_GEN_TIME) {
+				ol_ex[10].evt_type = EVT_AMMO_ITEM_GEN;
+				PostQueuedCompletionStatus(iocp_handle, 0, 0, reinterpret_cast<WSAOVERLAPPED*>(&ol_ex[10]));
+				m_fAmmoGenTime = 0.f;
+				m_bIsAmmoGen = false;
+			}
 		}
 	}
 
-	if (m_bIsAmmoGen) {
-		m_fAmmoGenTime += elapsed_time.count();
-		if (m_fAmmoGenTime >= ITEM_AMMO_GEN_TIME) {
-			ol_ex[10].evt_type = EVT_AMMO_ITEM_GEN;
-			PostQueuedCompletionStatus(iocp_handle, 0, 0, reinterpret_cast<WSAOVERLAPPED*>(&ol_ex[10]));
-			m_fAmmoGenTime = 0.f;
-			m_bIsAmmoGen = false;
-		}
-
-	}
 
 }

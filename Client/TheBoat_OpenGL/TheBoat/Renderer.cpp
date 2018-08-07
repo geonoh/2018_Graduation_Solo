@@ -509,6 +509,10 @@ void Renderer::InitializeTextureImage() {
 	m_Tex_CrossHair = CreatePngTexture("./Textures/Crosshair.png");
 	m_Tex_HpBackground = CreatePngTexture("./Textures/Hp.png");
 	m_Tex_HpBar = CreatePngTexture("./Textures/HpBar.png");
+	m_Tex_TimerComment = CreatePngTexture("./Textures/TimerComment.png");
+
+
+
 	// Title
 	m_Tex_TitleEnter = CreatePngTexture("./Textures/Title/TitleEnter.png");
 	m_Tex_TitleCredit = CreatePngTexture("./Textures/Title/TitleCredit.png");
@@ -2366,6 +2370,9 @@ void Renderer::DrawUITexture(int i_iTextureId, float i_fStartPosX, float i_fStar
 		break;
 	case 18:
 		glBindTexture(GL_TEXTURE_2D, m_Tex_HpBar);
+		break;
+	case 19:
+		glBindTexture(GL_TEXTURE_2D, m_Tex_TimerComment);
 		break;
 	}
 	GLuint pos = glGetAttribLocation(shader, "a_Position");

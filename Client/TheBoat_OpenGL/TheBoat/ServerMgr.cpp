@@ -476,8 +476,11 @@ void ServerMgr::SendPacket(int type) {
 		packet_buffer->type = CS_MODE_MELEE;
 		retval = WSASend(sock, &send_wsabuf, 1, &iobytes, 0, NULL, NULL);
 		break;
+	case CS_DEBUG_TIME:
+		packet_buffer->type = CS_DEBUG_TIME;
+		retval = WSASend(sock, &send_wsabuf, 1, &iobytes, 0, NULL, NULL);
+		break;
 	}
-
 	if (retval == 1) {
 		int error_code = WSAGetLastError();
 		ErrorDisplay("[WSASend] ¿¡·¯ : ", error_code);
