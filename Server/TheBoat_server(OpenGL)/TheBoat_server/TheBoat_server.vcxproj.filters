@@ -20,9 +20,6 @@
     <Filter Include="03. HeightMapImage">
       <UniqueIdentifier>{56ed8f75-cd54-481e-911c-0d332ca60e4d}</UniqueIdentifier>
     </Filter>
-    <Filter Include="04. Item">
-      <UniqueIdentifier>{863fdaf6-c210-4246-92d5-ec58025163f9}</UniqueIdentifier>
-    </Filter>
     <Filter Include="00.Fundamental">
       <UniqueIdentifier>{700c9475-d3c8-4ca8-a6da-961b81ef7518}</UniqueIdentifier>
     </Filter>
@@ -42,9 +39,6 @@
     </ClInclude>
     <ClInclude Include="Building.h">
       <Filter>02. Building</Filter>
-    </ClInclude>
-    <ClInclude Include="Item.h">
-      <Filter>04. Item</Filter>
     </ClInclude>
     <ClInclude Include="protocol.h">
       <Filter>00.ServerFramework</Filter>
@@ -68,9 +62,6 @@
     </ClCompile>
     <ClCompile Include="Building.cpp">
       <Filter>02. Building</Filter>
-    </ClCompile>
-    <ClCompile Include="Item.cpp">
-      <Filter>04. Item</Filter>
     </ClCompile>
     <ClCompile Include="TheBoat_server.cpp">
       <Filter>00.Fundamental</Filter>

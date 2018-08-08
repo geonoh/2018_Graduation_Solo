@@ -510,9 +510,22 @@ void Renderer::InitializeTextureImage() {
 	m_Tex_HpBackground = CreatePngTexture("./Textures/Hp.png");
 	m_Tex_HpBar = CreatePngTexture("./Textures/HpBar.png");
 	m_Tex_TimerComment = CreatePngTexture("./Textures/TimerComment.png");
+	m_Tex_Boat0 = CreatePngTexture("./Textures/Item/Oil.png");
+	m_Tex_Boat1 = CreatePngTexture("./Textures/Item/Board.png");
+	m_Tex_Boat2 = CreatePngTexture("./Textures/Item/BoltAndNut.png");
+	m_Tex_Boat3 = CreatePngTexture("./Textures/Item/ToolBox.png");
+	m_Tex_PlayerBlue = CreatePngTexture("./Textures/Player/PlayerBlue.png");
+	m_Tex_PlayerRed = CreatePngTexture("./Textures/Player/PlayerRed.png");
+	m_Tex_PlayerOrange = CreatePngTexture("./Textures/Player/PlayerOrange.png");
+	m_Tex_PlayerGreen = CreatePngTexture("./Textures/Player/PlayerGreen.png");
 
+	m_Tex_OffBoat0 = CreatePngTexture("./Textures/Item/OilOff.png");
+	m_Tex_OffBoat1 = CreatePngTexture("./Textures/Item/BoardOff.png");
+	m_Tex_OffBoat2 = CreatePngTexture("./Textures/Item/BoltAndNutOff.png");
+	m_Tex_OffBoat3 = CreatePngTexture("./Textures/Item/ToolBoxOff.png");
 
-
+	m_Tex_Bullet = CreatePngTexture("./Textures/Bullet.png");
+	m_Tex_Cloud = CreatePngTexture("./Textures/Cloud.png");
 	// Title
 	m_Tex_TitleEnter = CreatePngTexture("./Textures/Title/TitleEnter.png");
 	m_Tex_TitleCredit = CreatePngTexture("./Textures/Title/TitleCredit.png");
@@ -1132,7 +1145,6 @@ float cube[] = {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	
 }
 
 void Renderer::CreateParticle()
@@ -1937,7 +1949,7 @@ void Renderer::InitializeParticle()
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBO_Particle);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(float)*particleFloatCount, particleVertices, GL_STATIC_DRAW);
 }
-void Renderer::DrawParticle(float amount) //amount : 0~1, 0->no particles, 1->full particles
+void Renderer::DrawParticle(int iParticleType, float amount) //amount : 0~1, 0->no particles, 1->full particles
 {
 	GLuint shader = m_Shader_Particle;
 
@@ -1951,7 +1963,15 @@ void Renderer::DrawParticle(float amount) //amount : 0~1, 0->no particles, 1->fu
 	GLuint samplerTex = glGetUniformLocation(shader, "u_Texture");
 	glUniform1i(samplerTex, 0);
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, m_Tex_Particle);
+
+	switch (iParticleType) {
+	case 0:
+		glBindTexture(GL_TEXTURE_2D, m_Tex_Particle);
+		break;
+	}
+	
+
+
 
 	GLuint uniformTime = glGetUniformLocation(shader, "u_Time");
 	glUniform1f(uniformTime, g_time);
@@ -2122,7 +2142,7 @@ void Renderer::DrawBullet(float x, float y, float z) {
 	glUniform1i(texture, 0);
 
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, m_Tex_Brick);
+	glBindTexture(GL_TEXTURE_2D, m_Tex_Bullet);
 
 	glm::mat4 m4ModelPosition = glm::translate(glm::mat4(1.f), glm::vec3(x, y, z)) *
 		glm::scale(glm::mat4(1.f), glm::vec3(1.f, 1.f, 1.f));
@@ -2158,7 +2178,7 @@ void Renderer::DrawBullet(float x, float y, float z) {
 
 }
 
-void Renderer::DrawCube(float x, float y, float z)
+void Renderer::DrawCube(int iTextureID, float x, float y, float z, float fScaleX, float fScaleY, float fScaleZ)
 {
 	GLuint shader = m_Shader_Proj;
 
@@ -2177,12 +2197,47 @@ void Renderer::DrawCube(float x, float y, float z)
 	GLuint texture = glGetUniformLocation(shader, "u_Texture");
 
 	glUniform1i(texture, 0);
-
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, m_Tex_Brick);
+	// 4 Red
+	// 5 Blue
+	// 6 Orange
+	// 7 Green
+	switch (iTextureID) {
+	case 0:
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, m_Tex_Boat0);
+		break;
+	case 1:
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, m_Tex_Boat1);
+		break;
+	case 2:
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, m_Tex_Boat2);
+		break;
+	case 3:
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, m_Tex_Boat3);
+		break;
+	case 4:
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, m_Tex_PlayerRed);
+		break;
+	case 5:
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, m_Tex_PlayerBlue);
+		break;
+	case 6:
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, m_Tex_PlayerOrange);
+		break;
+	case 7:
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, m_Tex_PlayerGreen);
+		break;
+	}
 
 	glm::mat4 m4ModelPosition = glm::translate(glm::mat4(1.f), glm::vec3(x, y, z)) * 
-		glm::scale(glm::mat4(1.f), glm::vec3(10.f, 16.f, 10.f));
+		glm::scale(glm::mat4(1.f), glm::vec3(fScaleX, fScaleY, fScaleZ));
 	m4ModelPosition *= m_m4Model;
 	//m_m4ModelTranslation
 	glUniformMatrix4fv(projView, 1, GL_FALSE, &m_m4ProjView[0][0]);
@@ -2217,7 +2272,7 @@ void Renderer::DrawCube(float x, float y, float z)
 
 
 
-void Renderer::DrawCube(float x, float y, float z, float rot_x, float rot_y, float rot_z)
+void Renderer::DrawCube(int iTextureID, float x, float y, float z, float rot_x, float rot_y, float rot_z, float fScaleX, float fScaleY, float fScaleZ)
 {
 	//printf("DrawCube : [%f, %f, %f] \n", rot_x, rot_y, rot_z);
 
@@ -2243,9 +2298,44 @@ void Renderer::DrawCube(float x, float y, float z, float rot_x, float rot_y, flo
 	GLuint texture = glGetUniformLocation(shader, "u_Texture");
 
 	glUniform1i(texture, 0);
-
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, m_Tex_Brick);
+	// 4 Red
+	// 5 Blue
+	// 6 Orange
+	// 7 Green
+	switch (iTextureID) {
+	case 0:
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, m_Tex_Boat0);
+		break;
+	case 1:
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, m_Tex_Boat1);
+		break;
+	case 2:
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, m_Tex_Boat2);
+		break;
+	case 3:
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, m_Tex_Boat3);
+		break;
+	case 4:
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, m_Tex_PlayerRed);
+		break;
+	case 5:
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, m_Tex_PlayerBlue);
+		break;
+	case 6:
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, m_Tex_PlayerOrange);
+		break;
+	case 7:
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, m_Tex_PlayerGreen);
+		break;
+	}
 	//glm::mat4 m4ModelPosition = glm::translate(glm::mat4(1.f), glm::vec3(x, y, z)) * glm::eulerAngleXYZ(rot_x, rot_y, rot_z) *
 	//	glm::scale(glm::mat4(1.f), glm::vec3(10.f, 16.f, 10.f));
 	//glm::mat4 m4Rot = glm::eulerAngleXYZ(rot_x, rot_y, rot_z);
@@ -2373,6 +2463,35 @@ void Renderer::DrawUITexture(int i_iTextureId, float i_fStartPosX, float i_fStar
 		break;
 	case 19:
 		glBindTexture(GL_TEXTURE_2D, m_Tex_TimerComment);
+		break;
+		// 아이템 안먹었을때
+	case 20:
+		glBindTexture(GL_TEXTURE_2D, m_Tex_OffBoat0);
+		break;
+	case 21:
+		glBindTexture(GL_TEXTURE_2D, m_Tex_OffBoat1);
+		break;
+	case 22:
+		glBindTexture(GL_TEXTURE_2D, m_Tex_OffBoat2);
+		break;
+	case 23:
+		glBindTexture(GL_TEXTURE_2D, m_Tex_OffBoat3);
+		break;
+		// 아이템 먹었을때 
+	case 24:
+		glBindTexture(GL_TEXTURE_2D, m_Tex_Boat3);
+		break;
+	case 25:
+		glBindTexture(GL_TEXTURE_2D, m_Tex_Boat3);
+		break;
+	case 26:
+		glBindTexture(GL_TEXTURE_2D, m_Tex_Boat3);
+		break;
+	case 27:
+		glBindTexture(GL_TEXTURE_2D, m_Tex_Boat3);
+		break;
+	case 28:
+		glBindTexture(GL_TEXTURE_2D, m_Tex_Cloud);
 		break;
 	}
 	GLuint pos = glGetAttribLocation(shader, "a_Position");
@@ -2511,7 +2630,7 @@ void Renderer::GenFBOs()
 
 void Renderer::Bogang()
 {
-	DrawParticle(10.f);
+	//DrawParticle(10.f);
 	BloomPass2(m_Tex_P1_Emissive);
 	BloomPass3(m_Tex_P1_Color, m_Tex_P2_Bloom);
 	DrawTexture(m_Tex_P1_Color, 0, 0, 100, 100);

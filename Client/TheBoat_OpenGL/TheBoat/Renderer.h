@@ -68,6 +68,25 @@ public:
 	GLuint m_Tex_HpBar = 0;
 	GLuint m_Tex_TimerComment = 0;
 
+	GLuint m_Tex_Boat0 = 0;
+	GLuint m_Tex_Boat1 = 0;
+	GLuint m_Tex_Boat2 = 0;
+	GLuint m_Tex_Boat3 = 0;
+
+	GLuint m_Tex_OffBoat0 = 0;
+	GLuint m_Tex_OffBoat1 = 0;
+	GLuint m_Tex_OffBoat2 = 0;
+	GLuint m_Tex_OffBoat3 = 0;
+
+
+	GLuint m_Tex_PlayerRed = 0;
+	GLuint m_Tex_PlayerOrange = 0;
+	GLuint m_Tex_PlayerGreen = 0;
+	GLuint m_Tex_PlayerBlue = 0;
+
+	GLuint m_Tex_Bullet = 0;
+	GLuint m_Tex_Cloud = 0;
+
 
 	// Camera Setting 
 	void SetCameraLook(float x, float y, float z);
@@ -130,12 +149,12 @@ public:
 
 	void DrawSTParticle(float sx, float sy, float tx, float ty, float time);
 	void InitializeParticle();
-	void DrawParticle(float amount);
+	void DrawParticle(int iParticleType, float amount);
 
 
-	void DrawCube(float x, float y, float z);
+	void DrawCube(int iTextureID, float x, float y, float z, float fScaleX, float fScaleY, float fScaleZ);
 	void DrawBullet(float x, float y, float z);
-	void DrawCube(float x, float y, float z, float rot_x, float rot_y, float rot_z);
+	void DrawCube(int iTextureID, float x, float y, float z, float rot_x, float rot_y, float rot_z, float fScaleX, float fScaleY, float fScaleZ);
 
 	float m_targetPointX, m_targetPointY;
 

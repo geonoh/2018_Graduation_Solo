@@ -246,7 +246,7 @@ void ServerMgr::ProcessPacket(char* ptr) {
 	case SC_WORLD_TIME: {
 		SC_PACKET_TIME* packets = reinterpret_cast<SC_PACKET_TIME*>(ptr);
 		m_fWorldTime = packets->world_time;
-		//printf("시간은 : %f\n", m_fWorldTime);
+		printf("시간은 : %f\n", m_fWorldTime);
 		break;
 	}
 	case SC_PLAYER_READY: {
@@ -281,8 +281,32 @@ void ServerMgr::ProcessPacket(char* ptr) {
 		m_bGameStart = true;
 		break;
 	}
+	case SC_BOAT_ITEM_GEN: {
+		SC_PACKET_ITEM_GEN * packets = reinterpret_cast<SC_PACKET_ITEM_GEN*>(ptr);
+		int iItemType = packets->item_type;
+		m_itemBoat[iItemType].m_ItemType = iItemType;
+		m_itemBoat[iItemType].m_bUse = true;
+		m_itemBoat[iItemType].x = packets->x;
+		m_itemBoat[iItemType].y = packets->y;
+		m_itemBoat[iItemType].z = packets->z;
 
+		printf("아이템 도착 Type %d, [%f, %f, %f] \n", iItemType,
+			m_itemBoat[iItemType].x,
+			m_itemBoat[iItemType].y,
+			m_itemBoat[iItemType].z);
+		break;
 	}
+	case SC_PLAYER_HP_UPDATE: {
+		SC_PACKET_PLAYER_HP_UPDATE * packets = reinterpret_cast<SC_PACKET_PLAYER_HP_UPDATE*>(ptr);
+		printf("%d Player HP : %d \n", packets->m_cPlayerID, packets->m_fHp);
+		client_hp[packets->m_cPlayerID] = packets->m_fHp;
+		break;
+	}
+	}
+}
+
+Item ServerMgr::GetBoatItem(int iItemNumber) {
+	return m_itemBoat[iItemNumber];
 }
 
 float ServerMgr::GetTime() {

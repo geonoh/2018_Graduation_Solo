@@ -31,7 +31,7 @@ class ServerMgr
 	glm::vec3 m_v3PlayerLookVector[MAX_PLAYER];
 
 	glm::vec3 collision_pos;
-	float client_hp[4] = { 0 };
+	float client_hp[MAX_PLAYER] = { 0.f };
 	int camera_id = 0;
 	string server_ip;
 
@@ -61,7 +61,12 @@ class ServerMgr
 	// 1 = Blue
 	bool m_bTeam[4]{ false };
 	bool m_bGameStart = false;
+
+	Item m_itemBoat[4];
+	float m_fPlayerHP[MAX_PLAYER];
+
 public:
+	Item GetBoatItem(int iItemNumber);
 	mutex m_mutexBulletLock[MAX_PLAYER];
 	int GetCurrentAmmo();
 	int GetTotalAmmo();

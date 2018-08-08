@@ -41,6 +41,7 @@
 #define ITEM_BOAT_GEN_TIME			120.f
 #define ITEM_AMMO_GEN_TIME			2.f
 
+#define PLAYER_HP_UPDATE_TIME		1.f
 
 ///////////////////////////////////////////////////
 // Server To Client
@@ -52,33 +53,36 @@
 #define SC_COLLSION_PB			6	// Collsion Player to Bullet
 #define SC_COLLSION_BDP			7	// Building to Player
 #define SC_COLLSION_BB			8	// Bullet Building
-#define SC_COLLSION_TB			31	// Terrain Bullet
-#define SC_ITEM_GEN				9	// Actually Item gen packet
-#define SC_BUILDING_GEN			10
-#define SC_GAME_START			11
-#define SC_OUT_OF_AMMO			12
-#define SC_FULLY_AMMO			13
-#define SC_WORLD_TIME			14
-#define SC_AMMO					24
-#define SC_PLAYER_READY			25
-#define SC_PLAYER_READY_CANCLE	26
-#define SC_MODE_TEAM			27
-#define SC_MODE_MELEE			28
-#define SC_TEAM_RED				29
-#define SC_TEAM_BLUE			30
+#define SC_COLLSION_TB			9	// Terrain Bullet
+#define SC_ITEM_GEN				10	// Actually Item gen packet
+#define SC_BUILDING_GEN			11
+#define SC_GAME_START			12
+#define SC_OUT_OF_AMMO			13
+#define SC_FULLY_AMMO			14
+#define SC_WORLD_TIME			15
+#define SC_AMMO					16
+#define SC_PLAYER_READY			17
+#define SC_PLAYER_READY_CANCLE	18
+#define SC_MODE_TEAM			19
+#define SC_MODE_MELEE			20
+#define SC_TEAM_RED				21
+#define SC_TEAM_BLUE			22
+#define SC_BOAT_ITEM_GEN		23
+#define SC_PLAYER_HP_UPDATE		34
 ///////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////
 // Event
-#define EVT_SEND_PACKET			15
-#define EVT_RECV_PACKET			16
-#define EVT_COLLISION			17	//
-#define EVT_PLAYER_POS_SEND		18	//
-#define EVT_BULLET_GENERATE		19	//
-#define EVT_BULLET_UPDATE		20	//
-#define EVT_BOAT_ITEM_GEN		21	//
-#define EVT_SEND_TIME			22	//
-#define EVT_AMMO_ITEM_GEN		23	//
+#define EVT_SEND_PACKET			24
+#define EVT_RECV_PACKET			25
+#define EVT_COLLISION			26	//
+#define EVT_PLAYER_POS_SEND		27	//
+#define EVT_BULLET_GENERATE		28	//
+#define EVT_BULLET_UPDATE		29	//
+#define EVT_BOAT_ITEM_GEN		30	//
+#define EVT_SEND_TIME			31	//
+#define EVT_AMMO_ITEM_GEN		32	//
+#define EVT_PLAYER_HP_UPDATE	33
 ///////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////
@@ -273,6 +277,13 @@ struct SC_PACKET_GAMEMODE {
 	BYTE size;
 	BYTE type;
 
+};
+
+struct SC_PACKET_PLAYER_HP_UPDATE {
+	BYTE size;
+	BYTE type;
+	char m_cPlayerID;
+	float m_fHp;
 };
 
 // 클라->서버

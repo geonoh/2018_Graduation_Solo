@@ -1,9 +1,6 @@
 #include "stdafx.h"
 #include "ServerFramework.h"
 #include "CHeightMapImage.h"
-#include "Building.h"
-#include "Object.h"
-#include "Item.h"
 
 void ErrorDisplay(const char* msg, int err_no) {
 	WCHAR *lpMsgBuf;
@@ -24,12 +21,12 @@ ServerFramework::ServerFramework()
 
 ServerFramework::~ServerFramework()
 {
-	for (int i = 0; i < OBJECT_BUILDING; ++i) {
-		delete building[i];
-	}
-	for (int i = 0; i < MAX_ITEM; ++i) {
-		delete items[i];
-	}
+	//for (int i = 0; i < OBJECT_BUILDING; ++i) {
+	//	delete building[i];
+	//}
+	//for (int i = 0; i < MAX_ITEM; ++i) {
+	//	delete items[i];
+	//}
 	delete height_map;
 }
 
@@ -628,7 +625,7 @@ void ServerFramework::GameStart() {
 	m_bGameStart = true;
 	m_bIsAmmoGen = true;
 
-	m_fStartGameTime = GetTickCount();
+	//m_fStartGameTime = GetTickCount();
 }
 
 void ServerFramework::WorkerThread() {
@@ -686,96 +683,166 @@ void ServerFramework::WorkerThread() {
 			}
 
 		}
-		else if (overlapped_buffer->evt_type == EVT_AMMO_ITEM_GEN) {
-			int ammo_item_gen = 0;
-			for (int i = MAX_BOAT_ITEM; i < MAX_ITEM; ++i) {
-				if (items[i]->in_use) {
-					ammo_item_gen++;
-				}
-			}
-			if (ammo_item_gen < MAX_ITEM - MAX_BOAT_ITEM) {
-				SC_PACKET_ITEM_GEN packets;
-				packets.size = sizeof(SC_PACKET_ITEM_GEN);
-				packets.type = SC_ITEM_GEN;
-
-				int dice;
-				while (true) {
-					dice = rand() % (MAX_ITEM - MAX_BOAT_ITEM) + MAX_BOAT_ITEM;
-					if (items[dice]->in_use)
-						continue;
-					else
-						break;
-				}
-				items[dice]->in_use = true;
-
-				// dice가 짝수면 주무기
-				// dice가 홀수면 보조무기
-				// 참고로 Type은 0~3까지는 보트 부품
-				// type 4 -> 주무기
-				// type 5 -> 보조무기
-				if (dice % 2 == 0) {
-					items[dice]->SetItemType(4);
-				}
-				else {
-					items[dice]->SetItemType(5);
-				}
-				packets.x = rand() % 4000;
-				packets.z = rand() % 4000;
-				packets.y = height_map->GetHeight(packets.x + DX12_TO_OPGL, packets.z + DX12_TO_OPGL) + PLAYER_HEIGHT;
-				packets.item_type = dice;
-
-				items[dice]->SetPosition(packets.x, packets.y, packets.z);
-
-				// 부품의 타입도 정해야한다. 
-				printf("[아이템 생성 : Type %d] : %f %f %f \n", items[dice]->GetItemType(), packets.x, packets.y, packets.z);
-				for (int i = 0; i < MAX_PLAYER; ++i) {
-					if (m_Clients[i].in_use == true) {
-						SendPacket(i, &packets);
+		else if (overlapped_buffer->evt_type == EVT_PLAYER_HP_UPDATE) {
+			for (int i = 0; i < MAX_PLAYER; ++i) {
+				if (m_Clients[i].in_use && m_BoatGenedMap[0]) {
+					if (-256.f < m_Clients[i].x&&m_Clients[i].x <= 0.f) {
+						if (-256.f <= m_Clients[i].z && m_Clients[i].z <= 0.f) {
+							m_Clients[i].hp -= 1.f;
+							SC_PACKET_PLAYER_HP_UPDATE packets;
+							packets.size = sizeof(SC_PACKET_PLAYER_HP_UPDATE);
+							packets.type = SC_PLAYER_HP_UPDATE;
+							packets.m_fHp = m_Clients[i].hp;
+							packets.m_cPlayerID = i;
+							printf("%d Player HP : %d \n", packets.m_cPlayerID, packets.m_fHp);
+							SendPacket(i, &packets);
+						}
 					}
 				}
-				m_bIsAmmoGen = true;
+				if (m_Clients[i].in_use && m_BoatGenedMap[1]) {
+					if (-256.f < m_Clients[i].x&&m_Clients[i].x <= 0) {
+						if (0 <= m_Clients[i].z && m_Clients[i].z <= 256.f) {
+							m_Clients[i].hp -= 1.f;
+							SC_PACKET_PLAYER_HP_UPDATE packets;
+							packets.size = sizeof(SC_PACKET_PLAYER_HP_UPDATE);
+							packets.type = SC_PLAYER_HP_UPDATE;
+							packets.m_fHp = m_Clients[i].hp;
+							packets.m_cPlayerID = i;
+							printf("%d Player HP : %d \n", packets.m_cPlayerID, packets.m_fHp);
+							SendPacket(i, &packets);
+						}
+					}
+				}
+				if (m_Clients[i].in_use && m_BoatGenedMap[2]) {
+					if (0.f < m_Clients[i].x&&m_Clients[i].x <= 256.f) {
+						if (0 <= m_Clients[i].z && m_Clients[i].z <= 256.f) {
+							m_Clients[i].hp -= 1.f;
+							SC_PACKET_PLAYER_HP_UPDATE packets;
+							packets.size = sizeof(SC_PACKET_PLAYER_HP_UPDATE);
+							packets.type = SC_PLAYER_HP_UPDATE;
+							packets.m_fHp = m_Clients[i].hp;
+							packets.m_cPlayerID = i;
+							printf("%d Player HP : %d \n", packets.m_cPlayerID, packets.m_fHp);
+							SendPacket(i, &packets);
+						}
+					}
+				}
+				if (m_Clients[i].in_use && m_BoatGenedMap[3]) {
+					if (0.f < m_Clients[i].x&&m_Clients[i].x <= 256.f) {
+						if (-256.f <= m_Clients[i].z && m_Clients[i].z <= 0.f) {
+							m_Clients[i].hp -= 1.f;
+							SC_PACKET_PLAYER_HP_UPDATE packets;
+							packets.size = sizeof(SC_PACKET_PLAYER_HP_UPDATE);
+							packets.type = SC_PLAYER_HP_UPDATE;
+							packets.m_fHp = m_Clients[i].hp;
+							packets.m_cPlayerID = i;
+							printf("%d Player HP : %d \n", packets.m_cPlayerID, packets.m_fHp);
+							SendPacket(i, &packets);
+						}
+					}
+				}
 			}
 		}
+		else if (overlapped_buffer->evt_type == EVT_AMMO_ITEM_GEN) {
+			//int ammo_item_gen = 0;
+			//for (int i = MAX_BOAT_ITEM; i < MAX_ITEM; ++i) {
+			//	if (items[i]->in_use) {
+			//		ammo_item_gen++;
+			//	}
+			//}
+			//if (ammo_item_gen < MAX_ITEM - MAX_BOAT_ITEM) {
+			//	SC_PACKET_ITEM_GEN packets;
+			//	packets.size = sizeof(SC_PACKET_ITEM_GEN);
+			//	packets.type = SC_ITEM_GEN;
+
+			//	int dice;
+			//	while (true) {
+			//		dice = rand() % (MAX_ITEM - MAX_BOAT_ITEM) + MAX_BOAT_ITEM;
+			//		if (items[dice]->in_use)
+			//			continue;
+			//		else
+			//			break;
+			//	}
+			//	items[dice]->in_use = true;
+
+			//	// dice가 짝수면 주무기
+			//	// dice가 홀수면 보조무기
+			//	// 참고로 Type은 0~3까지는 보트 부품
+			//	// type 4 -> 주무기
+			//	// type 5 -> 보조무기
+			//	if (dice % 2 == 0) {
+			//		items[dice]->SetItemType(4);
+			//	}
+			//	else {
+			//		items[dice]->SetItemType(5);
+			//	}
+			//	packets.x = rand() % 4000;
+			//	packets.z = rand() % 4000;
+			//	packets.y = height_map->GetHeight(packets.x + DX12_TO_OPGL, packets.z + DX12_TO_OPGL) + PLAYER_HEIGHT;
+			//	packets.item_type = dice;
+
+			//	items[dice]->SetPosition(packets.x, packets.y, packets.z);
+
+			//	// 부품의 타입도 정해야한다. 
+			//	printf("[아이템 생성 : Type %d] : %f %f %f \n", items[dice]->GetItemType(), packets.x, packets.y, packets.z);
+			//	for (int i = 0; i < MAX_PLAYER; ++i) {
+			//		if (m_Clients[i].in_use == true) {
+			//			SendPacket(i, &packets);
+			//		}
+			//	}
+			//	m_bIsAmmoGen = true;
+			//}
+		}
 		else if (overlapped_buffer->evt_type == EVT_BOAT_ITEM_GEN) {
-			int boat_item_gen = 0;
-			for (int i = 0; i < MAX_BOAT_ITEM; ++i) {
-				if (items[i]->in_use) {
-					boat_item_gen++;
+
+			int iDice = 0;
+			while (true) {
+				iDice = rand() % 4;
+				if (m_iDiceCounter == 4) break;
+				if (!m_itemBoat[iDice].m_bUse) {
+					break;
+				}
+				else {
+					m_iDiceCounter++;
 				}
 			}
-			if (boat_item_gen < MAX_BOAT_ITEM) {
-				SC_PACKET_ITEM_GEN packets;
-				packets.size = sizeof(SC_PACKET_ITEM_GEN);
-				packets.type = SC_ITEM_GEN;
-
-				int dice;
-				while (true) {
-					dice = rand() % MAX_BOAT_ITEM;
-					if (items[dice]->in_use)
-						continue;
-					else
-						break;
-				}
-				items[dice]->in_use = true;
-				items[dice]->SetItemType(dice);
-				packets.x = rand() % 4000;
-				packets.z = rand() % 4000;
-				packets.y = height_map->GetHeight(packets.x + DX12_TO_OPGL, packets.z + DX12_TO_OPGL) + PLAYER_HEIGHT;
-				packets.item_type = dice;
-
-				items[dice]->SetPosition(packets.x, packets.y, packets.z);
-
-				// 부품의 타입도 정해야한다. 
-				printf("[아이템 생성 : Type %d] : %f %f %f \n", items[dice]->GetItemType(), packets.x, packets.y, packets.z);
-				for (int i = 0; i < MAX_PLAYER; ++i) {
-					if (m_Clients[i].in_use == true) {
-						SendPacket(i, &packets);
-					}
-				}
-
-				m_bIsBoatGen = true;
+			// 여기서 iDice가 type이 된다. 
+			m_itemBoat[iDice].m_bUse = true;
+			m_itemBoat[iDice].m_ItemType = iDice;
+			m_BoatGenedMap[iDice] = true;
+			switch (iDice) {
+			case 0:
+				m_itemBoat[iDice].x = -195.f;
+				m_itemBoat[iDice].y = 56.f;
+				m_itemBoat[iDice].z = -120.f;
+				break;
+			case 1:
+				m_itemBoat[iDice].x = -130;
+				m_itemBoat[iDice].y = 71.f;
+				m_itemBoat[iDice].z = 138.f;
+				break;
+			case 2:
+				m_itemBoat[iDice].x = 128.f;
+				m_itemBoat[iDice].y = 75.f;
+				m_itemBoat[iDice].z = 128.f;
+				break;
+			case 3:
+				m_itemBoat[iDice].x = 117.f;
+				m_itemBoat[iDice].y = 48.f;
+				m_itemBoat[iDice].z = -136.f;
+				break;
 			}
 
+			SC_PACKET_ITEM_GEN packets;
+			packets.size = sizeof(SC_PACKET_ITEM_GEN);
+			packets.type = SC_BOAT_ITEM_GEN;
+			packets.item_type = m_itemBoat[iDice].m_ItemType;
+			packets.x = m_itemBoat[iDice].x;
+			packets.y = m_itemBoat[iDice].y;
+			packets.z = m_itemBoat[iDice].z;
+			for (int i = 0; i < MAX_PLAYER; ++i) {
+				SendPacket(i, &packets);
+			}
 		}
 		// TimerThread에서 호출
 		// 1/20 마다 모든 플레이어에게 정보 전송
@@ -919,7 +986,6 @@ void ServerFramework::WorkerThread() {
 				packets.m_TotalAmmo = m_Clients[shooter_id].m_TotalAmmo;
 				m_mutexAmmoLock[shooter_id].unlock();
 				SendPacket(shooter_id, &packets);
-				bullet_times[shooter_id] = 0;
 			}
 			else {
 
@@ -1037,7 +1103,6 @@ void ServerFramework::Update(duration<float>& elapsed_time) {
 
 
 
-
 	sender_time += elapsed_time.count();
 	if (sender_time >= UPDATE_TIME) {   // 1/60 초마다 데이터 송신
 		for (int i = 0; i < MAX_PLAYER; ++i) {
@@ -1055,15 +1120,7 @@ void ServerFramework::Update(duration<float>& elapsed_time) {
 		m_fTimeSend += elapsed_time.count();
 		if (m_fTimeSend >= TIME_SEND_TIME) {
 			ol_ex[9].evt_type = EVT_SEND_TIME;
-			// chrono count의 경우 초 단위이므로 GetTickCount의 단위 (ms)를
-			// 맞춰주기 위해서 1000을 곱해줘야한다. 
-			if (ITEM_BOAT_GEN_TIME * 1000 - (GetTickCount() - m_fStartGameTime) < 0) {
-				m_fStartGameTime = GetTickCount();
-			}
-			//ol_ex[9].world_time = ITEM_BOAT_GEN_TIME * 1000 - (GetTickCount() - m_fStartGameTime);
-
-			// 아 이게 남은시간이구나
-			ol_ex[9].world_time = m_fBoatGenTime;
+			ol_ex[9].world_time = ITEM_BOAT_GEN_TIME - m_fBoatGenTime;
 			PostQueuedCompletionStatus(iocp_handle, 0, 9, reinterpret_cast<WSAOVERLAPPED*>(&ol_ex[9]));
 			m_fTimeSend = 0.f;
 		}
@@ -1074,7 +1131,7 @@ void ServerFramework::Update(duration<float>& elapsed_time) {
 				ol_ex[8].evt_type = EVT_BOAT_ITEM_GEN;
 				PostQueuedCompletionStatus(iocp_handle, 0, 0, reinterpret_cast<WSAOVERLAPPED*>(&ol_ex[8]));
 				m_fBoatGenTime = 0.f;
-				m_bIsBoatGen = false;
+				//m_bIsBoatGen = false;
 			}
 		}
 
@@ -1087,6 +1144,15 @@ void ServerFramework::Update(duration<float>& elapsed_time) {
 				m_bIsAmmoGen = false;
 			}
 		}
+
+		// 1초마다 플레이어 체력 갱신
+		m_fPlayerHpUpdateTime += elapsed_time.count();
+		if (m_fPlayerHpUpdateTime >= PLAYER_HP_UPDATE_TIME) {
+			ol_ex[11].evt_type = EVT_PLAYER_HP_UPDATE;
+			PostQueuedCompletionStatus(iocp_handle, 0, 11, reinterpret_cast<WSAOVERLAPPED*>(&ol_ex[11]));
+			m_fPlayerHpUpdateTime = 0.f;
+		}
+
 	}
 
 

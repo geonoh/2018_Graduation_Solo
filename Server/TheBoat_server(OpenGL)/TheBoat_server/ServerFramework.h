@@ -1,8 +1,6 @@
 #pragma once
 
 class CHeightMapImage;
-class Building;
-class Item;
 
 struct Event {
 	int id;
@@ -34,13 +32,17 @@ class ServerFramework
 	float m_fBoatGenTime = 0.f;
 	float m_fAmmoGenTime = 0.f;
 	float m_fTimeSend = 0.f;
-	bool m_bIsBoatGen = false;
+
+	// 이거 False로 바꿔야함
+	bool m_bIsBoatGen = true;	//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+								//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
 	bool m_bIsAmmoGen = false;
 	bool m_bGameStart = false;
 
 	bool m_bShootStart = false;
 
-	float m_fStartGameTime = 0.f;
+	//float m_fStartGameTime = 0.f;
 	mutex m_mutexBulletLock[MAX_PLAYER];
 	mutex m_mutexAmmoLock[MAX_PLAYER];
 	mutex m_mutexServerLock;
@@ -61,13 +63,16 @@ class ServerFramework
 	//int bullet_counter[4] = { 0 };
 
 
-	// 플레이어마다 bullet 시간을 가지고 있다. 
-	float bullet_times[4];
-
 	// Building obejct는 총 10개
 	//Object* object_mother;
-	Building* building[OBJECT_BUILDING];
-	Item* items[12];
+	//Building* building[OBJECT_BUILDING];
+	//Item* items[12];
+	Item m_itemBoat[4];
+	bool m_BoatGenedMap[4]{ false };
+	int m_iDiceCounter = 0;
+	int m_iDiceMapCounter = 0;
+	float m_fPlayerHpUpdateTime = 0.f;
+
 
 
 public:
