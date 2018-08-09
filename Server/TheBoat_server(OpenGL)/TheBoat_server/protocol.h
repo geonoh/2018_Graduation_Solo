@@ -40,8 +40,15 @@
 // Boat 아이템 생성 시간.
 #define ITEM_BOAT_GEN_TIME			120.f
 #define ITEM_AMMO_GEN_TIME			2.f
-
 #define PLAYER_HP_UPDATE_TIME		1.f
+
+// 거리 
+#define RAD_PLAYER				5.f
+#define RAD_ITEM				3.f
+#define RAD_BULLET				1.f
+
+
+
 
 ///////////////////////////////////////////////////
 // Server To Client
@@ -69,6 +76,7 @@
 #define SC_TEAM_BLUE			22
 #define SC_BOAT_ITEM_GEN		23
 #define SC_PLAYER_HP_UPDATE		34
+#define SC_PLAYER_GET_ITEM		35
 ///////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////
@@ -119,6 +127,7 @@
 #define CS_MODE_TEAM				28
 #define CS_MODE_MELEE				29
 #define CS_DEBUG_TIME				30
+#define CS_ASSENBLE_PARTS			31
 ///////////////////////////////////////////////////
 
 
@@ -182,6 +191,13 @@ enum SubWeapons {
 };
 
 // 서버->클라
+struct SC_PACKET_GET_ITEM {
+	BYTE size;
+	BYTE type;
+	char m_cItemType;
+};
+
+
 struct SC_PACKET_ENTER_PLAYER {
 	BYTE size;
 	BYTE type;
@@ -287,6 +303,11 @@ struct SC_PACKET_PLAYER_HP_UPDATE {
 };
 
 // 클라->서버
+struct CS_PACKET_ASSEMBLE {
+	BYTE size;
+	BYTE type;
+};
+
 struct CS_PACKET_BIGGEST {
 	BYTE size;
 	BYTE type;

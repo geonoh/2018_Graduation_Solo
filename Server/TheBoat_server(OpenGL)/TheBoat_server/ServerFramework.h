@@ -59,6 +59,8 @@ class ServerFramework
 
 	Bullet bullets[4][MAX_AMMO] = { 0 };
 	mutex bullet_lock;
+
+	mutex m_mutexBoatItem;
 	// 플레이어별 몇 번째 총알까지 발사했는지 저장하는 변수
 	//int bullet_counter[4] = { 0 };
 
@@ -72,8 +74,9 @@ class ServerFramework
 	int m_iDiceCounter = 0;
 	int m_iDiceMapCounter = 0;
 	float m_fPlayerHpUpdateTime = 0.f;
-
-
+	// False = Team
+	// True = Melee
+	bool m_bGameMode = false;
 
 public:
 	void InitServer();

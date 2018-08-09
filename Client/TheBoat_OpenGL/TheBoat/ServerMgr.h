@@ -65,7 +65,9 @@ class ServerMgr
 	Item m_itemBoat[4];
 	float m_fPlayerHP[MAX_PLAYER];
 
+	bool m_bPlayerBoatParts[4] = { false };
 public:
+	bool GetPlayerHaveParts(int iPartsType);
 	Item GetBoatItem(int iItemNumber);
 	mutex m_mutexBulletLock[MAX_PLAYER];
 	int GetCurrentAmmo();

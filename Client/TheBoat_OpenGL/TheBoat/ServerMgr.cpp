@@ -199,7 +199,6 @@ void ServerMgr::ProcessPacket(char* ptr) {
 	case SC_COLLSION_TB: {
 		SC_PACKET_COLLSION_TB* packets = reinterpret_cast<SC_PACKET_COLLSION_TB*>(ptr);
 		m_Bullets[packets->m_cPlayerID][packets->m_cBulletID].in_use = false;
-		printf("²¥ »ç¶óÁü \n");
 		break;
 	}
 	case SC_COLLSION_BDP: {	// building to player
@@ -302,7 +301,17 @@ void ServerMgr::ProcessPacket(char* ptr) {
 		client_hp[packets->m_cPlayerID] = packets->m_fHp;
 		break;
 	}
+	case SC_PLAYER_GET_ITEM: {
+		SC_PACKET_GET_ITEM * packets = reinterpret_cast<SC_PACKET_GET_ITEM*>(ptr);
+		m_itemBoat[packets->m_cItemType].m_bUse = false;
+		m_bPlayerBoatParts[packets->m_cItemType] = true;
+		break;
 	}
+	}
+}
+
+bool ServerMgr::GetPlayerHaveParts(int iPartsType) {
+	return m_bPlayerBoatParts[iPartsType];
 }
 
 Item ServerMgr::GetBoatItem(int iItemNumber) {
@@ -502,6 +511,10 @@ void ServerMgr::SendPacket(int type) {
 		break;
 	case CS_DEBUG_TIME:
 		packet_buffer->type = CS_DEBUG_TIME;
+		retval = WSASend(sock, &send_wsabuf, 1, &iobytes, 0, NULL, NULL);
+		break;
+	case CS_ASSENBLE_PARTS:
+		packet_buffer->type = CS_ASSENBLE_PARTS;
 		retval = WSASend(sock, &send_wsabuf, 1, &iobytes, 0, NULL, NULL);
 		break;
 	}

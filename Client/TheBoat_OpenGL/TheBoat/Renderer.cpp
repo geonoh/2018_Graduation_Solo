@@ -2145,7 +2145,7 @@ void Renderer::DrawBullet(float x, float y, float z) {
 	glBindTexture(GL_TEXTURE_2D, m_Tex_Bullet);
 
 	glm::mat4 m4ModelPosition = glm::translate(glm::mat4(1.f), glm::vec3(x, y, z)) *
-		glm::scale(glm::mat4(1.f), glm::vec3(1.f, 1.f, 1.f));
+		glm::scale(glm::mat4(1.f), glm::vec3(RAD_BULLET * 2, RAD_BULLET * 2, RAD_BULLET * 2));
 	m4ModelPosition *= m_m4Model;
 	//m_m4ModelTranslation
 	glUniformMatrix4fv(projView, 1, GL_FALSE, &m_m4ProjView[0][0]);
@@ -2479,13 +2479,13 @@ void Renderer::DrawUITexture(int i_iTextureId, float i_fStartPosX, float i_fStar
 		break;
 		// 아이템 먹었을때 
 	case 24:
-		glBindTexture(GL_TEXTURE_2D, m_Tex_Boat3);
+		glBindTexture(GL_TEXTURE_2D, m_Tex_Boat0);
 		break;
 	case 25:
-		glBindTexture(GL_TEXTURE_2D, m_Tex_Boat3);
+		glBindTexture(GL_TEXTURE_2D, m_Tex_Boat1);
 		break;
 	case 26:
-		glBindTexture(GL_TEXTURE_2D, m_Tex_Boat3);
+		glBindTexture(GL_TEXTURE_2D, m_Tex_Boat2);
 		break;
 	case 27:
 		glBindTexture(GL_TEXTURE_2D, m_Tex_Boat3);

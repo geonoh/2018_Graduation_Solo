@@ -80,7 +80,7 @@ void ServerFramework::InitServer() {
 		m_Clients[i].m_CurrentAmmo = 30;
 		m_Clients[i].m_TotalAmmo = 90;
 		for (int j = 0; j < 4; ++j) {
-			m_Clients[i].boat_parts[j] = false;
+			m_Clients[i].m_bPlayerBoatParts[j] = false;
 		}
 	}
 
@@ -187,7 +187,13 @@ void ServerFramework::AcceptPlayer() {
 	m_Clients[client_id].overlapped_ex.wsabuf.len = sizeof(m_Clients[client_id].overlapped_ex.io_buffer);
 	m_Clients[client_id].packet_size = 0;
 	m_Clients[client_id].prev_packet_size = 0;
+
+
+
+	//m_Clients[client_id].team = e_TeamRed;
 	m_Clients[client_id].team = e_NoTeam;
+
+
 	// 플레이어 입장 표시
 	m_Clients[client_id].in_use = true;
 
@@ -537,6 +543,7 @@ void ServerFramework::ProcessPacket(int cl_id, char* packet) {
 		SC_PACKET_GAMEMODE packets;
 		packets.size = sizeof(SC_PACKET_GAMEMODE);
 		packets.type = SC_MODE_TEAM;
+		m_bGameMode = false;
 		for (int i = 0; i < MAX_PLAYER; ++i) {
 			if (m_Clients[i].in_use) {
 				SendPacket(i, &packets);
@@ -549,10 +556,65 @@ void ServerFramework::ProcessPacket(int cl_id, char* packet) {
 		SC_PACKET_GAMEMODE packets;
 		packets.size = sizeof(SC_PACKET_GAMEMODE);
 		packets.type = SC_MODE_MELEE;
+		m_bGameMode = true;
 		for (int i = 0; i < MAX_PLAYER; ++i) {
 			if (m_Clients[i].in_use) {
 				SendPacket(i, &packets);
 			}
+		}
+		break;
+	}
+	case CS_ASSENBLE_PARTS: {
+		// 게임 Status Update
+		// 이걸 F키 눌렀을때 해야함 특정지역에서 
+		printf("파트 조립\n");
+		if (m_bGameMode == false) {
+			int iTeamRed = 0;
+			int iTeamBlue = 0;
+			for (int i = 0; i < MAX_PLAYER; ++i) {
+				if (m_Clients[i].team == e_TeamRed) {
+					for (int j = 0; j < 4; ++j) {
+						if (m_Clients[i].m_bPlayerBoatParts[j]) {
+							iTeamRed++;
+						}
+					}
+				}
+				else if (m_Clients[i].team == e_TeamBlue) {
+					for (int j = 0; j < 4; ++j) {
+						if (m_Clients[i].m_bPlayerBoatParts[j]) {
+							iTeamBlue++;
+						}
+					}
+				}
+			}
+			// Red 승리
+			if (iTeamRed == 4) {
+				printf("레드 승리 \n");
+				m_bGameStart = false;
+			}
+			// Blue 승리
+			else if (iTeamBlue == 4) {
+				printf("블루 승리 \n");
+				m_bGameStart = false;
+			}
+		}
+		else {
+			int iPlayerCounter[MAX_PLAYER] = { 0 };
+
+			for (int i = 0; i < MAX_PLAYER; ++i) {
+				for (int j = 0; j < 4; ++j) {
+					if (m_Clients[i].m_bPlayerBoatParts[j]) {
+						iPlayerCounter[i]++;
+					}
+				}
+
+				if (iPlayerCounter[i] == 4) {
+					printf("%d 플레이어 승리\n", i);
+					m_bGameStart = false;
+				}
+			}
+
+
 		}
 		break;
 	}
@@ -744,104 +806,62 @@ void ServerFramework::WorkerThread() {
 			}
 		}
 		else if (overlapped_buffer->evt_type == EVT_AMMO_ITEM_GEN) {
-			//int ammo_item_gen = 0;
-			//for (int i = MAX_BOAT_ITEM; i < MAX_ITEM; ++i) {
-			//	if (items[i]->in_use) {
-			//		ammo_item_gen++;
-			//	}
-			//}
-			//if (ammo_item_gen < MAX_ITEM - MAX_BOAT_ITEM) {
-			//	SC_PACKET_ITEM_GEN packets;
-			//	packets.size = sizeof(SC_PACKET_ITEM_GEN);
-			//	packets.type = SC_ITEM_GEN;
-
-			//	int dice;
-			//	while (true) {
-			//		dice = rand() % (MAX_ITEM - MAX_BOAT_ITEM) + MAX_BOAT_ITEM;
-			//		if (items[dice]->in_use)
-			//			continue;
-			//		else
-			//			break;
-			//	}
-			//	items[dice]->in_use = true;
-
-			//	// dice가 짝수면 주무기
-			//	// dice가 홀수면 보조무기
-			//	// 참고로 Type은 0~3까지는 보트 부품
-			//	// type 4 -> 주무기
-			//	// type 5 -> 보조무기
-			//	if (dice % 2 == 0) {
-			//		items[dice]->SetItemType(4);
-			//	}
-			//	else {
-			//		items[dice]->SetItemType(5);
-			//	}
-			//	packets.x = rand() % 4000;
-			//	packets.z = rand() % 4000;
-			//	packets.y = height_map->GetHeight(packets.x + DX12_TO_OPGL, packets.z + DX12_TO_OPGL) + PLAYER_HEIGHT;
-			//	packets.item_type = dice;
-
-			//	items[dice]->SetPosition(packets.x, packets.y, packets.z);
-
-			//	// 부품의 타입도 정해야한다. 
-			//	printf("[아이템 생성 : Type %d] : %f %f %f \n", items[dice]->GetItemType(), packets.x, packets.y, packets.z);
-			//	for (int i = 0; i < MAX_PLAYER; ++i) {
-			//		if (m_Clients[i].in_use == true) {
-			//			SendPacket(i, &packets);
-			//		}
-			//	}
-			//	m_bIsAmmoGen = true;
-			//}
 		}
 		else if (overlapped_buffer->evt_type == EVT_BOAT_ITEM_GEN) {
 
-			int iDice = 0;
-			while (true) {
-				iDice = rand() % 4;
-				if (m_iDiceCounter == 4) break;
-				if (!m_itemBoat[iDice].m_bUse) {
+			if (m_iDiceCounter < 4) {
+				m_mutexBoatItem.lock();
+				int iDice = 0;
+				while (true) {
+					iDice = rand() % 4;
+					// 랜덤하게 접근한 번호가 사용중이면  닫시 랜덤 
+					if (m_BoatGenedMap[iDice] == true) {
+						continue;
+					}
+					else {
+						m_iDiceCounter++;
+						m_itemBoat[iDice].m_bUse = true;
+						m_itemBoat[iDice].m_ItemType = iDice;
+						m_BoatGenedMap[iDice] = true;
+
+						break;
+					}
+				}
+				switch (iDice) {
+				case 0:
+					m_itemBoat[iDice].x = -195.f;
+					m_itemBoat[iDice].y = 56.f;
+					m_itemBoat[iDice].z = -120.f;
+					break;
+				case 1:
+					m_itemBoat[iDice].x = -130;
+					m_itemBoat[iDice].y = 71.f;
+					m_itemBoat[iDice].z = 138.f;
+					break;
+				case 2:
+					m_itemBoat[iDice].x = 128.f;
+					m_itemBoat[iDice].y = 75.f;
+					m_itemBoat[iDice].z = 128.f;
+					break;
+				case 3:
+					m_itemBoat[iDice].x = 117.f;
+					m_itemBoat[iDice].y = 48.f;
+					m_itemBoat[iDice].z = -136.f;
 					break;
 				}
-				else {
-					m_iDiceCounter++;
-				}
-			}
-			// 여기서 iDice가 type이 된다. 
-			m_itemBoat[iDice].m_bUse = true;
-			m_itemBoat[iDice].m_ItemType = iDice;
-			m_BoatGenedMap[iDice] = true;
-			switch (iDice) {
-			case 0:
-				m_itemBoat[iDice].x = -195.f;
-				m_itemBoat[iDice].y = 56.f;
-				m_itemBoat[iDice].z = -120.f;
-				break;
-			case 1:
-				m_itemBoat[iDice].x = -130;
-				m_itemBoat[iDice].y = 71.f;
-				m_itemBoat[iDice].z = 138.f;
-				break;
-			case 2:
-				m_itemBoat[iDice].x = 128.f;
-				m_itemBoat[iDice].y = 75.f;
-				m_itemBoat[iDice].z = 128.f;
-				break;
-			case 3:
-				m_itemBoat[iDice].x = 117.f;
-				m_itemBoat[iDice].y = 48.f;
-				m_itemBoat[iDice].z = -136.f;
-				break;
-			}
 
-			SC_PACKET_ITEM_GEN packets;
-			packets.size = sizeof(SC_PACKET_ITEM_GEN);
-			packets.type = SC_BOAT_ITEM_GEN;
-			packets.item_type = m_itemBoat[iDice].m_ItemType;
-			packets.x = m_itemBoat[iDice].x;
-			packets.y = m_itemBoat[iDice].y;
-			packets.z = m_itemBoat[iDice].z;
-			for (int i = 0; i < MAX_PLAYER; ++i) {
-				SendPacket(i, &packets);
+				SC_PACKET_ITEM_GEN packets;
+				packets.size = sizeof(SC_PACKET_ITEM_GEN);
+				packets.type = SC_BOAT_ITEM_GEN;
+				packets.item_type = m_itemBoat[iDice].m_ItemType;
+				packets.x = m_itemBoat[iDice].x;
+				packets.y = m_itemBoat[iDice].y;
+				packets.z = m_itemBoat[iDice].z;
+				printf("%d Type 보냈다\n", packets.item_type);
+				for (int i = 0; i < MAX_PLAYER; ++i) {
+					SendPacket(i, &packets);
+				}
+				m_mutexBoatItem.unlock();
 			}
 		}
 		// TimerThread에서 호출
@@ -916,8 +936,33 @@ void ServerFramework::WorkerThread() {
 			}
 		}
 		else if (overlapped_buffer->evt_type == EVT_COLLISION) {
-			// 아이템과 플레이어
-
+			// 보트아이템과 플레이어
+			m_mutexBoatItem.lock();
+			for (int i = 0; i < MAX_PLAYER; ++i) {
+				if (m_Clients[i].in_use) {
+					for (int j = 0; j < 4; ++j) {
+						if (m_itemBoat[j].m_bUse) {
+							float fDist =
+								(m_itemBoat[j].x - m_Clients[i].x)*(m_itemBoat[j].x - m_Clients[i].x) +
+								(m_itemBoat[j].y - m_Clients[i].y)*(m_itemBoat[j].y - m_Clients[i].y) +
+								(m_itemBoat[j].z - m_Clients[i].z)*(m_itemBoat[j].z - m_Clients[i].z);
+							float fDistOrigin = (RAD_PLAYER + RAD_ITEM) * (RAD_PLAYER + RAD_ITEM);
+							// 충돌
+							if (fDist < fDistOrigin) {
+								SC_PACKET_GET_ITEM packets;
+								packets.size = sizeof(SC_PLAYER_GET_ITEM);
+								packets.type = SC_PLAYER_GET_ITEM;
+								packets.m_cItemType = j;
+								m_Clients[i].m_bPlayerBoatParts[j] = true;
+								m_itemBoat[j].m_bUse = false;
+								printf("%d플레이어와 %d아이템 충돌\n", i, j);
+								SendPacket(i, &packets);
+							}
+						}
+					}
+				}
+			}
+			m_mutexBoatItem.unlock();
 
 			// 총알과 플레이어
 			for (int i = 0; i < MAX_PLAYER - 1; ++i) {
@@ -1095,28 +1140,11 @@ void ServerFramework::Update(duration<float>& elapsed_time) {
 	if (m_bGameStart) {
 		ol_ex[5].evt_type = EVT_COLLISION;
 		PostQueuedCompletionStatus(iocp_handle, 0, 5, reinterpret_cast<WSAOVERLAPPED*>(&ol_ex[5]));
-	}
 
-	ol_ex[7].evt_type = EVT_BULLET_UPDATE;
-	ol_ex[7].elapsed_time = elapsed_time.count();
-	PostQueuedCompletionStatus(iocp_handle, 0, 7, reinterpret_cast<WSAOVERLAPPED*>(&ol_ex[7]));
+		ol_ex[7].evt_type = EVT_BULLET_UPDATE;
+		ol_ex[7].elapsed_time = elapsed_time.count();
+		PostQueuedCompletionStatus(iocp_handle, 0, 7, reinterpret_cast<WSAOVERLAPPED*>(&ol_ex[7]));
 
-
-
-	sender_time += elapsed_time.count();
-	if (sender_time >= UPDATE_TIME) {   // 1/60 초마다 데이터 송신
-		for (int i = 0; i < MAX_PLAYER; ++i) {
-			if (m_Clients[i].is_move_backward || m_Clients[i].is_move_foward || m_Clients[i].is_move_left || m_Clients[i].is_move_right) {
-				ol_ex[i].evt_type = EVT_PLAYER_POS_SEND;
-				ol_ex[i].elapsed_time = elapsed_time.count() + sender_time;
-				PostQueuedCompletionStatus(iocp_handle, 0, i, reinterpret_cast<WSAOVERLAPPED*>(&ol_ex[i]));
-			}
-		}
-		sender_time = 0.f;
-	}
-
-	// 월드 타임..?
-	if (m_bGameStart) {
 		m_fTimeSend += elapsed_time.count();
 		if (m_fTimeSend >= TIME_SEND_TIME) {
 			ol_ex[9].evt_type = EVT_SEND_TIME;
@@ -1153,7 +1181,23 @@ void ServerFramework::Update(duration<float>& elapsed_time) {
 			m_fPlayerHpUpdateTime = 0.f;
 		}
 
+
+		sender_time += elapsed_time.count();
+		if (sender_time >= UPDATE_TIME) {   // 1/60 초마다 데이터 송신
+			for (int i = 0; i < MAX_PLAYER; ++i) {
+				if (m_Clients[i].is_move_backward || m_Clients[i].is_move_foward || m_Clients[i].is_move_left || m_Clients[i].is_move_right) {
+					ol_ex[i].evt_type = EVT_PLAYER_POS_SEND;
+					ol_ex[i].elapsed_time = elapsed_time.count() + sender_time;
+					PostQueuedCompletionStatus(iocp_handle, 0, i, reinterpret_cast<WSAOVERLAPPED*>(&ol_ex[i]));
+				}
+			}
+			sender_time = 0.f;
+		}
+
+
 	}
+
+
 
 
 }
