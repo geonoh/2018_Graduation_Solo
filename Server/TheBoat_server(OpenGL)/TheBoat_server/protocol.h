@@ -77,6 +77,8 @@
 #define SC_BOAT_ITEM_GEN		23
 #define SC_PLAYER_HP_UPDATE		34
 #define SC_PLAYER_GET_ITEM		35
+#define SC_WEATHER_CHANGE		36
+#define SC_HIT					37
 ///////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////
@@ -191,6 +193,21 @@ enum SubWeapons {
 };
 
 // 서버->클라
+struct SC_PACKET_HIT {
+	BYTE size;
+	BYTE type;
+	float m_fHp;
+	char m_cShooterID;
+	char m_cBulletNumber;
+	char m_cHitID;
+};
+
+struct SC_PACKET_WEATHER {
+	BYTE size;
+	BYTE type;
+};
+
+
 struct SC_PACKET_GET_ITEM {
 	BYTE size;
 	BYTE type;

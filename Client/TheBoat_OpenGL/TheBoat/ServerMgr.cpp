@@ -184,32 +184,9 @@ void ServerMgr::ProcessPacket(char* ptr) {
 		//	packets->x, packets->y, packets->z);
 		break;
 	}
-	case SC_COLLSION_PB: {
-		SC_PACKET_COLLISION* packets = reinterpret_cast<SC_PACKET_COLLISION*>(ptr);
-		collision_pos.x = packets->x;
-		collision_pos.y = packets->y;
-		collision_pos.z = packets->z;
-		s_is_collide = true;
-		client_hp[packets->client_id] = packets->hp;
-		printf("%d 플레이어의 충돌지점 x : %f, y : %f, z : %f, 체력 : %f \n", packets->client_id, collision_pos.x,
-			collision_pos.y, collision_pos.z, client_hp[packets->client_id]);
-
-		break;
-	}
 	case SC_COLLSION_TB: {
 		SC_PACKET_COLLSION_TB* packets = reinterpret_cast<SC_PACKET_COLLSION_TB*>(ptr);
 		m_Bullets[packets->m_cPlayerID][packets->m_cBulletID].in_use = false;
-		break;
-	}
-	case SC_COLLSION_BDP: {	// building to player
-		SC_PACKET_COLLISION* packets = reinterpret_cast<SC_PACKET_COLLISION*>(ptr);
-		collision_pos.x = packets->x;
-		collision_pos.y = packets->y;
-		collision_pos.z = packets->z;
-		//client_hp[packets->client_id] = packets->hp;
-		//printf("%d 플레이어 벽과 꽈당 [%f, %f, %f] \n", packets->client_id, collision_pos.x,
-		//	collision_pos.y, collision_pos.z, client_hp[packets->client_id]);
-
 		break;
 	}
 	case SC_ITEM_GEN: {
@@ -307,7 +284,24 @@ void ServerMgr::ProcessPacket(char* ptr) {
 		m_bPlayerBoatParts[packets->m_cItemType] = true;
 		break;
 	}
+	case SC_WEATHER_CHANGE: {
+		SC_PACKET_WEATHER * packets = reinterpret_cast<SC_PACKET_WEATHER*>(ptr);
+		m_bWeather = true;
+		break;
 	}
+	case SC_HIT: {
+		SC_PACKET_HIT * packets = reinterpret_cast<SC_PACKET_HIT*>(ptr);
+		m_Bullets[packets->m_cShooterID][packets->m_cBulletNumber].in_use = false;
+		client_hp[packets->m_cHitID] = packets->m_fHp;
+		printf("SC_HIT : HP : %f \n", client_hp[packets->m_cHitID]);
+		break;
+	}
+	}
+}
+
+
+bool ServerMgr::GetWeather() {
+	return m_bWeather;
 }
 
 bool ServerMgr::GetPlayerHaveParts(int iPartsType) {

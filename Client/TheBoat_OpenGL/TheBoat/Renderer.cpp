@@ -3,7 +3,6 @@
 #include "LoadPng.h"
 #include <Windows.h>
 #include <cstdlib>
-#include "CHeightMapImage.h"
 
 float ToRadians(const float &fAngleInDegrees) {
 	return fAngleInDegrees * TO_RADS;
@@ -80,12 +79,6 @@ Renderer::Renderer(int windowSizeX, int windowSizeY)
 {
 	Initialize(windowSizeX, windowSizeY);
 	glm::vec3 xmf3Scale(1.f, 1.f, 1.f);
-	LPCTSTR file_name = _T("height_map.raw");
-	m_HeightMap = new CHeightMapImage(file_name, 513, 513, xmf3Scale);
-
-	//printf("directX ÁÂÇ¥ : [%f, %f, %f] OpenGL ÁÂÇ¥ : [%f, %f, %f] \n",
-	//	eye_vec.x + 256, eye_vec.y, eye_vec.z + 256.f,
-	//	eye_vec.x, eye_vec.y, eye_vec.z);
 
 	UpdateView();
 }
@@ -93,7 +86,6 @@ Renderer::Renderer(int windowSizeX, int windowSizeY)
 
 Renderer::~Renderer()
 {
-	delete m_HeightMap;
 }
 
 glm::mat4 Renderer::GetViewMatrix() const {
@@ -411,13 +403,14 @@ void Renderer::Initialize(int windowSizeX, int windowSizeY)
 		= m_m4ModelTranslation * m_m4ModelRotation*m_m4ModelScaling;
 
 
-	m_Tex_Particle = CreatePngTexture("./Textures/particle.png");
+	m_Tex_Snow = CreatePngTexture("./Textures/particle.png");
 
 	//Height Map Initialization
 	InitializeHeightMap();
 
 	//SkyBox Initialization
 	InitializeSkyBox();
+	InitializeSkyBox2();
 
 	//Cube Initialization
 	InitializeCube();
@@ -526,6 +519,11 @@ void Renderer::InitializeTextureImage() {
 
 	m_Tex_Bullet = CreatePngTexture("./Textures/Bullet.png");
 	m_Tex_Cloud = CreatePngTexture("./Textures/Cloud.png");
+
+	m_Tex_Tree = CreatePngTexture("./Textures/Tree.png");
+	m_Tex_Rock = CreatePngTexture("./Textures/Rock.png");
+
+
 	// Title
 	m_Tex_TitleEnter = CreatePngTexture("./Textures/Title/TitleEnter.png");
 	m_Tex_TitleCredit = CreatePngTexture("./Textures/Title/TitleCredit.png");
@@ -540,6 +538,8 @@ void Renderer::InitializeTextureImage() {
 	m_Tex_SelectBoxMini = CreatePngTexture("./Textures/Lobby/SelectBoxMini.png");
 	m_Tex_SelectPlayer = CreatePngTexture("./Textures/Lobby/SelectBoxPlayer.png");
 	m_Tex_PlayerReady = CreatePngTexture("./Textures/Lobby/PlayerReady.png");
+
+	m_Tex_Rain = CreatePngTexture("./Textures/Rain.png");
 }
 
 bool Renderer::IsInitialized()
@@ -696,44 +696,87 @@ float cube[] = {
 	-temp, temp, temp, 0.f, 0.f, 1.f, 1.f, 0.f,  0.f, 1.f,
 	-temp, -temp, temp, 0.f, 0.f, 1.f, 1.f, 0.f,  0.f, 0.f,
 	temp, -temp, temp, 0.f, 0.f, 1.f, 1.f, 0.f, 1.f, 0.f,
-	temp, temp, temp, 0.f, 0.f, 1.f, 1.f, 0.f, 1.f, 1.f,// first face : R
+	temp, temp, temp, 0.f, 0.f, 1.f, 1.f, 0.f, 1.f, 1.f,// front face : R
 
-	temp, -temp, temp, 1.f, 0.f, 0.f, 0.f, 1.f, 0.f, 1.f, //x, y, z, nx, ny, nz, r, g, tx, ty
-	temp, temp, -temp, 1.f, 0.f, 0.f, 0.f, 1.f, 1.f, 0.f,
-	temp, temp, temp, 1.f, 0.f, 0.f, 0.f, 1.f, 1.f, 1.f,
-	temp, -temp, temp, 1.f, 0.f, 0.f, 0.f, 1.f, 0.f, 1.f, //x, y, z, nx, ny, nz, r, g, tx, ty
-	temp, -temp, -temp, 1.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f,
-	temp, temp, -temp, 1.f, 0.f, 0.f, 0.f, 1.f, 1.f, 0.f, //second face : G
+	temp, -temp, temp, 1.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f, //x, y, z, nx, ny, nz, r, g, tx, ty
+	temp, temp, -temp, 1.f, 0.f, 0.f, 0.f, 1.f, 1.f, 1.f,
+	temp, temp, temp, 1.f, 0.f, 0.f, 0.f, 1.f, 0.f, 1.f,
+	temp, -temp, temp, 1.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f, //x, y, z, nx, ny, nz, r, g, tx, ty
+	temp, -temp, -temp, 1.f, 0.f, 0.f, 0.f, 1.f, 1.f, 0.f,
+	temp, temp, -temp, 1.f, 0.f, 0.f, 0.f, 1.f, 1.f, 1.f, //right face : G
 
-	-temp, temp, temp, 0.f, 1.f, 0.f, 0.f, 0.f, 0.f, 1.f, //x, y, z, nx, ny, nz, r, g, tx, ty
-	temp, temp, -temp, 0.f, 1.f, 0.f, 0.f, 0.f, 1.f, 0.f,
-	-temp, temp, -temp, 0.f, 1.f, 0.f, 0.f, 0.f, 0.f, 0.f,
-	-temp, temp, temp, 0.f, 1.f, 0.f, 0.f, 0.f, 0.f, 1.f, //x, y, z, nx, ny, nz, r, g, tx, ty
-	temp, temp, temp, 0.f, 1.f, 0.f, 0.f, 0.f, 1.f, 1.f,
-	temp, temp, -temp, 0.f, 1.f, 0.f, 0.f, 0.f, 1.f, 0.f, //third face : B
+	-temp, temp, temp, 0.f, 1.f, 0.f, 0.f, 0.f, 0.f, 0.f, //x, y, z, nx, ny, nz, r, g, tx, ty
+	temp, temp, -temp, 0.f, 1.f, 0.f, 0.f, 0.f, 1.f, 1.f,
+	-temp, temp, -temp, 0.f, 1.f, 0.f, 0.f, 0.f, 0.f, 1.f,
+	-temp, temp, temp, 0.f, 1.f, 0.f, 0.f, 0.f, 0.f, 0.f, //x, y, z, nx, ny, nz, r, g, tx, ty
+	temp, temp, temp, 0.f, 1.f, 0.f, 0.f, 0.f, 1.f, 0.f,
+	temp, temp, -temp, 0.f, 1.f, 0.f, 0.f, 0.f, 1.f, 1.f, //top face : B
 
-	-temp, -temp, -temp, 0.f, 0.f, -1.f, 1.f, 1.f,  0.f, 0.f, //x, y, z, nx, ny, nz, r, g, tx, ty
-	-temp, temp, -temp, 0.f, 0.f, -1.f, 1.f, 1.f, 0.f, 1.f,
-	temp, temp, -temp, 0.f, 0.f, -1.f, 1.f, 1.f, 1.f, 1.f,
-	-temp, -temp, -temp, 0.f, 0.f, -1.f, 1.f, 1.f, 0.f, 0.f, //x, y, z, nx, ny, nz, r, g, tx, ty
-	temp, temp, -temp, 0.f, 0.f, -1.f, 1.f, 1.f, 1.f, 1.f,
-	temp, -temp, -temp, 0.f, 0.f, -1.f, 1.f, 1.f, 1.f, 0.f, //fourth face : R+G (yellow)
+	-temp, -temp, -temp, 0.f, 0.f, -1.f, 1.f, 1.f,  1.f, 0.f, //x, y, z, nx, ny, nz, r, g, tx, ty
+	-temp, temp, -temp, 0.f, 0.f, -1.f, 1.f, 1.f, 1.f, 1.f,
+	temp, temp, -temp, 0.f, 0.f, -1.f, 1.f, 1.f, 0.f, 1.f,
+	-temp, -temp, -temp, 0.f, 0.f, -1.f, 1.f, 1.f, 1.f, 0.f, //x, y, z, nx, ny, nz, r, g, tx, ty
+	temp, temp, -temp, 0.f, 0.f, -1.f, 1.f, 1.f, 0.f, 1.f,
+	temp, -temp, -temp, 0.f, 0.f, -1.f, 1.f, 1.f, 0.f, 0.f, //back face : R+G (yellow)
 
-	-temp, -temp, temp, -1.f, 0.f, 0.f, 1.f, 0.f, 0.f, 1.f, //x, y, z, nx, ny, nz, r, g, tx, ty
+	-temp, -temp, temp, -1.f, 0.f, 0.f, 1.f, 0.f, 1.f, 0.f, //x, y, z, nx, ny, nz, r, g, tx, ty
 	-temp, temp, temp, -1.f, 0.f, 0.f, 1.f, 0.f, 1.f, 1.f,
-	-temp, temp, -temp, -1.f, 0.f, 0.f, 1.f, 0.f, 1.f, 0.f,
-	-temp, -temp, temp, -1.f, 0.f, 0.f, 1.f, 0.f, 0.f, 1.f, //x, y, z, nx, ny, nz, r, g, tx, ty
-	-temp, temp, -temp, -1.f, 0.f, 0.f, 1.f, 0.f, 1.f, 0.f,
-	-temp, -temp, -temp, -1.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, // fifth face : R+B (purple)
+	-temp, temp, -temp, -1.f, 0.f, 0.f, 1.f, 0.f, 0.f, 1.f,
+	-temp, -temp, temp, -1.f, 0.f, 0.f, 1.f, 0.f, 1.f, 0.f, //x, y, z, nx, ny, nz, r, g, tx, ty
+	-temp, temp, -temp, -1.f, 0.f, 0.f, 1.f, 0.f, 0.f, 1.f,
+	-temp, -temp, -temp, -1.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, // left face : R+B (purple)
 
-	-temp, -temp, temp, 0.f, -1.f, 0.f, 0.f, 1.f, 0.f, 1.f, //x, y, z, nx, ny, nz, r, g, tx, ty
-	temp, -temp, -temp, 0.f, -1.f, 0.f, 0.f, 1.f, 1.f, 0.f,
-	temp, -temp, temp, 0.f, -1.f, 0.f, 0.f, 1.f, 1.f, 1.f,
-	-temp, -temp, temp, 0.f, -1.f, 0.f, 0.f, 1.f, 0.f, 1.f, //x, y, z, nx, ny, nz, r, g, tx, ty
-	-temp, -temp, -temp, 0.f, -1.f, 0.f, 0.f, 1.f, 0.f, 0.f,
-	temp, -temp, -temp, 0.f, -1.f, 0.f, 0.f, 1.f, 1.f, 0.f, //sixth face : G+B (Cyan)
+	-temp, -temp, temp, 0.f, -1.f, 0.f, 0.f, 1.f, 0.f, 0.f, //x, y, z, nx, ny, nz, r, g, tx, ty
+	temp, -temp, -temp, 0.f, -1.f, 0.f, 0.f, 1.f, 1.f, 1.f,
+	temp, -temp, temp, 0.f, -1.f, 0.f, 0.f, 1.f, 0.f, 1.f,
+	-temp, -temp, temp, 0.f, -1.f, 0.f, 0.f, 1.f, 0.f, 0.f, //x, y, z, nx, ny, nz, r, g, tx, ty
+	-temp, -temp, -temp, 0.f, -1.f, 0.f, 0.f, 1.f, 1.f, 0.f,
+	temp, -temp, -temp, 0.f, -1.f, 0.f, 0.f, 1.f, 1.f, 1.f, //sixth face : G+B (Cyan)
 };
 
+//float cube[] = {
+//	-temp, -temp, temp, 0.f, 0.f, 1.f, 1.f, 0.f, 0.f, 0.f,//x, y, z, nx, ny, nz, r, g, tx, ty
+//	temp, temp, temp, 0.f, 0.f, 1.f, 1.f, 0.f, 1.f, 1.f,
+//	-temp, temp, temp, 0.f, 0.f, 1.f, 1.f, 0.f,  0.f, 1.f,
+//	-temp, -temp, temp, 0.f, 0.f, 1.f, 1.f, 0.f,  0.f, 0.f,
+//	temp, -temp, temp, 0.f, 0.f, 1.f, 1.f, 0.f, 1.f, 0.f,
+//	temp, temp, temp, 0.f, 0.f, 1.f, 1.f, 0.f, 1.f, 1.f,// first face : R
+//
+//	temp, -temp, temp, 1.f, 0.f, 0.f, 0.f, 1.f, 0.f, 1.f, //x, y, z, nx, ny, nz, r, g, tx, ty
+//	temp, temp, -temp, 1.f, 0.f, 0.f, 0.f, 1.f, 1.f, 0.f,
+//	temp, temp, temp, 1.f, 0.f, 0.f, 0.f, 1.f, 1.f, 1.f,
+//	temp, -temp, temp, 1.f, 0.f, 0.f, 0.f, 1.f, 0.f, 1.f, //x, y, z, nx, ny, nz, r, g, tx, ty
+//	temp, -temp, -temp, 1.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f,
+//	temp, temp, -temp, 1.f, 0.f, 0.f, 0.f, 1.f, 1.f, 0.f, //second face : G
+//
+//	-temp, temp, temp, 0.f, 1.f, 0.f, 0.f, 0.f, 0.f, 1.f, //x, y, z, nx, ny, nz, r, g, tx, ty
+//	temp, temp, -temp, 0.f, 1.f, 0.f, 0.f, 0.f, 1.f, 0.f,
+//	-temp, temp, -temp, 0.f, 1.f, 0.f, 0.f, 0.f, 0.f, 0.f,
+//	-temp, temp, temp, 0.f, 1.f, 0.f, 0.f, 0.f, 0.f, 1.f, //x, y, z, nx, ny, nz, r, g, tx, ty
+//	temp, temp, temp, 0.f, 1.f, 0.f, 0.f, 0.f, 1.f, 1.f,
+//	temp, temp, -temp, 0.f, 1.f, 0.f, 0.f, 0.f, 1.f, 0.f, //third face : B
+//
+//	-temp, -temp, -temp, 0.f, 0.f, -1.f, 1.f, 1.f,  0.f, 0.f, //x, y, z, nx, ny, nz, r, g, tx, ty
+//	-temp, temp, -temp, 0.f, 0.f, -1.f, 1.f, 1.f, 0.f, 1.f,
+//	temp, temp, -temp, 0.f, 0.f, -1.f, 1.f, 1.f, 1.f, 1.f,
+//	-temp, -temp, -temp, 0.f, 0.f, -1.f, 1.f, 1.f, 0.f, 0.f, //x, y, z, nx, ny, nz, r, g, tx, ty
+//	temp, temp, -temp, 0.f, 0.f, -1.f, 1.f, 1.f, 1.f, 1.f,
+//	temp, -temp, -temp, 0.f, 0.f, -1.f, 1.f, 1.f, 1.f, 0.f, //fourth face : R+G (yellow)
+//
+//	-temp, -temp, temp, -1.f, 0.f, 0.f, 1.f, 0.f, 0.f, 1.f, //x, y, z, nx, ny, nz, r, g, tx, ty
+//	-temp, temp, temp, -1.f, 0.f, 0.f, 1.f, 0.f, 1.f, 1.f,
+//	-temp, temp, -temp, -1.f, 0.f, 0.f, 1.f, 0.f, 1.f, 0.f,
+//	-temp, -temp, temp, -1.f, 0.f, 0.f, 1.f, 0.f, 0.f, 1.f, //x, y, z, nx, ny, nz, r, g, tx, ty
+//	-temp, temp, -temp, -1.f, 0.f, 0.f, 1.f, 0.f, 1.f, 0.f,
+//	-temp, -temp, -temp, -1.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, // fifth face : R+B (purple)
+//
+//	-temp, -temp, temp, 0.f, -1.f, 0.f, 0.f, 1.f, 0.f, 1.f, //x, y, z, nx, ny, nz, r, g, tx, ty
+//	temp, -temp, -temp, 0.f, -1.f, 0.f, 0.f, 1.f, 1.f, 0.f,
+//	temp, -temp, temp, 0.f, -1.f, 0.f, 0.f, 1.f, 1.f, 1.f,
+//	-temp, -temp, temp, 0.f, -1.f, 0.f, 0.f, 1.f, 0.f, 1.f, //x, y, z, nx, ny, nz, r, g, tx, ty
+//	-temp, -temp, -temp, 0.f, -1.f, 0.f, 0.f, 1.f, 0.f, 0.f,
+//	temp, -temp, -temp, 0.f, -1.f, 0.f, 0.f, 1.f, 1.f, 0.f, //sixth face : G+B (Cyan)
+//};
 
 	glGenBuffers(1, &m_VBO_Cube);
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBO_Cube);
@@ -1577,7 +1620,7 @@ void Renderer::DrawSTParticle(float sx, float sy, float tx, float ty, float time
 	glUniform1i(uniformTex, 0);
 
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, m_Tex_Particle);
+	glBindTexture(GL_TEXTURE_2D, m_Tex_Snow);
 	
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBOPoints);
 	glVertexAttribPointer(attribPos, 4, GL_FLOAT, GL_FALSE, 0, 0);
@@ -1966,7 +2009,10 @@ void Renderer::DrawParticle(int iParticleType, float amount) //amount : 0~1, 0->
 
 	switch (iParticleType) {
 	case 0:
-		glBindTexture(GL_TEXTURE_2D, m_Tex_Particle);
+		glBindTexture(GL_TEXTURE_2D, m_Tex_Rain);
+		break;
+	case 1:
+		glBindTexture(GL_TEXTURE_2D, m_Tex_Snow);
 		break;
 	}
 	
@@ -2233,6 +2279,14 @@ void Renderer::DrawCube(int iTextureID, float x, float y, float z, float fScaleX
 	case 7:
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, m_Tex_PlayerGreen);
+		break;
+	case 8:
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, m_Tex_Tree);
+		break;
+	case 9:
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, m_Tex_Rock);
 		break;
 	}
 
@@ -2869,7 +2923,7 @@ void Renderer::DrawHeightMap()
 }
 
 
-void Renderer::DrawSkyBox()
+void Renderer::DrawSkyBox(int iTime)
 {
 	GLuint shader = m_Shader_SkyBox;
 
@@ -2894,10 +2948,16 @@ void Renderer::DrawSkyBox()
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBO_SkyBox);
 
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, m_Tex_Cube_SkyBox);
-
+	switch (iTime) {
+		// DayTime
+	case 0:
+		glBindTexture(GL_TEXTURE_CUBE_MAP, m_Tex_Cube_SkyBox);
+		break;
+	case 1:
+		glBindTexture(GL_TEXTURE_CUBE_MAP, m_Tex_Cube_NightTime);
+		break;
+	}
 	glVertexAttribPointer(attribPosition, 3, GL_FLOAT, GL_FALSE, 0, 0);
-
 	glDrawArrays(GL_TRIANGLES, 0, 36);
 
 	glDisableVertexAttribArray(attribPosition);
@@ -3156,6 +3216,106 @@ void Renderer::InitializeSkyBox()
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+	
+}
+
+void Renderer::InitializeSkyBox2() {
+	//Compile SkyBox Shader
+	m_Shader_SkyBox = CompileShaders("./Shaders/SkyBoxShaders/SkyBox.vs", "./Shaders/SkyBoxShaders/SkyBox.fs");
+
+
+	float temp = 50.f;
+
+	float cube[] = {
+		-temp, -temp, temp,
+		temp, temp, temp,
+		-temp, temp, temp,
+		-temp, -temp, temp,
+		temp, -temp, temp,
+		temp, temp, temp,
+
+		temp, -temp, temp,
+		temp, temp, -temp,
+		temp, temp, temp,
+		temp, -temp, temp,
+		temp, -temp, -temp,
+		temp, temp, -temp,
+
+		-temp, temp, temp,
+		temp, temp, -temp,
+		-temp, temp, -temp,
+		-temp, temp, temp,
+		temp, temp, temp,
+		temp, temp, -temp,
+
+		-temp, -temp, -temp,
+		-temp, temp, -temp,
+		temp, temp, -temp,
+		-temp, -temp, -temp,
+		temp, temp, -temp,
+		temp, -temp, -temp,
+
+		-temp, -temp, temp,
+		-temp, temp, temp,
+		-temp, temp, -temp,
+		-temp, -temp, temp,
+		-temp, temp, -temp,
+		-temp, -temp, -temp,
+
+		-temp, -temp, temp,
+		temp, -temp, -temp,
+		temp, -temp, temp,
+		-temp, -temp, temp,
+		-temp, -temp, -temp,
+		temp, -temp, -temp,
+	};
+
+	glGenBuffers(1, &m_VBO_SkyBox);
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBO_SkyBox);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(cube), cube, GL_STATIC_DRAW);
+
+	//Load Textures
+	glGenTextures(1, &m_Tex_Cube_NightTime);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, m_Tex_Cube_NightTime);
+
+	const char* filePath = "./Textures/SkyBox/NightTime/NightFront.png";
+	std::vector<unsigned char> imageFront;
+	unsigned width, height;
+	unsigned error = lodepng::decode(imageFront, width, height, filePath);
+	glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, &imageFront[0]);
+
+	filePath = "./Textures/SkyBox/NightTime/NightBack.png";
+	std::vector<unsigned char> imageBack;
+	error = lodepng::decode(imageBack, width, height, filePath);
+	glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_X, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, &imageBack[0]);
+
+	filePath = "./Textures/SkyBox/NightTime/NightLeft.png";
+	std::vector<unsigned char> imageLeft;
+	error = lodepng::decode(imageLeft, width, height, filePath);
+	glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Z, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, &imageLeft[0]);
+
+	filePath = "./Textures/SkyBox/NightTime/NightRight.png";
+	std::vector<unsigned char> imageRight;
+	error = lodepng::decode(imageRight, width, height, filePath);
+	glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, &imageRight[0]);
+
+	filePath = "./Textures/SkyBox/NightTime/NightTop.png";
+	std::vector<unsigned char> imageTop;
+	error = lodepng::decode(imageTop, width, height, filePath);
+	glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Y, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, &imageTop[0]);
+
+	filePath = "./Textures/SkyBox/NightTime/NightBottom.png";
+	std::vector<unsigned char> imageBottom;
+	error = lodepng::decode(imageBottom, width, height, filePath);
+	glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, &imageBottom[0]);
+
+	glTexParameterf(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameterf(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
 }
 
 glm::vec3 Renderer::MakingNormalizedLookVector(glm::vec3& eye, glm::vec3& object) {

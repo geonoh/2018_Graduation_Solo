@@ -21,12 +21,6 @@ ServerFramework::ServerFramework()
 
 ServerFramework::~ServerFramework()
 {
-	//for (int i = 0; i < OBJECT_BUILDING; ++i) {
-	//	delete building[i];
-	//}
-	//for (int i = 0; i < MAX_ITEM; ++i) {
-	//	delete items[i];
-	//}
 	delete height_map;
 }
 
@@ -35,7 +29,10 @@ void ServerFramework::InitServer() {
 	printf("---------------------------------\n");
 	printf("- 개발모드\n");
 	printf("---------------------------------\n");
+	m_bIsBoatGen = true;
 	m_bGameStart = true;
+	m_bIsAmmoGen = true;
+	m_fBoatGenTime = 0.f;
 #endif
 	wcout.imbue(locale("korean"));
 
@@ -83,61 +80,6 @@ void ServerFramework::InitServer() {
 			m_Clients[i].m_bPlayerBoatParts[j] = false;
 		}
 	}
-
-	//for (int i = 0; i < MAX_PLAYER; ++i) {
-	//	m_Clients[i].SetOOBB(XMFLOAT3(m_Clients[i].x, m_Clients[i].y, m_Clients[i].z), XMFLOAT3(OBB_SCALE_PLAYER_X, OBB_SCALE_PLAYER_Y, OBB_SCALE_PLAYER_Z), XMFLOAT4(0, 0, 0, 1));
-	//	m_Clients[i].bounding_box.Center;
-	//}
-
-	//for (int j = 0; j < MAX_PLAYER; ++j) {
-	//	for (int i = 0; i < MAX_AMMO; ++i) {
-	//		bullets[j][i].SetOOBB(XMFLOAT3(bullets[j][i].x, bullets[j][i].y, bullets[j][i].z),
-	//			XMFLOAT3(OBB_SCALE_BULLET_X, OBB_SCALE_BULLET_Y, OBB_SCALE_BULLET_Z),
-	//			XMFLOAT4(0, 0, 0, 1)); 
-	//	}
-	//}
-
-	//XMFLOAT3 input_buffer[10];
-	//XMFLOAT3 input_extents[10];
-
-	//input_buffer[0] = XMFLOAT3{ 594.f,height_map->GetHeight(594.f,556.f) ,556.f };
-	//input_buffer[1] = XMFLOAT3{ 922.f,height_map->GetHeight(922.f,519.f) ,519.f };
-	//input_buffer[2] = XMFLOAT3{ 1152.f,height_map->GetHeight(1152.f,911.f) ,911.f };
-	//input_buffer[3] = XMFLOAT3{ 2168.f,height_map->GetHeight(2168.f,741.f) ,741.f };
-	//input_buffer[4] = XMFLOAT3{ 594.f,height_map->GetHeight(594.f,556.f) ,556.f };
-	//input_buffer[5] = XMFLOAT3{ 739.f,height_map->GetHeight(739.f,3526.f) ,3526.f };
-
-	//input_buffer[6] = XMFLOAT3{ 2516.f,height_map->GetHeight(2516.f,1589.f) ,1589.f };
-	//input_buffer[7] = XMFLOAT3{ 3071.f,height_map->GetHeight(3071.f,1906.f) ,1906.f };
-	//input_buffer[8] = XMFLOAT3{ 3251.f,height_map->GetHeight(3251.f,2721.f) ,2721.f };
-	//input_buffer[9] = XMFLOAT3{ 2106.f,height_map->GetHeight(2106.f,3322.f) ,3322.f };
-
-	//input_extents[0] = XMFLOAT3{ 100,100,100 };
-	//input_extents[1] = XMFLOAT3{ 100,100,100 };
-	//input_extents[2] = XMFLOAT3{ 100,100,100 };
-	//input_extents[3] = XMFLOAT3{ 100,100,100 };
-	//input_extents[4] = XMFLOAT3{ 100,100,100 };
-	//input_extents[5] = XMFLOAT3{ 100,100,100 };
-	//input_extents[6] = XMFLOAT3{ 100,100,100 };
-	//input_extents[7] = XMFLOAT3{ 100,100,100 };
-	//input_extents[8] = XMFLOAT3{ 100,100,100 };
-	//input_extents[9] = XMFLOAT3{ 100,100,100 };
-
-
-	//for (int i = 0; i < OBJECT_BUILDING; ++i) {
-	//	input_extents[0] = XMFLOAT3{ 100,100,100 };
-	//	building[i] = new Building;
-	//	building[i]->SetOBB(input_buffer[i], input_extents[i]);
-	//}
-
-	//// 이건 됨
-	//XMFLOAT3 items_extents = XMFLOAT3{ 10.f,10.f,10.f };
-	//XMFLOAT3 init_item_pos = XMFLOAT3{ 0.f,0.f,0.f };
-	//for (int i = 0; i < MAX_ITEM; ++i) {
-	//	items[i] = new Item;
-	//	items[i]->in_use = false;
-	//	items[i]->SetOBB(init_item_pos, items_extents);
-	//}
 
 }
 
@@ -632,51 +574,50 @@ void ServerFramework::GameStart() {
 			SendPacket(i, &packets);
 	}
 
+	m_Clients[0].x = -195.f;
+	m_Clients[0].z = -120.f;
+	m_Clients[0].y = height_map->GetHeight(m_Clients[0].x + DX12_TO_OPGL, m_Clients[0].z + DX12_TO_OPGL) + PLAYER_HEIGHT;
 
+	m_Clients[1].x = -130.f;
+	m_Clients[1].z = 138.f;
+	m_Clients[1].y = height_map->GetHeight(m_Clients[1].x + DX12_TO_OPGL, m_Clients[1].z + DX12_TO_OPGL) + PLAYER_HEIGHT;
 
-	// 플레이어  위치 섞기
-	for (int i = 0; i < MAX_PLAYER; ++i) {
-		int dice = rand() % 4;
-		switch (dice) {
-		case MAP_AREA_1:
-			printf("[%d] 플레이어 Area 1\n", i);
-			//m_Clients[i].x = rand() % 1500;
-			//m_Clients[i].z = rand() % 800 + 3000;
-			break;
-		case MAP_AREA_2:
-			printf("[%d] 플레이어 Area 2\n", i);
-			//m_Clients[i].x = rand() % 800 + 2000;
-			//m_Clients[i].z = rand() % 1000 + 2200;
-			break;
-		case MAP_AREA_3:
-			printf("[%d] 플레이어 Area 3\n", i);
-			//m_Clients[i].x = rand() % 1500 + 1500;
-			//m_Clients[i].z = rand() % 1500 + 400;
-			break;
-		case MAP_AREA_4:
-			printf("[%d] 플레이어 Area 4\n", i);
-			//m_Clients[i].x = rand() % 1500 + 100;
-			//m_Clients[i].z = rand() % 1500 + 400;
-			break;
-		}
-		//m_Clients[i].y = height_map->GetHeight(m_Clients[i].x + DX12_TO_OPGL, m_Clients[i].z + DX12_TO_OPGL) + PLAYER_HEIGHT;
-		m_Clients[i].hp = 100.f;
-	}
+	m_Clients[2].x = 128.f;
+	m_Clients[2].z = 128.f;
+	m_Clients[2].y = height_map->GetHeight(m_Clients[2].x + DX12_TO_OPGL, m_Clients[2].z + DX12_TO_OPGL) + PLAYER_HEIGHT;
 
-	//// OOBB 셋
+	m_Clients[3].x = 117.f;
+	m_Clients[3].z = -136.f;
+	m_Clients[3].y = height_map->GetHeight(m_Clients[3].x + DX12_TO_OPGL, m_Clients[3].z + DX12_TO_OPGL) + PLAYER_HEIGHT;
+	//// 플레이어  위치 섞기
 	//for (int i = 0; i < MAX_PLAYER; ++i) {
-	//	//m_Clients[i].SetOOBB(XMFLOAT3(0, 0, 0), XMFLOAT3(10.f, 10.f, 10.f), XMFLOAT4(0, 0, 0, 1));
-	//	m_Clients[i].SetOOBB(XMFLOAT3(m_Clients[i].x, m_Clients[i].y, m_Clients[i].z), XMFLOAT3(OBB_SCALE_PLAYER_X, OBB_SCALE_PLAYER_Y, OBB_SCALE_PLAYER_Z), XMFLOAT4(0, 0, 0, 1));
+	//	int dice = rand() % 4;
+	//	switch (dice) {
+	//	case MAP_AREA_1:
+	//		printf("[%d] 플레이어 Area 1\n", i);
+	//		m_Clients[i].x = -195.f;
+	//		m_Clients[i].z = -120.f;
+	//		break;
+	//	case MAP_AREA_2:
+	//		printf("[%d] 플레이어 Area 2\n", i);
+	//		m_Clients[i].x = -130.f;
+	//		m_Clients[i].z = 138.f;
+	//		break;
+	//	case MAP_AREA_3:
+	//		printf("[%d] 플레이어 Area 3\n", i);
+	//		m_Clients[i].x = 128.f;
+	//		m_Clients[i].z = 128.f;
+	//		break;
+	//	case MAP_AREA_4:
+	//		printf("[%d] 플레이어 Area 4\n", i);
+	//		m_Clients[i].x = 117.f;
+	//		m_Clients[i].z = -136.f;
+	//		break;
+	//	}
+	//	m_Clients[i].y = height_map->GetHeight(m_Clients[i].x + DX12_TO_OPGL, m_Clients[i].z + DX12_TO_OPGL) + PLAYER_HEIGHT;
+	//	m_Clients[i].hp = 100.f;
 	//}
 
-	//// Bullet의 OBB
-	//for (int j = 0; j < MAX_PLAYER; ++j) {
-	//	for (int i = 0; i < MAX_AMMO; ++i) {
-	//		bullets[j][i].SetOOBB(XMFLOAT3(bullets[j][i].x, bullets[j][i].y, bullets[j][i].z),
-	//			XMFLOAT3(OBB_SCALE_BULLET_X, OBB_SCALE_BULLET_Y, OBB_SCALE_BULLET_Z),
-	//			XMFLOAT4(0, 0, 0, 1));
-	//	}
-	//}
 	for (int i = 0; i < MAX_PLAYER; ++i) {
 		ol_ex[i].evt_type = EVT_PLAYER_POS_SEND;
 		PostQueuedCompletionStatus(iocp_handle, 0, i, reinterpret_cast<WSAOVERLAPPED*>(&ol_ex[i]));
@@ -686,8 +627,7 @@ void ServerFramework::GameStart() {
 	m_bIsBoatGen = true;
 	m_bGameStart = true;
 	m_bIsAmmoGen = true;
-
-	//m_fStartGameTime = GetTickCount();
+	m_fBoatGenTime = 0.f;
 }
 
 void ServerFramework::WorkerThread() {
@@ -756,7 +696,7 @@ void ServerFramework::WorkerThread() {
 							packets.type = SC_PLAYER_HP_UPDATE;
 							packets.m_fHp = m_Clients[i].hp;
 							packets.m_cPlayerID = i;
-							printf("%d Player HP : %d \n", packets.m_cPlayerID, packets.m_fHp);
+							printf("%d Player HP : %f \n", packets.m_cPlayerID, packets.m_fHp);
 							SendPacket(i, &packets);
 						}
 					}
@@ -770,7 +710,7 @@ void ServerFramework::WorkerThread() {
 							packets.type = SC_PLAYER_HP_UPDATE;
 							packets.m_fHp = m_Clients[i].hp;
 							packets.m_cPlayerID = i;
-							printf("%d Player HP : %d \n", packets.m_cPlayerID, packets.m_fHp);
+							printf("%d Player HP : %f \n", packets.m_cPlayerID, packets.m_fHp);
 							SendPacket(i, &packets);
 						}
 					}
@@ -784,7 +724,7 @@ void ServerFramework::WorkerThread() {
 							packets.type = SC_PLAYER_HP_UPDATE;
 							packets.m_fHp = m_Clients[i].hp;
 							packets.m_cPlayerID = i;
-							printf("%d Player HP : %d \n", packets.m_cPlayerID, packets.m_fHp);
+							printf("%d Player HP : %f \n", packets.m_cPlayerID, packets.m_fHp);
 							SendPacket(i, &packets);
 						}
 					}
@@ -798,7 +738,7 @@ void ServerFramework::WorkerThread() {
 							packets.type = SC_PLAYER_HP_UPDATE;
 							packets.m_fHp = m_Clients[i].hp;
 							packets.m_cPlayerID = i;
-							printf("%d Player HP : %d \n", packets.m_cPlayerID, packets.m_fHp);
+							printf("%d Player HP : %f \n", packets.m_cPlayerID, packets.m_fHp);
 							SendPacket(i, &packets);
 						}
 					}
@@ -862,6 +802,14 @@ void ServerFramework::WorkerThread() {
 					SendPacket(i, &packets);
 				}
 				m_mutexBoatItem.unlock();
+			}
+			if (m_iDiceCounter == 2) {
+				SC_PACKET_WEATHER packets;
+				packets.size = sizeof(SC_PACKET_WEATHER);
+				packets.type = SC_WEATHER_CHANGE;
+				for (int i = 0; i < MAX_PLAYER; ++i) {
+					SendPacket(i, &packets);
+				}
 			}
 		}
 		// TimerThread에서 호출
@@ -950,7 +898,7 @@ void ServerFramework::WorkerThread() {
 							// 충돌
 							if (fDist < fDistOrigin) {
 								SC_PACKET_GET_ITEM packets;
-								packets.size = sizeof(SC_PLAYER_GET_ITEM);
+								packets.size = sizeof(SC_PACKET_GET_ITEM);
 								packets.type = SC_PLAYER_GET_ITEM;
 								packets.m_cItemType = j;
 								m_Clients[i].m_bPlayerBoatParts[j] = true;
@@ -970,11 +918,48 @@ void ServerFramework::WorkerThread() {
 				m_mutexBulletLock[i + 1].lock();
 				for (int j = 1; j <= MAX_AMMO; ++j) {
 					if (m_Clients[i].in_use && bullets[i + 1][j].in_use) {
-						bullets[i + 1][j].look_vec;
-						continue;
+						float fDist =
+							(bullets[i + 1][j].x - m_Clients[i].x)*(bullets[i + 1][j].x - m_Clients[i].x) +
+							(bullets[i + 1][j].y - m_Clients[i].y)*(bullets[i + 1][j].y - m_Clients[i].y) +
+							(bullets[i + 1][j].z - m_Clients[i].z)*(bullets[i + 1][j].z - m_Clients[i].z);
+						float fDistOrigin = (RAD_PLAYER + RAD_BULLET) * (RAD_PLAYER + RAD_BULLET);
+						// 충돌
+						if (fDist < fDistOrigin) {
+							SC_PACKET_HIT packets;
+							packets.size = sizeof(SC_PACKET_HIT);
+							packets.type = SC_HIT;
+							m_Clients[i].hp -= 10.f;
+							packets.m_fHp = m_Clients[i].hp;
+							packets.m_cBulletNumber = j;
+							packets.m_cShooterID = i + 1;
+							packets.m_cHitID = i;
+							printf("%d플레이어와 %d플레이어의 총알 충돌\n", i, i + 1);
+							printf("후 HP : %f\n", packets.m_fHp);
+							SendPacket(i, &packets);
+							bullets[i + 1][j].in_use = false;
+						}
 					}
-					else if (m_Clients[i + 1].in_use && bullets[i][j].in_use) {
-						continue;
+					if (m_Clients[i + 1].in_use && bullets[i][j].in_use) {
+						float fDist =
+							(bullets[i][j].x - m_Clients[i + 1].x)*(bullets[i][j].x - m_Clients[i + 1].x) +
+							(bullets[i][j].y - m_Clients[i + 1].y)*(bullets[i][j].y - m_Clients[i + 1].y) +
+							(bullets[i][j].z - m_Clients[i + 1].z)*(bullets[i][j].z - m_Clients[i + 1].z);
+						float fDistOrigin = (RAD_PLAYER + RAD_ITEM) * (RAD_PLAYER + RAD_ITEM);
+						// 충돌
+						if (fDist < fDistOrigin) {
+							SC_PACKET_HIT packets;
+							packets.size = sizeof(SC_PACKET_HIT);
+							packets.type = SC_HIT;
+							m_Clients[i + 1].hp -= 10.f;
+							packets.m_fHp = m_Clients[i + 1].hp;
+							packets.m_cBulletNumber = j;
+							packets.m_cShooterID = i;
+							packets.m_cHitID = i + 1;
+							printf("%d플레이어와 %d플레이어의 총알 충돌\n", i + 1, i);
+							printf("후 HP : %f\n", packets.m_fHp);
+							SendPacket(i + 1, &packets);
+							bullets[i][j].in_use = false;
+						}
 					}
 				}
 				m_mutexBulletLock[i].unlock();

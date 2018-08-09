@@ -5,7 +5,6 @@
 #include <fstream>
 #include <iostream>
 
-class CHeightMapImage;
 class Renderer
 {
 private:
@@ -67,6 +66,10 @@ public:
 	GLuint m_Tex_HpBackground = 0;
 	GLuint m_Tex_HpBar = 0;
 	GLuint m_Tex_TimerComment = 0;
+	GLuint m_Tex_Snow = 0;
+	GLuint m_Tex_Rain = 0;
+	GLuint m_Tex_Tree = 0;
+	GLuint m_Tex_Rock = 0;
 
 	GLuint m_Tex_Boat0 = 0;
 	GLuint m_Tex_Boat1 = 0;
@@ -87,6 +90,9 @@ public:
 	GLuint m_Tex_Bullet = 0;
 	GLuint m_Tex_Cloud = 0;
 
+	GLuint m_Tex_Cube_NightTime;
+
+
 
 	// Camera Setting 
 	void SetCameraLook(float x, float y, float z);
@@ -95,7 +101,6 @@ public:
 	// Update View
 	void UpdateView();
 	// 디버그용 Height
-	CHeightMapImage* m_HeightMap = nullptr;
 // ------------------------------------------------------------------------------
 	glm::mat4 GetViewMatrix() const;
 	void KeyPressed(const unsigned char key);
@@ -168,7 +173,7 @@ public:
 
 	
 	void DrawHeightMap();
-	void DrawSkyBox();
+	void DrawSkyBox(int iTime);
 	void DrawTexture(GLuint texID, GLuint x, GLuint y, GLuint width, GLuint height);
 	
 private:
@@ -227,7 +232,6 @@ private:
 	GLuint m_Tex_BTS = 0;
 	GLuint m_Tex_Twice = 0;
 	GLuint m_Tex_Brick = 0;
-	GLuint m_Tex_Particle = 0;
 
 
 	GLuint m_Shader_ProxyGeo = 0;
@@ -295,6 +299,7 @@ private:
 
 	//SkyBox resources
 	void InitializeSkyBox();
+	void InitializeSkyBox2();
 	GLuint m_Shader_SkyBox;
 	GLuint m_VBO_SkyBox;
 	GLuint m_Tex_Cube_SkyBox;

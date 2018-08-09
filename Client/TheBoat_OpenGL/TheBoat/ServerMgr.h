@@ -31,7 +31,6 @@ class ServerMgr
 	glm::vec3 m_v3PlayerLookVector[MAX_PLAYER];
 
 	glm::vec3 collision_pos;
-	float client_hp[MAX_PLAYER] = { 0.f };
 	int camera_id = 0;
 	string server_ip;
 
@@ -63,10 +62,15 @@ class ServerMgr
 	bool m_bGameStart = false;
 
 	Item m_itemBoat[4];
+	float client_hp[MAX_PLAYER] = { 0.f };
 	float m_fPlayerHP[MAX_PLAYER];
 
 	bool m_bPlayerBoatParts[4] = { false };
+	// ³· -> false(ºñ)
+	// ¹ã -> true (´«)
+	bool m_bWeather = false;
 public:
+	bool GetWeather();
 	bool GetPlayerHaveParts(int iPartsType);
 	Item GetBoatItem(int iItemNumber);
 	mutex m_mutexBulletLock[MAX_PLAYER];
