@@ -58,7 +58,7 @@ class ServerMgr
 	bool m_bGameMode = false;
 	// 0 = Red
 	// 1 = Blue
-	bool m_bTeam[4]{ false };
+	//bool m_bTeam[4]{ false };
 	bool m_bGameStart = false;
 
 	Item m_itemBoat[4];
@@ -69,7 +69,9 @@ class ServerMgr
 	// ³· -> false(ºñ)
 	// ¹ã -> true (´«)
 	bool m_bWeather = false;
+	Team m_TeamPlayer[MAX_PLAYER];
 public:
+	Team GetTeam(int iPlayerID);
 	bool GetWeather();
 	bool GetPlayerHaveParts(int iPartsType);
 	Item GetBoatItem(int iItemNumber);
@@ -82,7 +84,7 @@ public:
 	bool GetGameMode();
 	// 0 = Red
 	// 1 = Blue
-	bool* GetTeam();
+	//bool* GetTeam();
 	bool* GetPlayerReadyStatus();
 	float GetTime();
 	bool GetStart();

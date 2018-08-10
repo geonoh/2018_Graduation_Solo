@@ -26,13 +26,13 @@ ServerFramework::~ServerFramework()
 
 void ServerFramework::InitServer() {
 #ifdef _Dev
-	printf("---------------------------------\n");
-	printf("- 개발모드\n");
-	printf("---------------------------------\n");
-	m_bIsBoatGen = true;
-	m_bGameStart = true;
-	m_bIsAmmoGen = true;
-	m_fBoatGenTime = 0.f;
+	//printf("---------------------------------\n");
+	//printf("- 개발모드\n");
+	//printf("---------------------------------\n");
+	//m_bIsBoatGen = true;
+	//m_bGameStart = true;
+	//m_bIsAmmoGen = true;
+	//m_fBoatGenTime = 0.f;
 #endif
 	wcout.imbue(locale("korean"));
 
@@ -223,7 +223,7 @@ void ServerFramework::ProcessPacket(int cl_id, char* packet) {
 		// 디버그 용임-> 시간 빨리 깎기
 	case CS_DEBUG_TIME:
 		m_fBoatGenTime += 10;
-		
+
 		break;
 	case CS_KEY_PRESS_1:
 		printf("[ProcessPacket] :: AR 무기 선택\n");
@@ -404,7 +404,7 @@ void ServerFramework::ProcessPacket(int cl_id, char* packet) {
 		//}
 		// 걷지도 뛰지도 않는 상황
 
-		
+
 		for (int i = 0; i < MAX_PLAYER; ++i) {
 			if (m_Clients[i].in_use == true) {
 				SendPacket(i, &packets);
@@ -479,7 +479,7 @@ void ServerFramework::ProcessPacket(int cl_id, char* packet) {
 				SendPacket(i, &packets);
 		}
 	}
-		break;
+					   break;
 	case CS_MODE_TEAM: {
 		printf("팀 패킷 도착\n");
 		SC_PACKET_GAMEMODE packets;
@@ -570,6 +570,9 @@ void ServerFramework::GameStart() {
 	packets.size = sizeof(SC_PACKET_START);
 	packets.type = SC_GAME_START;
 	for (int i = 0; i < MAX_PLAYER; ++i) {
+		packets.m_bPlayerTeam[i] = m_Clients[i].team;
+	}
+	for (int i = 0; i < MAX_PLAYER; ++i) {
 		if (m_Clients[i].in_use)
 			SendPacket(i, &packets);
 	}
@@ -589,34 +592,6 @@ void ServerFramework::GameStart() {
 	m_Clients[3].x = 117.f;
 	m_Clients[3].z = -136.f;
 	m_Clients[3].y = height_map->GetHeight(m_Clients[3].x + DX12_TO_OPGL, m_Clients[3].z + DX12_TO_OPGL) + PLAYER_HEIGHT;
-	//// 플레이어  위치 섞기
-	//for (int i = 0; i < MAX_PLAYER; ++i) {
-	//	int dice = rand() % 4;
-	//	switch (dice) {
-	//	case MAP_AREA_1:
-	//		printf("[%d] 플레이어 Area 1\n", i);
-	//		m_Clients[i].x = -195.f;
-	//		m_Clients[i].z = -120.f;
-	//		break;
-	//	case MAP_AREA_2:
-	//		printf("[%d] 플레이어 Area 2\n", i);
-	//		m_Clients[i].x = -130.f;
-	//		m_Clients[i].z = 138.f;
-	//		break;
-	//	case MAP_AREA_3:
-	//		printf("[%d] 플레이어 Area 3\n", i);
-	//		m_Clients[i].x = 128.f;
-	//		m_Clients[i].z = 128.f;
-	//		break;
-	//	case MAP_AREA_4:
-	//		printf("[%d] 플레이어 Area 4\n", i);
-	//		m_Clients[i].x = 117.f;
-	//		m_Clients[i].z = -136.f;
-	//		break;
-	//	}
-	//	m_Clients[i].y = height_map->GetHeight(m_Clients[i].x + DX12_TO_OPGL, m_Clients[i].z + DX12_TO_OPGL) + PLAYER_HEIGHT;
-	//	m_Clients[i].hp = 100.f;
-	//}
 
 	for (int i = 0; i < MAX_PLAYER; ++i) {
 		ol_ex[i].evt_type = EVT_PLAYER_POS_SEND;
@@ -687,6 +662,10 @@ void ServerFramework::WorkerThread() {
 		}
 		else if (overlapped_buffer->evt_type == EVT_PLAYER_HP_UPDATE) {
 			for (int i = 0; i < MAX_PLAYER; ++i) {
+				if (m_Clients[i].hp <= 0.f) {
+					printf("%d 플레이어 Die\n");
+					
+				}
 				if (m_Clients[i].in_use && m_BoatGenedMap[0]) {
 					if (-256.f < m_Clients[i].x&&m_Clients[i].x <= 0.f) {
 						if (-256.f <= m_Clients[i].z && m_Clients[i].z <= 0.f) {
@@ -816,22 +795,127 @@ void ServerFramework::WorkerThread() {
 		// 1/20 마다 모든 플레이어에게 정보 전송
 		else if (overlapped_buffer->evt_type == EVT_PLAYER_POS_SEND) {
 			for (int i = 0; i < MAX_PLAYER; ++i) {
-				//m_mutexServerLock.lock();
 				m_Clients[i].m_mutexServerLock.lock();
 				if (m_Clients[i].is_move_foward) {
 					if (m_Clients[i].is_running) {
-						m_Clients[i].z += (-1) * METER_PER_PIXEL * m_Clients[i].look_vec.z * (RUN_SPEED * overlapped_buffer->elapsed_time);
-						m_Clients[i].x += (-1) * METER_PER_PIXEL * m_Clients[i].look_vec.x * (RUN_SPEED * overlapped_buffer->elapsed_time);
+						if (m_Clients[i].x < 34.f && -92.f <= m_Clients[i].z && m_Clients[i].z <= 28) {
+							glm::vec3 v3Normal = { 1.f,0.f,0.f };
+							glm::vec3 v3Sliding = m_Clients[i].look_vec - v3Normal * (glm::dot(m_Clients[i].look_vec, v3Normal));
+							m_Clients[i].z += -METER_PER_PIXEL * v3Sliding.z * (RUN_SPEED * overlapped_buffer->elapsed_time);
+							m_Clients[i].x += -METER_PER_PIXEL * v3Sliding.x * (RUN_SPEED * overlapped_buffer->elapsed_time);
+						}
+						else if (m_Clients[i].x > 255.f) {
+							glm::vec3 v3Normal = { -1.f,0.f,0.f };
+							glm::vec3 v3Sliding = m_Clients[i].look_vec - v3Normal * (glm::dot(m_Clients[i].look_vec, v3Normal));
+							m_Clients[i].z += -METER_PER_PIXEL * v3Sliding.z * (RUN_SPEED * overlapped_buffer->elapsed_time);
+							m_Clients[i].x += -METER_PER_PIXEL * v3Sliding.x * (RUN_SPEED * overlapped_buffer->elapsed_time);
+						}
+						else if (-255.f > m_Clients[i].x) {
+							glm::vec3 v3Normal = { 1.f,0.f,0.f };
+							glm::vec3 v3Sliding = m_Clients[i].look_vec - v3Normal * (glm::dot(m_Clients[i].look_vec, v3Normal));
+							m_Clients[i].z += -METER_PER_PIXEL * v3Sliding.z * (RUN_SPEED * overlapped_buffer->elapsed_time);
+							m_Clients[i].x += -METER_PER_PIXEL * v3Sliding.x * (RUN_SPEED * overlapped_buffer->elapsed_time);
+						}
+						else if (-255.f > m_Clients[i].z) {
+							glm::vec3 v3Normal = { 0.f,0.f,1.f };
+							glm::vec3 v3Sliding = m_Clients[i].look_vec - v3Normal * (glm::dot(m_Clients[i].look_vec, v3Normal));
+							m_Clients[i].z += -METER_PER_PIXEL * v3Sliding.z * (RUN_SPEED * overlapped_buffer->elapsed_time);
+							m_Clients[i].x += -METER_PER_PIXEL * v3Sliding.x * (RUN_SPEED * overlapped_buffer->elapsed_time);
+						}
+						else if (255.f < m_Clients[i].z) {
+							glm::vec3 v3Normal = { 0.f,0.f,-1.f };
+							glm::vec3 v3Sliding = m_Clients[i].look_vec - v3Normal * (glm::dot(m_Clients[i].look_vec, v3Normal));
+							m_Clients[i].z += -METER_PER_PIXEL * v3Sliding.z * (RUN_SPEED * overlapped_buffer->elapsed_time);
+							m_Clients[i].x += -METER_PER_PIXEL * v3Sliding.x * (RUN_SPEED * overlapped_buffer->elapsed_time);
+						}
+						else {
+							m_Clients[i].z += (-1) * METER_PER_PIXEL * m_Clients[i].look_vec.z * (RUN_SPEED * overlapped_buffer->elapsed_time);
+							m_Clients[i].x += (-1) * METER_PER_PIXEL * m_Clients[i].look_vec.x * (RUN_SPEED * overlapped_buffer->elapsed_time);
+						}
 					}
 					else {
-						m_Clients[i].z += (-1) * METER_PER_PIXEL * m_Clients[i].look_vec.z * (WALK_SPEED * overlapped_buffer->elapsed_time);
-						m_Clients[i].x += (-1) * METER_PER_PIXEL * m_Clients[i].look_vec.x * (WALK_SPEED * overlapped_buffer->elapsed_time);
+						if (31.f <= m_Clients[i].x &&m_Clients[i].x < 34.f && -92.f <= m_Clients[i].z && m_Clients[i].z <= 28) {
+							printf("1번 벽 부닺침\n");
+							glm::vec3 v3Normal = { 1.f,0.f,0.f };
+							glm::vec3 v3Sliding = m_Clients[i].look_vec - v3Normal * (glm::dot(m_Clients[i].look_vec, v3Normal));
+							m_Clients[i].z += -METER_PER_PIXEL * v3Sliding.z * (WALK_SPEED * overlapped_buffer->elapsed_time);
+							m_Clients[i].x += -METER_PER_PIXEL * v3Sliding.x * (WALK_SPEED * overlapped_buffer->elapsed_time);
+						}
+						else if (-156.f <= m_Clients[i].x && m_Clients[i].x <= 33.f && 26.f <= m_Clients[i].z && m_Clients[i].z <= 28.f) {
+							printf("2번 벽 부닺침\n");
+							glm::vec3 v3Normal = { 0.f,0.f,1.f };
+							glm::vec3 v3Sliding = m_Clients[i].look_vec - v3Normal * (glm::dot(m_Clients[i].look_vec, v3Normal));
+							m_Clients[i].z += -METER_PER_PIXEL * v3Sliding.z * (WALK_SPEED * overlapped_buffer->elapsed_time);
+							m_Clients[i].x += -METER_PER_PIXEL * v3Sliding.x * (WALK_SPEED * overlapped_buffer->elapsed_time);
+						}
+						else if (-156.f <= m_Clients[i].x && m_Clients[i].x <= -153.f && -92.f <= m_Clients[i].z && m_Clients[i].z <= 28.f) {
+							printf("3번 벽 부닺침\n");
+							glm::vec3 v3Normal = { -1.f,0.f,0.f };
+							glm::vec3 v3Sliding = m_Clients[i].look_vec - v3Normal * (glm::dot(m_Clients[i].look_vec, v3Normal));
+							m_Clients[i].z += -METER_PER_PIXEL * v3Sliding.z * (WALK_SPEED * overlapped_buffer->elapsed_time);
+							m_Clients[i].x += -METER_PER_PIXEL * v3Sliding.x * (WALK_SPEED * overlapped_buffer->elapsed_time);
+						}
+						else if (-156.f <= m_Clients[i].x && m_Clients[i].x <= 33.f && -92.f <= m_Clients[i].z && m_Clients[i].z <= -89.f) {
+							printf("4번 벽 부닺침\n");
+							glm::vec3 v3Normal = { 0.f,0.f, -1.f };
+							glm::vec3 v3Sliding = m_Clients[i].look_vec - v3Normal * (glm::dot(m_Clients[i].look_vec, v3Normal));
+							m_Clients[i].z += -METER_PER_PIXEL * v3Sliding.z * (WALK_SPEED * overlapped_buffer->elapsed_time);
+							m_Clients[i].x += -METER_PER_PIXEL * v3Sliding.x * (WALK_SPEED * overlapped_buffer->elapsed_time);
+						}
+						else if (30.f <= m_Clients[i].x && m_Clients[i].x <= 33.f && -256.f <= m_Clients[i].z && m_Clients[i].z <= -178.f) {
+							printf("5번 벽 부닺침\n");
+							glm::vec3 v3Normal = { 1.f, 0.f, 0.f };
+							glm::vec3 v3Sliding = m_Clients[i].look_vec - v3Normal * (glm::dot(m_Clients[i].look_vec, v3Normal));
+							m_Clients[i].z += -METER_PER_PIXEL * v3Sliding.z * (WALK_SPEED * overlapped_buffer->elapsed_time);
+							m_Clients[i].x += -METER_PER_PIXEL * v3Sliding.x * (WALK_SPEED * overlapped_buffer->elapsed_time);
+						}
+						else if (-156.f <= m_Clients[i].x && m_Clients[i].x <= 33.f && -180.f <= m_Clients[i].z && m_Clients[i].z <= -178.f) {
+							printf("6번 벽 부닺침\n");
+							glm::vec3 v3Normal = { 0.f, 0.f, 1.f };
+							glm::vec3 v3Sliding = m_Clients[i].look_vec - v3Normal * (glm::dot(m_Clients[i].look_vec, v3Normal));
+							m_Clients[i].z += -METER_PER_PIXEL * v3Sliding.z * (WALK_SPEED * overlapped_buffer->elapsed_time);
+							m_Clients[i].x += -METER_PER_PIXEL * v3Sliding.x * (WALK_SPEED * overlapped_buffer->elapsed_time);
+						}
+						else if (-156.f <= m_Clients[i].x && m_Clients[i].x <= -154.f && -256.f <= m_Clients[i].z && m_Clients[i].z <= -178.f) {
+							printf("7번 벽 부닺침\n");
+							glm::vec3 v3Normal = { -1.f, 0.f, 0.f };
+							glm::vec3 v3Sliding = m_Clients[i].look_vec - v3Normal * (glm::dot(m_Clients[i].look_vec, v3Normal));
+							m_Clients[i].z += -METER_PER_PIXEL * v3Sliding.z * (WALK_SPEED * overlapped_buffer->elapsed_time);
+							m_Clients[i].x += -METER_PER_PIXEL * v3Sliding.x * (WALK_SPEED * overlapped_buffer->elapsed_time);
+						}
+						else if (m_Clients[i].x > 255.f) {
+							glm::vec3 v3Normal = { -1.f,0.f,0.f };
+							glm::vec3 v3Sliding = m_Clients[i].look_vec - v3Normal * (glm::dot(m_Clients[i].look_vec, v3Normal));
+							m_Clients[i].z += -METER_PER_PIXEL * v3Sliding.z * (WALK_SPEED * overlapped_buffer->elapsed_time);
+							m_Clients[i].x += -METER_PER_PIXEL * v3Sliding.x * (WALK_SPEED * overlapped_buffer->elapsed_time);
+						}
+						else if (-255.f > m_Clients[i].x) {
+							glm::vec3 v3Normal = { 1.f,0.f,0.f };
+							glm::vec3 v3Sliding = m_Clients[i].look_vec - v3Normal * (glm::dot(m_Clients[i].look_vec, v3Normal));
+							m_Clients[i].z += -METER_PER_PIXEL * v3Sliding.z * (WALK_SPEED * overlapped_buffer->elapsed_time);
+							m_Clients[i].x += -METER_PER_PIXEL * v3Sliding.x * (WALK_SPEED * overlapped_buffer->elapsed_time);
+						}
+						else if (-255.f > m_Clients[i].z) {
+							glm::vec3 v3Normal = { 0.f,0.f,1.f };
+							glm::vec3 v3Sliding = m_Clients[i].look_vec - v3Normal * (glm::dot(m_Clients[i].look_vec, v3Normal));
+							m_Clients[i].z += -METER_PER_PIXEL * v3Sliding.z * (WALK_SPEED * overlapped_buffer->elapsed_time);
+							m_Clients[i].x += -METER_PER_PIXEL * v3Sliding.x * (WALK_SPEED * overlapped_buffer->elapsed_time);
+						}
+						else if (255.f < m_Clients[i].z) {
+							glm::vec3 v3Normal = { 0.f,0.f,-1.f };
+							glm::vec3 v3Sliding = m_Clients[i].look_vec - v3Normal * (glm::dot(m_Clients[i].look_vec, v3Normal));
+							m_Clients[i].z += -METER_PER_PIXEL * v3Sliding.z * (WALK_SPEED * overlapped_buffer->elapsed_time);
+							m_Clients[i].x += -METER_PER_PIXEL * v3Sliding.x * (WALK_SPEED * overlapped_buffer->elapsed_time);
+						}
+						else {
+							m_Clients[i].z += (-1) * METER_PER_PIXEL * m_Clients[i].look_vec.z * (WALK_SPEED * overlapped_buffer->elapsed_time);
+							m_Clients[i].x += (-1) * METER_PER_PIXEL * m_Clients[i].look_vec.x * (WALK_SPEED * overlapped_buffer->elapsed_time);
+						}
 
-						//m_Clients[i].y -= METER_PER_PIXEL * m_Clients[i].look_vec.y * (WALK_SPEED * overlapped_buffer->elapsed_time);
-						//printf("m_Clients[i].look_vec.y :: %f 빼고있다\n", m_Clients[i].look_vec.y);
 					}
 				}
 				if (m_Clients[i].is_move_backward) {
+
 					if (m_Clients[i].is_running) {
 						m_Clients[i].z += METER_PER_PIXEL * m_Clients[i].look_vec.z * (RUN_SPEED * overlapped_buffer->elapsed_time);
 						m_Clients[i].x += METER_PER_PIXEL * m_Clients[i].look_vec.x * (RUN_SPEED * overlapped_buffer->elapsed_time);
@@ -862,6 +946,13 @@ void ServerFramework::WorkerThread() {
 						m_Clients[i].x += METER_PER_PIXEL * m_Clients[i].look_vec.z * (WALK_SPEED * overlapped_buffer->elapsed_time);
 					}
 				}
+
+				////}
+				//// Sliding Vector 
+				//else {
+				//	if (m_Clients[i].is_move_foward) {
+				//	}
+				//}
 				m_Clients[i].m_mutexServerLock.unlock();
 			}
 
@@ -1061,7 +1152,9 @@ void ServerFramework::WorkerThread() {
 							packets.y = bullets[i][j].y;
 							packets.z = bullets[i][j].z;
 							// 해당 플레이어에게만 보내야함
-							SendPacket(i, &packets);
+							for (int k = 0; k < MAX_PLAYER; ++k) {
+								SendPacket(k, &packets);
+							}
 
 						}
 						m_mutexBulletLock[i].unlock();
@@ -1071,7 +1164,7 @@ void ServerFramework::WorkerThread() {
 
 		}
 		// Send로 인해 할당된 영역 반납
-		else if(overlapped_buffer->evt_type == EVT_SEND_PACKET){
+		else if (overlapped_buffer->evt_type == EVT_SEND_PACKET) {
 			delete overlapped_buffer;
 		}
 	}

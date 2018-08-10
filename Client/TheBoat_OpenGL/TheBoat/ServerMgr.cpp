@@ -245,15 +245,20 @@ void ServerMgr::ProcessPacket(char* ptr) {
 	}
 	case SC_TEAM_RED: {
 		CS_PACKET_TEAM_SELECT* packets = reinterpret_cast<CS_PACKET_TEAM_SELECT*>(ptr);
-		m_bTeam[packets->m_cID] = false;
+		m_TeamPlayer[packets->m_cID] = e_TeamRed;
 		break;
 	}
 	case SC_TEAM_BLUE: {
 		CS_PACKET_TEAM_SELECT* packets = reinterpret_cast<CS_PACKET_TEAM_SELECT*>(ptr);
-		m_bTeam[packets->m_cID] = true;
+		m_TeamPlayer[packets->m_cID] = e_TeamBlue;
 		break;
 	}
 	case SC_GAME_START: {
+		SC_PACKET_START* packets = reinterpret_cast<SC_PACKET_START*>(ptr);
+		for (int i = 0; i < MAX_PLAYER; ++i) {
+			m_TeamPlayer[i] = packets->m_bPlayerTeam[i];
+			printf("%dPlayer Team : %d\n", i, m_TeamPlayer[i]);
+		}
 		m_bGameStart = true;
 		break;
 	}
@@ -320,8 +325,8 @@ bool ServerMgr::GetStart() {
 	return m_bGameStart;
 }
 
-bool* ServerMgr::GetTeam() {
-	return m_bTeam;
+Team ServerMgr::GetTeam(int iPlayerID) {
+	return m_TeamPlayer[iPlayerID];
 }
 
 bool ServerMgr::GetGameMode() {

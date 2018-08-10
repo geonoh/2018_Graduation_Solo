@@ -283,6 +283,7 @@ struct SC_PACKET_BULLET {
 struct SC_PACKET_START {
 	BYTE size;
 	BYTE type;
+	Team m_bPlayerTeam[MAX_PLAYER] = { e_NoTeam };
 };
 
 struct SC_PACKET_AMMO_O {
