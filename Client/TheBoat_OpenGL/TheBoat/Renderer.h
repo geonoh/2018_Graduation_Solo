@@ -90,6 +90,13 @@ public:
 	GLuint m_Tex_Bullet = 0;
 	GLuint m_Tex_Cloud = 0;
 
+	GLuint m_Tex_Win1 = 0;
+	GLuint m_Tex_Win2 = 0;
+	GLuint m_Tex_Win3 = 0;
+	GLuint m_Tex_Win4 = 0;
+	GLuint m_Tex_WinRed = 0;
+	GLuint m_Tex_WinBlue = 0;
+
 	GLuint m_Tex_Cube_NightTime;
 
 

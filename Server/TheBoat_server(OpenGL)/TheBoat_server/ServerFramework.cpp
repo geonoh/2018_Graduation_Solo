@@ -664,7 +664,67 @@ void ServerFramework::WorkerThread() {
 			for (int i = 0; i < MAX_PLAYER; ++i) {
 				if (m_Clients[i].hp <= 0.f) {
 					printf("%d ÇÃ·¹ÀÌ¾î Die\n");
-					
+					SC_PACKET_DIE packets;
+					packets.size = sizeof(SC_PACKET_DIE);
+					packets.type = SC_PLAYER_DIE;
+					packets.m_cDiePlayer = i;
+					for (int j = 0; j < MAX_PLAYER; ++j) {
+						SendPacket(j, &packets);
+					}
+					// Melee Mode
+					if (m_bGameMode) {
+						iAliveCounter--;
+						if (iAliveCounter == 1) {
+							m_bGameStart = false;
+							for (int j = 0; j < MAX_PLAYER; ++j) {
+								// Ã¼·ÂÀÌ ¾ç¼öÀÎ ÇÃ·¹ÀÌ¾î°¡ ÃÖÁ¾ »ýÁ¸ÀÚ¶ó´Â ¶æ
+								if (m_Clients[j].hp > 0.f) {
+									printf("%d Player Win\n", j);
+									SC_PACKET_RESULT packets;
+									packets.size = sizeof(SC_PACKET_RESULT);
+									packets.type = SC_RESULT;
+									packets.m_cVictoryTeam = j + 1;
+									for (int k = 0; k < MAX_PLAYER; ++k) {
+										SendPacket(k, &packets);
+									}
+								}
+							}
+						}
+					}
+					// Team Mode
+					else {
+						if (m_Clients[i].team == e_TeamRed) {
+							iAliveCounterRed--;
+							if (iAliveCounterRed == 0) {
+								m_bGameStart = false;
+								printf("Blue Team Win\n");
+								SC_PACKET_RESULT packets;
+								packets.size = sizeof(SC_PACKET_RESULT);
+								packets.type = SC_RESULT;
+								packets.m_cVictoryTeam = 5;
+								for (int k = 0; k < MAX_PLAYER; ++k) {
+									SendPacket(k, &packets);
+								}
+
+							}
+						}
+						if (m_Clients[i].team == e_TeamBlue) {
+							iAliveCounterBlue--;
+							if (iAliveCounterBlue == 0) {
+								m_bGameStart = false;
+								printf("Red Team Win\n");
+								SC_PACKET_RESULT packets;
+								packets.size = sizeof(SC_PACKET_RESULT);
+								packets.type = SC_RESULT;
+								packets.m_cVictoryTeam = 6;
+								for (int k = 0; k < MAX_PLAYER; ++k) {
+									SendPacket(k, &packets);
+								}
+
+							}
+						}
+					}
+
 				}
 				if (m_Clients[i].in_use && m_BoatGenedMap[0]) {
 					if (-256.f < m_Clients[i].x&&m_Clients[i].x <= 0.f) {
@@ -798,8 +858,51 @@ void ServerFramework::WorkerThread() {
 				m_Clients[i].m_mutexServerLock.lock();
 				if (m_Clients[i].is_move_foward) {
 					if (m_Clients[i].is_running) {
-						if (m_Clients[i].x < 34.f && -92.f <= m_Clients[i].z && m_Clients[i].z <= 28) {
+						if (31.f <= m_Clients[i].x &&m_Clients[i].x < 34.f && -92.f <= m_Clients[i].z && m_Clients[i].z <= 28) {
+							//printf("1¹ø º® ºÎ´èÄ§\n");
 							glm::vec3 v3Normal = { 1.f,0.f,0.f };
+							glm::vec3 v3Sliding = m_Clients[i].look_vec - v3Normal * (glm::dot(m_Clients[i].look_vec, v3Normal));
+							m_Clients[i].z += -METER_PER_PIXEL * v3Sliding.z * (RUN_SPEED * overlapped_buffer->elapsed_time);
+							m_Clients[i].x += -METER_PER_PIXEL * v3Sliding.x * (RUN_SPEED * overlapped_buffer->elapsed_time);
+						}
+						else if (-156.f <= m_Clients[i].x && m_Clients[i].x <= 33.f && 26.f <= m_Clients[i].z && m_Clients[i].z <= 28.f) {
+							//printf("2¹ø º® ºÎ´èÄ§\n");
+							glm::vec3 v3Normal = { 0.f,0.f,1.f };
+							glm::vec3 v3Sliding = m_Clients[i].look_vec - v3Normal * (glm::dot(m_Clients[i].look_vec, v3Normal));
+							m_Clients[i].z += -METER_PER_PIXEL * v3Sliding.z * (RUN_SPEED * overlapped_buffer->elapsed_time);
+							m_Clients[i].x += -METER_PER_PIXEL * v3Sliding.x * (RUN_SPEED * overlapped_buffer->elapsed_time);
+						}
+						else if (-156.f <= m_Clients[i].x && m_Clients[i].x <= -153.f && -92.f <= m_Clients[i].z && m_Clients[i].z <= 28.f) {
+							//printf("3¹ø º® ºÎ´èÄ§\n");
+							glm::vec3 v3Normal = { -1.f,0.f,0.f };
+							glm::vec3 v3Sliding = m_Clients[i].look_vec - v3Normal * (glm::dot(m_Clients[i].look_vec, v3Normal));
+							m_Clients[i].z += -METER_PER_PIXEL * v3Sliding.z * (RUN_SPEED * overlapped_buffer->elapsed_time);
+							m_Clients[i].x += -METER_PER_PIXEL * v3Sliding.x * (RUN_SPEED * overlapped_buffer->elapsed_time);
+						}
+						else if (-156.f <= m_Clients[i].x && m_Clients[i].x <= 33.f && -92.f <= m_Clients[i].z && m_Clients[i].z <= -89.f) {
+							//printf("4¹ø º® ºÎ´èÄ§\n");
+							glm::vec3 v3Normal = { 0.f,0.f, -1.f };
+							glm::vec3 v3Sliding = m_Clients[i].look_vec - v3Normal * (glm::dot(m_Clients[i].look_vec, v3Normal));
+							m_Clients[i].z += -METER_PER_PIXEL * v3Sliding.z * (RUN_SPEED * overlapped_buffer->elapsed_time);
+							m_Clients[i].x += -METER_PER_PIXEL * v3Sliding.x * (RUN_SPEED * overlapped_buffer->elapsed_time);
+						}
+						else if (30.f <= m_Clients[i].x && m_Clients[i].x <= 33.f && -256.f <= m_Clients[i].z && m_Clients[i].z <= -178.f) {
+							//printf("5¹ø º® ºÎ´èÄ§\n");
+							glm::vec3 v3Normal = { 1.f, 0.f, 0.f };
+							glm::vec3 v3Sliding = m_Clients[i].look_vec - v3Normal * (glm::dot(m_Clients[i].look_vec, v3Normal));
+							m_Clients[i].z += -METER_PER_PIXEL * v3Sliding.z * (RUN_SPEED * overlapped_buffer->elapsed_time);
+							m_Clients[i].x += -METER_PER_PIXEL * v3Sliding.x * (RUN_SPEED * overlapped_buffer->elapsed_time);
+						}
+						else if (-156.f <= m_Clients[i].x && m_Clients[i].x <= 33.f && -180.f <= m_Clients[i].z && m_Clients[i].z <= -178.f) {
+							//printf("6¹ø º® ºÎ´èÄ§\n");
+							glm::vec3 v3Normal = { 0.f, 0.f, 1.f };
+							glm::vec3 v3Sliding = m_Clients[i].look_vec - v3Normal * (glm::dot(m_Clients[i].look_vec, v3Normal));
+							m_Clients[i].z += -METER_PER_PIXEL * v3Sliding.z * (RUN_SPEED * overlapped_buffer->elapsed_time);
+							m_Clients[i].x += -METER_PER_PIXEL * v3Sliding.x * (RUN_SPEED * overlapped_buffer->elapsed_time);
+						}
+						else if (-156.f <= m_Clients[i].x && m_Clients[i].x <= -154.f && -256.f <= m_Clients[i].z && m_Clients[i].z <= -178.f) {
+							//printf("7¹ø º® ºÎ´èÄ§\n");
+							glm::vec3 v3Normal = { -1.f, 0.f, 0.f };
 							glm::vec3 v3Sliding = m_Clients[i].look_vec - v3Normal * (glm::dot(m_Clients[i].look_vec, v3Normal));
 							m_Clients[i].z += -METER_PER_PIXEL * v3Sliding.z * (RUN_SPEED * overlapped_buffer->elapsed_time);
 							m_Clients[i].x += -METER_PER_PIXEL * v3Sliding.x * (RUN_SPEED * overlapped_buffer->elapsed_time);
@@ -835,49 +938,49 @@ void ServerFramework::WorkerThread() {
 					}
 					else {
 						if (31.f <= m_Clients[i].x &&m_Clients[i].x < 34.f && -92.f <= m_Clients[i].z && m_Clients[i].z <= 28) {
-							printf("1¹ø º® ºÎ´èÄ§\n");
+							//printf("1¹ø º® ºÎ´èÄ§\n");
 							glm::vec3 v3Normal = { 1.f,0.f,0.f };
 							glm::vec3 v3Sliding = m_Clients[i].look_vec - v3Normal * (glm::dot(m_Clients[i].look_vec, v3Normal));
 							m_Clients[i].z += -METER_PER_PIXEL * v3Sliding.z * (WALK_SPEED * overlapped_buffer->elapsed_time);
 							m_Clients[i].x += -METER_PER_PIXEL * v3Sliding.x * (WALK_SPEED * overlapped_buffer->elapsed_time);
 						}
 						else if (-156.f <= m_Clients[i].x && m_Clients[i].x <= 33.f && 26.f <= m_Clients[i].z && m_Clients[i].z <= 28.f) {
-							printf("2¹ø º® ºÎ´èÄ§\n");
+							//printf("2¹ø º® ºÎ´èÄ§\n");
 							glm::vec3 v3Normal = { 0.f,0.f,1.f };
 							glm::vec3 v3Sliding = m_Clients[i].look_vec - v3Normal * (glm::dot(m_Clients[i].look_vec, v3Normal));
 							m_Clients[i].z += -METER_PER_PIXEL * v3Sliding.z * (WALK_SPEED * overlapped_buffer->elapsed_time);
 							m_Clients[i].x += -METER_PER_PIXEL * v3Sliding.x * (WALK_SPEED * overlapped_buffer->elapsed_time);
 						}
 						else if (-156.f <= m_Clients[i].x && m_Clients[i].x <= -153.f && -92.f <= m_Clients[i].z && m_Clients[i].z <= 28.f) {
-							printf("3¹ø º® ºÎ´èÄ§\n");
+							//printf("3¹ø º® ºÎ´èÄ§\n");
 							glm::vec3 v3Normal = { -1.f,0.f,0.f };
 							glm::vec3 v3Sliding = m_Clients[i].look_vec - v3Normal * (glm::dot(m_Clients[i].look_vec, v3Normal));
 							m_Clients[i].z += -METER_PER_PIXEL * v3Sliding.z * (WALK_SPEED * overlapped_buffer->elapsed_time);
 							m_Clients[i].x += -METER_PER_PIXEL * v3Sliding.x * (WALK_SPEED * overlapped_buffer->elapsed_time);
 						}
 						else if (-156.f <= m_Clients[i].x && m_Clients[i].x <= 33.f && -92.f <= m_Clients[i].z && m_Clients[i].z <= -89.f) {
-							printf("4¹ø º® ºÎ´èÄ§\n");
+							//printf("4¹ø º® ºÎ´èÄ§\n");
 							glm::vec3 v3Normal = { 0.f,0.f, -1.f };
 							glm::vec3 v3Sliding = m_Clients[i].look_vec - v3Normal * (glm::dot(m_Clients[i].look_vec, v3Normal));
 							m_Clients[i].z += -METER_PER_PIXEL * v3Sliding.z * (WALK_SPEED * overlapped_buffer->elapsed_time);
 							m_Clients[i].x += -METER_PER_PIXEL * v3Sliding.x * (WALK_SPEED * overlapped_buffer->elapsed_time);
 						}
 						else if (30.f <= m_Clients[i].x && m_Clients[i].x <= 33.f && -256.f <= m_Clients[i].z && m_Clients[i].z <= -178.f) {
-							printf("5¹ø º® ºÎ´èÄ§\n");
+							//printf("5¹ø º® ºÎ´èÄ§\n");
 							glm::vec3 v3Normal = { 1.f, 0.f, 0.f };
 							glm::vec3 v3Sliding = m_Clients[i].look_vec - v3Normal * (glm::dot(m_Clients[i].look_vec, v3Normal));
 							m_Clients[i].z += -METER_PER_PIXEL * v3Sliding.z * (WALK_SPEED * overlapped_buffer->elapsed_time);
 							m_Clients[i].x += -METER_PER_PIXEL * v3Sliding.x * (WALK_SPEED * overlapped_buffer->elapsed_time);
 						}
 						else if (-156.f <= m_Clients[i].x && m_Clients[i].x <= 33.f && -180.f <= m_Clients[i].z && m_Clients[i].z <= -178.f) {
-							printf("6¹ø º® ºÎ´èÄ§\n");
+							//printf("6¹ø º® ºÎ´èÄ§\n");
 							glm::vec3 v3Normal = { 0.f, 0.f, 1.f };
 							glm::vec3 v3Sliding = m_Clients[i].look_vec - v3Normal * (glm::dot(m_Clients[i].look_vec, v3Normal));
 							m_Clients[i].z += -METER_PER_PIXEL * v3Sliding.z * (WALK_SPEED * overlapped_buffer->elapsed_time);
 							m_Clients[i].x += -METER_PER_PIXEL * v3Sliding.x * (WALK_SPEED * overlapped_buffer->elapsed_time);
 						}
 						else if (-156.f <= m_Clients[i].x && m_Clients[i].x <= -154.f && -256.f <= m_Clients[i].z && m_Clients[i].z <= -178.f) {
-							printf("7¹ø º® ºÎ´èÄ§\n");
+							//printf("7¹ø º® ºÎ´èÄ§\n");
 							glm::vec3 v3Normal = { -1.f, 0.f, 0.f };
 							glm::vec3 v3Sliding = m_Clients[i].look_vec - v3Normal * (glm::dot(m_Clients[i].look_vec, v3Normal));
 							m_Clients[i].z += -METER_PER_PIXEL * v3Sliding.z * (WALK_SPEED * overlapped_buffer->elapsed_time);
@@ -1081,7 +1184,7 @@ void ServerFramework::WorkerThread() {
 		}
 		else if (overlapped_buffer->evt_type == EVT_BULLET_GENERATE) {
 			int shooter_id = overlapped_buffer->shooter_player_id;
-			if (m_Clients[shooter_id].equipted_weapon == 0 && m_Clients[shooter_id].in_use) {
+			if (m_Clients[shooter_id].equipted_weapon == 0 && m_Clients[shooter_id].in_use && m_Clients[shooter_id].hp > 0.f) {
 				printf("%d°¡ ¹ß»çÇÑ ÃÑ¾Ë : %d\n", shooter_id, m_Clients[shooter_id].m_CurrentAmmo);
 				m_mutexBulletLock[shooter_id].lock();
 				if (m_Clients[shooter_id].m_CurrentAmmo == 1) {
@@ -1109,7 +1212,7 @@ void ServerFramework::WorkerThread() {
 				SendPacket(shooter_id, &packets);
 			}
 			else {
-
+				printf("ÃÑ¾ËÀÌ ¾ø°Å³ª Á×¾ú°Å³ª ÇÏ³ª\n");
 			}
 		}
 		else if (overlapped_buffer->evt_type == EVT_SEND_TIME) {

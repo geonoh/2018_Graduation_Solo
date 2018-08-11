@@ -301,9 +301,26 @@ void ServerMgr::ProcessPacket(char* ptr) {
 		printf("SC_HIT : HP : %f \n", client_hp[packets->m_cHitID]);
 		break;
 	}
+	case SC_PLAYER_DIE: {
+		SC_PACKET_DIE * packets = reinterpret_cast<SC_PACKET_DIE*>(ptr);
+		m_bPlayerDie[packets->m_cDiePlayer] = true;
+		break;
+	}
+	case SC_RESULT: {
+		SC_PACKET_RESULT * packets = reinterpret_cast<SC_PACKET_RESULT*>(ptr);
+		m_cResult = packets->m_cVictoryTeam;
+		break;
+	}
 	}
 }
 
+char ServerMgr::GetResult() {
+	return m_cResult;
+}
+
+bool ServerMgr::GetPlayerDie(int iPlayerID) {
+	return m_bPlayerDie[iPlayerID];
+}
 
 bool ServerMgr::GetWeather() {
 	return m_bWeather;

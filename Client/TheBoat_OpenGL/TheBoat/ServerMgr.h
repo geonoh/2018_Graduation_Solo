@@ -70,7 +70,11 @@ class ServerMgr
 	// ¹ã -> true (´«)
 	bool m_bWeather = false;
 	Team m_TeamPlayer[MAX_PLAYER];
+	bool m_bPlayerDie[MAX_PLAYER] = { false };
+	char m_cResult = 0;
 public:
+	char GetResult();
+	bool GetPlayerDie(int iPlayerID);
 	Team GetTeam(int iPlayerID);
 	bool GetWeather();
 	bool GetPlayerHaveParts(int iPartsType);

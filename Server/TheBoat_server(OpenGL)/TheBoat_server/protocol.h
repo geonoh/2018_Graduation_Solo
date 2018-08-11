@@ -4,7 +4,7 @@
 #define SERVER_PORT			4000
 #define MAX_BUFFER_SIZE		4000
 #define MAX_PACKET_SIZE		256
-#define MAX_PLAYER		2
+#define MAX_PLAYER			2
 #define	WM_SOCKET			WM_USER + 1
 #define CLIENT_BUF_SIZE		1024
 #define MAX_AMMO			30
@@ -79,6 +79,8 @@
 #define SC_PLAYER_GET_ITEM		35
 #define SC_WEATHER_CHANGE		36
 #define SC_HIT					37
+#define SC_PLAYER_DIE			38
+#define SC_RESULT				39
 ///////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////
@@ -193,6 +195,20 @@ enum SubWeapons {
 };
 
 // 서버->클라
+struct SC_PACKET_RESULT {
+	BYTE size;
+	BYTE type;
+	char m_cVictoryTeam;
+};
+
+
+struct SC_PACKET_DIE {
+	BYTE size;
+	BYTE type;
+	char m_cDiePlayer;
+};
+
+
 struct SC_PACKET_HIT {
 	BYTE size;
 	BYTE type;

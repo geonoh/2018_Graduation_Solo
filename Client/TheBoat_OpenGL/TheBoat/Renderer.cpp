@@ -540,6 +540,17 @@ void Renderer::InitializeTextureImage() {
 	m_Tex_PlayerReady = CreatePngTexture("./Textures/Lobby/PlayerReady.png");
 
 	m_Tex_Rain = CreatePngTexture("./Textures/Rain.png");
+
+
+	// Result
+	m_Tex_Win1 = CreatePngTexture("./Textures/Result/P1Win.png");
+	m_Tex_Win2 = CreatePngTexture("./Textures/Result/P2Win.png");
+	m_Tex_Win3 = CreatePngTexture("./Textures/Result/P3Win.png");
+	m_Tex_Win4 = CreatePngTexture("./Textures/Result/P4Win.png");
+
+	m_Tex_WinRed = CreatePngTexture("./Textures/Result/RedWin.png");
+	m_Tex_WinBlue = CreatePngTexture("./Textures/Result/BlueWin.png");
+
 }
 
 bool Renderer::IsInitialized()
@@ -2546,6 +2557,25 @@ void Renderer::DrawUITexture(int i_iTextureId, float i_fStartPosX, float i_fStar
 		break;
 	case 28:
 		glBindTexture(GL_TEXTURE_2D, m_Tex_Cloud);
+		break;
+		// 여기서부터 Result
+	case 29:
+		glBindTexture(GL_TEXTURE_2D, m_Tex_Win1);
+		break;
+	case 30:
+		glBindTexture(GL_TEXTURE_2D, m_Tex_Win2);
+		break;
+	case 31:
+		glBindTexture(GL_TEXTURE_2D, m_Tex_Win3);
+		break;
+	case 32:
+		glBindTexture(GL_TEXTURE_2D, m_Tex_Win4);
+		break;
+	case 33:
+		glBindTexture(GL_TEXTURE_2D, m_Tex_WinRed);
+		break;
+	case 34:
+		glBindTexture(GL_TEXTURE_2D, m_Tex_WinBlue);
 		break;
 	}
 	GLuint pos = glGetAttribLocation(shader, "a_Position");
