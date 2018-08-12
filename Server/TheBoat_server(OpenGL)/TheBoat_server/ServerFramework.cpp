@@ -26,13 +26,13 @@ ServerFramework::~ServerFramework()
 
 void ServerFramework::InitServer() {
 #ifdef _Dev
-	//printf("---------------------------------\n");
-	//printf("- 개발모드\n");
-	//printf("---------------------------------\n");
-	//m_bIsBoatGen = true;
-	//m_bGameStart = true;
-	//m_bIsAmmoGen = true;
-	//m_fBoatGenTime = 0.f;
+	printf("---------------------------------\n");
+	printf("- 개발모드\n");
+	printf("---------------------------------\n");
+	m_bIsBoatGen = true;
+	m_bGameStart = true;
+	m_bIsAmmoGen = true;
+	m_fBoatGenTime = 0.f;
 #endif
 	wcout.imbue(locale("korean"));
 
@@ -816,6 +816,83 @@ void ServerFramework::WorkerThread() {
 			}
 		}
 		else if (overlapped_buffer->evt_type == EVT_AMMO_ITEM_GEN) {
+			int iDice = 0;
+			iDice = rand() % 8;
+			switch (iDice) {
+			case 0:
+				m_itemAmmo[0].m_bUse = true;
+				m_itemAmmo[0].m_ItemType = 4;
+				m_itemAmmo[0].x = -204.f;
+				m_itemAmmo[0].y = 79.f;
+				m_itemAmmo[0].z = -186.f;
+				break;
+			case 1:
+				m_itemAmmo[1].m_bUse = true;
+				m_itemAmmo[1].m_ItemType = 4;
+				m_itemAmmo[1].x = -195.f;
+				m_itemAmmo[1].y = 72.f;
+				m_itemAmmo[1].z = -73.f;
+				break;
+			case 2:
+				m_itemAmmo[2].m_bUse = true;
+				m_itemAmmo[2].m_ItemType = 4;
+				m_itemAmmo[2].x = -160.f;
+				m_itemAmmo[2].y = 81.f;
+				m_itemAmmo[2].z = 71.f;
+				break;
+			case 3:
+				m_itemAmmo[3].m_bUse = true;
+				m_itemAmmo[3].m_ItemType = 4;
+				m_itemAmmo[3].x = -167.f;
+				m_itemAmmo[3].y = 45.f;
+				m_itemAmmo[3].z = 201.f;
+				break;
+			case 4:
+				m_itemAmmo[4].m_bUse = true;
+				m_itemAmmo[4].m_ItemType = 4;
+				m_itemAmmo[4].x = 79.f;
+				m_itemAmmo[4].y = 43.f;
+				m_itemAmmo[4].z = 191.f;
+				break;
+			case 5:
+				m_itemAmmo[5].m_bUse = true;
+				m_itemAmmo[5].m_ItemType = 4;
+				m_itemAmmo[5].x = 162.f;
+				m_itemAmmo[5].y = 61.f;
+				m_itemAmmo[5].z = 95.f;
+				break;
+			case 6:
+				m_itemAmmo[6].m_bUse = true;
+				m_itemAmmo[6].m_ItemType = 4;
+				m_itemAmmo[6].x = 170.f;
+				m_itemAmmo[6].y = 57.f;
+				m_itemAmmo[6].z = -58.f;
+				break;
+			case 7:
+				m_itemAmmo[7].m_bUse = true;
+				m_itemAmmo[7].m_ItemType = 4;
+				m_itemAmmo[7].x = 158.f;
+				m_itemAmmo[7].y = 45.f;
+				m_itemAmmo[7].z = -183.f;
+				break;
+			}
+			printf("Ammo : No.%d 생성 [%f, %f, %f]\n",iDice,
+				m_itemAmmo[iDice].x,
+				m_itemAmmo[iDice].y,
+				m_itemAmmo[iDice].z);
+
+			SC_PACKET_ITEM_GEN packets;
+			packets.size = sizeof(SC_PACKET_ITEM_GEN);
+			packets.type = SC_AMMO_ITEM_GEN;
+			packets.item_type = 4;
+			packets.m_cItemID = iDice;
+			packets.x = m_itemAmmo[iDice].x;
+			packets.y = m_itemAmmo[iDice].y;
+			packets.z = m_itemAmmo[iDice].z;
+			for (int i = 0; i < MAX_PLAYER; ++i) {
+				SendPacket(i, &packets);
+			}
+
 		}
 		else if (overlapped_buffer->evt_type == EVT_BOAT_ITEM_GEN) {
 
@@ -1126,10 +1203,13 @@ void ServerFramework::WorkerThread() {
 								packets.size = sizeof(SC_PACKET_GET_ITEM);
 								packets.type = SC_PLAYER_GET_ITEM;
 								packets.m_cItemType = j;
+								packets.m_cGetterID = i;
 								m_Clients[i].m_bPlayerBoatParts[j] = true;
 								m_itemBoat[j].m_bUse = false;
 								printf("%d플레이어와 %d아이템 충돌\n", i, j);
-								SendPacket(i, &packets);
+								for (int k = 0; k < MAX_PLAYER; ++k) {
+									SendPacket(k, &packets);
+								}
 							}
 						}
 					}
@@ -1137,6 +1217,37 @@ void ServerFramework::WorkerThread() {
 			}
 			m_mutexBoatItem.unlock();
 
+			// Ammo 아이템과 플레이어
+			for (int i = 0; i < MAX_PLAYER; ++i) {
+				for (int j = 0; j < 8; ++j) {
+					if (m_Clients[i].in_use && m_itemAmmo[j].m_bUse) {
+						float fDist =
+							(m_itemAmmo[j].x - m_Clients[i].x)*(m_itemAmmo[j].x - m_Clients[i].x) +
+							(m_itemAmmo[j].y - m_Clients[i].y)*(m_itemAmmo[j].y - m_Clients[i].y) +
+							(m_itemAmmo[j].z - m_Clients[i].z)*(m_itemAmmo[j].z - m_Clients[i].z);
+						float fDistOrigin = (RAD_PLAYER + RAD_AMMO_ITEM) * (RAD_PLAYER + RAD_AMMO_ITEM);
+						// 충돌
+						if (fDist < fDistOrigin) {
+							SC_PACKET_GET_ITEM packets;
+							packets.size = sizeof(SC_PACKET_GET_ITEM);
+							packets.type = SC_PLAYER_GET_ITEM;
+							// 4 는 무조건 Ammo 아이템이다. 
+							packets.m_cItemType = 4;
+							packets.m_cAmmoItemID = j;
+							packets.m_cGetterID = i;
+							//m_Clients[i].m_bPlayerBoatParts[j] = true;
+							m_Clients[i].m_TotalAmmo = 90;
+							m_itemAmmo[j].m_bUse = false;
+							printf("%d플레이어와 %d아이템 충돌\n", i, j);
+							for (int k = 0; k < MAX_PLAYER; ++k) {
+								SendPacket(k, &packets);
+							}
+
+						}
+
+					}
+				}
+			}
 			
 			// 총알과 플레이어
 			for (int i = 0; i < MAX_PLAYER; ++i) {
@@ -1149,26 +1260,53 @@ void ServerFramework::WorkerThread() {
 						// 총알 쏘는 플레이어와 총알 맞는 플레이어 모두 존재하고 
 						// 플레이어가 발사한 총알까지 존재 해야 이 함수 실행
 						if (i == k)continue;
-						if (m_Clients[i].in_use && m_Clients[k].in_use && bullets[i][j].in_use) {
-							float fDist =
-								(bullets[i][j].x - m_Clients[k].x)*(bullets[i][j].x - m_Clients[k].x) +
-								(bullets[i][j].y - m_Clients[k].y)*(bullets[i][j].y - m_Clients[k].y) +
-								(bullets[i][j].z - m_Clients[k].z)*(bullets[i][j].z - m_Clients[k].z);
-							float fDistOrigin = (RAD_PLAYER + RAD_BULLET) * (RAD_PLAYER + RAD_BULLET);
-							// 충돌
-							if (fDist < fDistOrigin) {
-								SC_PACKET_HIT packets;
-								packets.size = sizeof(SC_PACKET_HIT);
-								packets.type = SC_HIT;
-								m_Clients[k].hp -= 10.f;
-								packets.m_fHp = m_Clients[k].hp;
-								packets.m_cBulletNumber = j;
-								packets.m_cShooterID = i;
-								packets.m_cHitID = k;
-								printf("%d플레이어와 %d플레이어의 총알 충돌\n", k, i);
-								printf("후 HP : %f\n", packets.m_fHp);
-								SendPacket(k, &packets);
-								bullets[i][j].in_use = false;
+						if (m_bGameMode == 0) {
+							if (m_Clients[i].in_use && m_Clients[k].in_use && bullets[i][j].in_use &&
+								m_Clients[i].team != m_Clients[k].team) {
+								float fDist =
+									(bullets[i][j].x - m_Clients[k].x)*(bullets[i][j].x - m_Clients[k].x) +
+									(bullets[i][j].y - m_Clients[k].y)*(bullets[i][j].y - m_Clients[k].y) +
+									(bullets[i][j].z - m_Clients[k].z)*(bullets[i][j].z - m_Clients[k].z);
+								float fDistOrigin = (RAD_PLAYER + RAD_BULLET) * (RAD_PLAYER + RAD_BULLET);
+								// 충돌
+								if (fDist < fDistOrigin) {
+									SC_PACKET_HIT packets;
+									packets.size = sizeof(SC_PACKET_HIT);
+									packets.type = SC_HIT;
+									m_Clients[k].hp -= 10.f;
+									packets.m_fHp = m_Clients[k].hp;
+									packets.m_cBulletNumber = j;
+									packets.m_cShooterID = i;
+									packets.m_cHitID = k;
+									printf("%d플레이어와 %d플레이어의 총알 충돌\n", k, i);
+									printf("후 HP : %f\n", packets.m_fHp);
+									SendPacket(k, &packets);
+									bullets[i][j].in_use = false;
+								}
+							}
+						}
+						else {
+							if (m_Clients[i].in_use && m_Clients[k].in_use && bullets[i][j].in_use) {
+								float fDist =
+									(bullets[i][j].x - m_Clients[k].x)*(bullets[i][j].x - m_Clients[k].x) +
+									(bullets[i][j].y - m_Clients[k].y)*(bullets[i][j].y - m_Clients[k].y) +
+									(bullets[i][j].z - m_Clients[k].z)*(bullets[i][j].z - m_Clients[k].z);
+								float fDistOrigin = (RAD_PLAYER + RAD_BULLET) * (RAD_PLAYER + RAD_BULLET);
+								// 충돌
+								if (fDist < fDistOrigin) {
+									SC_PACKET_HIT packets;
+									packets.size = sizeof(SC_PACKET_HIT);
+									packets.type = SC_HIT;
+									m_Clients[k].hp -= 10.f;
+									packets.m_fHp = m_Clients[k].hp;
+									packets.m_cBulletNumber = j;
+									packets.m_cShooterID = i;
+									packets.m_cHitID = k;
+									printf("%d플레이어와 %d플레이어의 총알 충돌\n", k, i);
+									printf("후 HP : %f\n", packets.m_fHp);
+									SendPacket(k, &packets);
+									bullets[i][j].in_use = false;
+								}
 							}
 						}
 					}
@@ -1422,7 +1560,7 @@ void ServerFramework::Update(duration<float>& elapsed_time) {
 				ol_ex[10].evt_type = EVT_AMMO_ITEM_GEN;
 				PostQueuedCompletionStatus(iocp_handle, 0, 0, reinterpret_cast<WSAOVERLAPPED*>(&ol_ex[10]));
 				m_fAmmoGenTime = 0.f;
-				m_bIsAmmoGen = false;
+				//m_bIsAmmoGen = false;
 			}
 		}
 

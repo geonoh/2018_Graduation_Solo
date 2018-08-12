@@ -284,10 +284,30 @@ void ServerMgr::ProcessPacket(char* ptr) {
 		client_hp[packets->m_cPlayerID] = packets->m_fHp;
 		break;
 	}
+	case SC_AMMO_ITEM_GEN: {
+		SC_PACKET_ITEM_GEN * packets = reinterpret_cast<SC_PACKET_ITEM_GEN*>(ptr);
+		// packets->item_type
+		m_itemAmmo[packets->m_cItemID].m_bUse = true;
+		m_itemAmmo[packets->m_cItemID].x = packets->x;
+		m_itemAmmo[packets->m_cItemID].y = packets->y;
+		m_itemAmmo[packets->m_cItemID].z = packets->z;
+		break;
+	}
 	case SC_PLAYER_GET_ITEM: {
 		SC_PACKET_GET_ITEM * packets = reinterpret_cast<SC_PACKET_GET_ITEM*>(ptr);
-		m_itemBoat[packets->m_cItemType].m_bUse = false;
-		m_bPlayerBoatParts[packets->m_cItemType] = true;
+		if (packets->m_cItemType < 4) {
+			if (packets->m_cGetterID == clients_id) {
+				m_bPlayerBoatParts[packets->m_cItemType] = true;
+			}
+			m_itemBoat[packets->m_cItemType].m_bUse = false;
+		}
+		else if (packets->m_cItemType == 4) {
+			if (packets->m_cGetterID == clients_id) {
+				m_TotalAmmo = 90;
+			}
+			m_itemAmmo[packets->m_cAmmoItemID].m_bUse = false;
+			printf("%d 아이템 use false로 바꿨다. 분명\n", packets->m_cAmmoItemID);
+		}
 		break;
 	}
 	case SC_WEATHER_CHANGE: {
@@ -320,6 +340,9 @@ void ServerMgr::ProcessPacket(char* ptr) {
 		m_bGameMode = 0;
 		m_TotalAmmo = 90;
 		m_CurrentAmmo = 30;
+		for (int i = 0; i < 8; ++i) {
+			m_itemAmmo[i].m_bUse = false;
+		}
 		for (int i = 0; i < MAX_PLAYER; ++i) {
 			m_bPlayerReady[i] = false;
 			m_TeamPlayer[i] = e_NoTeam;
@@ -337,6 +360,10 @@ void ServerMgr::ProcessPacket(char* ptr) {
 		break;
 	}
 	}
+}
+
+Item ServerMgr::GetAmmoItem(int iItemNumber) {
+	return m_itemAmmo[iItemNumber];
 }
 
 char ServerMgr::GetResult() {

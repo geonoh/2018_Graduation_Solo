@@ -62,6 +62,7 @@ class ServerMgr
 	bool m_bGameStart = false;
 
 	Item m_itemBoat[4];
+	Item m_itemAmmo[8];
 	float client_hp[MAX_PLAYER] = { 0.f };
 
 	bool m_bPlayerBoatParts[4] = { false };
@@ -78,6 +79,7 @@ public:
 	bool GetWeather();
 	bool GetPlayerHaveParts(int iPartsType);
 	Item GetBoatItem(int iItemNumber);
+	Item GetAmmoItem(int iItemNumber);
 	mutex m_mutexBulletLock[MAX_PLAYER];
 	int GetCurrentAmmo();
 	int GetTotalAmmo();

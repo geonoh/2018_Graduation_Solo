@@ -39,12 +39,13 @@
 
 // Boat 아이템 생성 시간.
 #define ITEM_BOAT_GEN_TIME			120.f
-#define ITEM_AMMO_GEN_TIME			2.f
+#define ITEM_AMMO_GEN_TIME			15.f
 #define PLAYER_HP_UPDATE_TIME		1.f
 
 // 거리 
 #define RAD_PLAYER				5.f
 #define RAD_ITEM				3.f
+#define RAD_AMMO_ITEM			5.f
 #define RAD_BULLET				1.f
 
 
@@ -82,6 +83,7 @@
 #define SC_PLAYER_DIE			38
 #define SC_RESULT				39
 #define SC_ENTER_LOBBY			40
+#define SC_AMMO_ITEM_GEN		41
 ///////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////
@@ -238,6 +240,8 @@ struct SC_PACKET_GET_ITEM {
 	BYTE size;
 	BYTE type;
 	char m_cItemType;
+	char m_cAmmoItemID;
+	char m_cGetterID;
 };
 
 
@@ -285,6 +289,7 @@ struct SC_PACKET_ITEM_GEN {
 	BYTE size;
 	BYTE type;
 	char item_type;
+	char m_cItemID;
 	float x, y, z;
 };
 

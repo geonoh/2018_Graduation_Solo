@@ -70,6 +70,7 @@ class ServerFramework
 	//Building* building[OBJECT_BUILDING];
 	//Item* items[12];
 	Item m_itemBoat[4];
+	Item m_itemAmmo[8];
 	bool m_BoatGenedMap[4]{ false };
 	int m_iDiceCounter = 0;
 	int m_iDiceMapCounter = 0;
