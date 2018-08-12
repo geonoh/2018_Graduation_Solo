@@ -35,7 +35,7 @@ private:
 	float m_fCameraRotationY = 0.f;
 	float m_fCameraRotationZ = 0.f;
 
-public:
+private:
 	// Texture
 	GLuint m_Tex_Slash = 0;
 	GLuint m_Tex_Number1 = 0;
@@ -62,14 +62,12 @@ public:
 	GLuint m_Tex_TimerBar = 0;
 	GLuint m_Tex_Progress = 0;
 	GLuint m_Tex_Scope = 0;
-	GLuint m_Tex_CrossHair = 0;
+	//GLuint m_Tex_CrossHair = 0;
 	GLuint m_Tex_HpBackground = 0;
 	GLuint m_Tex_HpBar = 0;
 	GLuint m_Tex_TimerComment = 0;
 	GLuint m_Tex_Snow = 0;
 	GLuint m_Tex_Rain = 0;
-	GLuint m_Tex_Tree = 0;
-	GLuint m_Tex_Rock = 0;
 
 	GLuint m_Tex_Boat0 = 0;
 	GLuint m_Tex_Boat1 = 0;
@@ -96,11 +94,14 @@ public:
 	GLuint m_Tex_Win4 = 0;
 	GLuint m_Tex_WinRed = 0;
 	GLuint m_Tex_WinBlue = 0;
-
 	GLuint m_Tex_Cube_NightTime;
 
+	GLuint m_Tex_Wood = 0;
+	GLuint m_Tex_Leaf = 0;
+	GLuint m_Tex_DarkWood = 0;
+	GLuint m_Tex_DarkLeaf = 0;
 
-
+public:
 	// Camera Setting 
 	void SetCameraLook(float x, float y, float z);
 	glm::vec3 GetCameraLook();
@@ -236,9 +237,9 @@ private:
 	GLuint m_Tex_SmileTotal = 0;
 
 
-	GLuint m_Tex_BTS = 0;
-	GLuint m_Tex_Twice = 0;
-	GLuint m_Tex_Brick = 0;
+	//GLuint m_Tex_BTS = 0;
+	//GLuint m_Tex_Twice = 0;
+	//GLuint m_Tex_Brick = 0;
 
 
 	GLuint m_Shader_ProxyGeo = 0;

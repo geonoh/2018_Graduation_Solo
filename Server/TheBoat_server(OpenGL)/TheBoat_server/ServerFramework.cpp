@@ -26,13 +26,13 @@ ServerFramework::~ServerFramework()
 
 void ServerFramework::InitServer() {
 #ifdef _Dev
-	//printf("---------------------------------\n");
-	//printf("- 개발모드\n");
-	//printf("---------------------------------\n");
-	//m_bIsBoatGen = true;
-	//m_bGameStart = true;
-	//m_bIsAmmoGen = true;
-	//m_fBoatGenTime = 0.f;
+	printf("---------------------------------\n");
+	printf("- 개발모드\n");
+	printf("---------------------------------\n");
+	m_bIsBoatGen = true;
+	m_bGameStart = true;
+	m_bIsAmmoGen = true;
+	m_fBoatGenTime = 0.f;
 #endif
 	wcout.imbue(locale("korean"));
 
@@ -1106,59 +1106,99 @@ void ServerFramework::WorkerThread() {
 			}
 			m_mutexBoatItem.unlock();
 
+			
 			// 총알과 플레이어
-			for (int i = 0; i < MAX_PLAYER - 1; ++i) {
+			for (int i = 0; i < MAX_PLAYER; ++i) {
 				m_mutexBulletLock[i].lock();
-				m_mutexBulletLock[i + 1].lock();
 				for (int j = 1; j <= MAX_AMMO; ++j) {
-					if (m_Clients[i].in_use && bullets[i + 1][j].in_use) {
-						float fDist =
-							(bullets[i + 1][j].x - m_Clients[i].x)*(bullets[i + 1][j].x - m_Clients[i].x) +
-							(bullets[i + 1][j].y - m_Clients[i].y)*(bullets[i + 1][j].y - m_Clients[i].y) +
-							(bullets[i + 1][j].z - m_Clients[i].z)*(bullets[i + 1][j].z - m_Clients[i].z);
-						float fDistOrigin = (RAD_PLAYER + RAD_BULLET) * (RAD_PLAYER + RAD_BULLET);
-						// 충돌
-						if (fDist < fDistOrigin) {
-							SC_PACKET_HIT packets;
-							packets.size = sizeof(SC_PACKET_HIT);
-							packets.type = SC_HIT;
-							m_Clients[i].hp -= 10.f;
-							packets.m_fHp = m_Clients[i].hp;
-							packets.m_cBulletNumber = j;
-							packets.m_cShooterID = i + 1;
-							packets.m_cHitID = i;
-							printf("%d플레이어와 %d플레이어의 총알 충돌\n", i, i + 1);
-							printf("후 HP : %f\n", packets.m_fHp);
-							SendPacket(i, &packets);
-							bullets[i + 1][j].in_use = false;
-						}
-					}
-					if (m_Clients[i + 1].in_use && bullets[i][j].in_use) {
-						float fDist =
-							(bullets[i][j].x - m_Clients[i + 1].x)*(bullets[i][j].x - m_Clients[i + 1].x) +
-							(bullets[i][j].y - m_Clients[i + 1].y)*(bullets[i][j].y - m_Clients[i + 1].y) +
-							(bullets[i][j].z - m_Clients[i + 1].z)*(bullets[i][j].z - m_Clients[i + 1].z);
-						float fDistOrigin = (RAD_PLAYER + RAD_ITEM) * (RAD_PLAYER + RAD_ITEM);
-						// 충돌
-						if (fDist < fDistOrigin) {
-							SC_PACKET_HIT packets;
-							packets.size = sizeof(SC_PACKET_HIT);
-							packets.type = SC_HIT;
-							m_Clients[i + 1].hp -= 10.f;
-							packets.m_fHp = m_Clients[i + 1].hp;
-							packets.m_cBulletNumber = j;
-							packets.m_cShooterID = i;
-							packets.m_cHitID = i + 1;
-							printf("%d플레이어와 %d플레이어의 총알 충돌\n", i + 1, i);
-							printf("후 HP : %f\n", packets.m_fHp);
-							SendPacket(i + 1, &packets);
-							bullets[i][j].in_use = false;
+					for (int k = 0; k < MAX_PLAYER; ++k) {
+						// i 플레이어의 총알과 다른 플레이어들을 서로 충돌체크 
+						//
+						//	i							k
+						// 총알 쏘는 플레이어와 총알 맞는 플레이어 모두 존재하고 
+						// 플레이어가 발사한 총알까지 존재 해야 이 함수 실행
+						if (i == k)continue;
+						if (m_Clients[i].in_use && m_Clients[k].in_use && bullets[i][j].in_use) {
+							float fDist =
+								(bullets[i][j].x - m_Clients[k].x)*(bullets[i][j].x - m_Clients[k].x) +
+								(bullets[i][j].y - m_Clients[k].y)*(bullets[i][j].y - m_Clients[k].y) +
+								(bullets[i][j].z - m_Clients[k].z)*(bullets[i][j].z - m_Clients[k].z);
+							float fDistOrigin = (RAD_PLAYER + RAD_BULLET) * (RAD_PLAYER + RAD_BULLET);
+							// 충돌
+							if (fDist < fDistOrigin) {
+								SC_PACKET_HIT packets;
+								packets.size = sizeof(SC_PACKET_HIT);
+								packets.type = SC_HIT;
+								m_Clients[k].hp -= 10.f;
+								packets.m_fHp = m_Clients[k].hp;
+								packets.m_cBulletNumber = j;
+								packets.m_cShooterID = i;
+								packets.m_cHitID = k;
+								printf("%d플레이어와 %d플레이어의 총알 충돌\n", k, i);
+								printf("후 HP : %f\n", packets.m_fHp);
+								SendPacket(k, &packets);
+								bullets[i][j].in_use = false;
+							}
 						}
 					}
 				}
 				m_mutexBulletLock[i].unlock();
-				m_mutexBulletLock[i + 1].unlock();
 			}
+
+
+
+			//for (int i = 0; i < MAX_PLAYER - 1; ++i) {
+			//	m_mutexBulletLock[i].lock();
+			//	m_mutexBulletLock[i + 1].lock();
+			//	for (int j = 1; j <= MAX_AMMO; ++j) {
+			//		if (m_Clients[i].in_use && bullets[i + 1][j].in_use) {
+			//			float fDist =
+			//				(bullets[i + 1][j].x - m_Clients[i].x)*(bullets[i + 1][j].x - m_Clients[i].x) +
+			//				(bullets[i + 1][j].y - m_Clients[i].y)*(bullets[i + 1][j].y - m_Clients[i].y) +
+			//				(bullets[i + 1][j].z - m_Clients[i].z)*(bullets[i + 1][j].z - m_Clients[i].z);
+			//			float fDistOrigin = (RAD_PLAYER + RAD_BULLET) * (RAD_PLAYER + RAD_BULLET);
+			//			// 충돌
+			//			if (fDist < fDistOrigin) {
+			//				SC_PACKET_HIT packets;
+			//				packets.size = sizeof(SC_PACKET_HIT);
+			//				packets.type = SC_HIT;
+			//				m_Clients[i].hp -= 10.f;
+			//				packets.m_fHp = m_Clients[i].hp;
+			//				packets.m_cBulletNumber = j;
+			//				packets.m_cShooterID = i + 1;
+			//				packets.m_cHitID = i;
+			//				printf("%d플레이어와 %d플레이어의 총알 충돌\n", i, i + 1);
+			//				printf("후 HP : %f\n", packets.m_fHp);
+			//				SendPacket(i, &packets);
+			//				bullets[i + 1][j].in_use = false;
+			//			}
+			//		}
+			//		if (m_Clients[i + 1].in_use && bullets[i][j].in_use) {
+			//			float fDist =
+			//				(bullets[i][j].x - m_Clients[i + 1].x)*(bullets[i][j].x - m_Clients[i + 1].x) +
+			//				(bullets[i][j].y - m_Clients[i + 1].y)*(bullets[i][j].y - m_Clients[i + 1].y) +
+			//				(bullets[i][j].z - m_Clients[i + 1].z)*(bullets[i][j].z - m_Clients[i + 1].z);
+			//			float fDistOrigin = (RAD_PLAYER + RAD_ITEM) * (RAD_PLAYER + RAD_ITEM);
+			//			// 충돌
+			//			if (fDist < fDistOrigin) {
+			//				SC_PACKET_HIT packets;
+			//				packets.size = sizeof(SC_PACKET_HIT);
+			//				packets.type = SC_HIT;
+			//				m_Clients[i + 1].hp -= 10.f;
+			//				packets.m_fHp = m_Clients[i + 1].hp;
+			//				packets.m_cBulletNumber = j;
+			//				packets.m_cShooterID = i;
+			//				packets.m_cHitID = i + 1;
+			//				printf("%d플레이어와 %d플레이어의 총알 충돌\n", i + 1, i);
+			//				printf("후 HP : %f\n", packets.m_fHp);
+			//				SendPacket(i + 1, &packets);
+			//				bullets[i][j].in_use = false;
+			//			}
+			//		}
+			//	}
+			//	m_mutexBulletLock[i].unlock();
+			//	m_mutexBulletLock[i + 1].unlock();
+			//}
 
 			// 지면과 충돌
 			for (int i = 0; i < MAX_PLAYER; ++i) {
@@ -1256,7 +1296,8 @@ void ServerFramework::WorkerThread() {
 							packets.z = bullets[i][j].z;
 							// 해당 플레이어에게만 보내야함
 							for (int k = 0; k < MAX_PLAYER; ++k) {
-								SendPacket(k, &packets);
+								if (m_Clients[k].in_use)
+									SendPacket(k, &packets);
 							}
 
 						}

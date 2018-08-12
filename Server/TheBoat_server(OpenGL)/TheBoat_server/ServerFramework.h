@@ -58,7 +58,7 @@ class ServerFramework
 	OverlappedExtensionSet ol_ex[20];
 
 	Bullet bullets[4][MAX_AMMO] = { 0 };
-	mutex bullet_lock;
+	//mutex bullet_lock;
 
 	mutex m_mutexBoatItem;
 	// 플레이어별 몇 번째 총알까지 발사했는지 저장하는 변수

@@ -499,7 +499,7 @@ void Renderer::InitializeTextureImage() {
 	m_Tex_Progress = CreatePngTexture("./Textures/ProgressBarProcess.png");
 	m_Tex_Pin = CreatePngTexture("./Textures/Pin.png");
 	m_Tex_Scope = CreatePngTexture("./Textures/Scope.png");
-	m_Tex_CrossHair = CreatePngTexture("./Textures/Crosshair.png");
+	//m_Tex_CrossHair = CreatePngTexture("./Textures/Crosshair.png");
 	m_Tex_HpBackground = CreatePngTexture("./Textures/Hp.png");
 	m_Tex_HpBar = CreatePngTexture("./Textures/HpBar.png");
 	m_Tex_TimerComment = CreatePngTexture("./Textures/TimerComment.png");
@@ -520,8 +520,6 @@ void Renderer::InitializeTextureImage() {
 	m_Tex_Bullet = CreatePngTexture("./Textures/Bullet.png");
 	m_Tex_Cloud = CreatePngTexture("./Textures/Cloud.png");
 
-	m_Tex_Tree = CreatePngTexture("./Textures/Tree.png");
-	m_Tex_Rock = CreatePngTexture("./Textures/Rock.png");
 
 
 	// Title
@@ -551,6 +549,10 @@ void Renderer::InitializeTextureImage() {
 	m_Tex_WinRed = CreatePngTexture("./Textures/Result/RedWin.png");
 	m_Tex_WinBlue = CreatePngTexture("./Textures/Result/BlueWin.png");
 
+	m_Tex_Wood = CreatePngTexture("./Textures/WoodTexture.png");
+	m_Tex_Leaf = CreatePngTexture("./Textures/Leaf.png");
+	m_Tex_DarkWood = CreatePngTexture("./Textures/DarkWoodTexture.png");
+	m_Tex_DarkLeaf = CreatePngTexture("./Textures/DarkLeaf.png");
 }
 
 bool Renderer::IsInitialized()
@@ -1170,35 +1172,35 @@ float cube[] = {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-	unsigned int x, y;
-	unsigned char * temp1 = loadBMPRaw("./textures/twice.bmp", x, y);
-	glGenTextures(1, &m_Tex_Twice);
-	glBindTexture(GL_TEXTURE_2D, m_Tex_Twice);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, x, y, 0, GL_RGB, GL_UNSIGNED_BYTE, temp1);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	//unsigned int x, y;
+	//unsigned char * temp1 = loadBMPRaw("./textures/twice.bmp", x, y);
+	//glGenTextures(1, &m_Tex_Twice);
+	//glBindTexture(GL_TEXTURE_2D, m_Tex_Twice);
+	//glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, x, y, 0, GL_RGB, GL_UNSIGNED_BYTE, temp1);
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-	unsigned int x1, y1;
-	unsigned char * temp2 = loadBMPRaw("./textures/bts.bmp", x1, y1);
-	glGenTextures(1, &m_Tex_BTS);
-	glBindTexture(GL_TEXTURE_2D, m_Tex_BTS);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, x1, y1, 0, GL_RGB, GL_UNSIGNED_BYTE, temp2);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	//unsigned int x1, y1;
+	//unsigned char * temp2 = loadBMPRaw("./textures/bts.bmp", x1, y1);
+	//glGenTextures(1, &m_Tex_BTS);
+	//glBindTexture(GL_TEXTURE_2D, m_Tex_BTS);
+	//glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, x1, y1, 0, GL_RGB, GL_UNSIGNED_BYTE, temp2);
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-	unsigned int x2, y2;
-	unsigned char * temp3 = loadBMPRaw("./textures/brick.bmp", x2, y2);
-	glGenTextures(1, &m_Tex_Brick);
-	glBindTexture(GL_TEXTURE_2D, m_Tex_Brick);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, x2, y2, 0, GL_RGB, GL_UNSIGNED_BYTE, temp3);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	//unsigned int x2, y2;
+	//unsigned char * temp3 = loadBMPRaw("./textures/brick.bmp", x2, y2);
+	//glGenTextures(1, &m_Tex_Brick);
+	//glBindTexture(GL_TEXTURE_2D, m_Tex_Brick);
+	//glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, x2, y2, 0, GL_RGB, GL_UNSIGNED_BYTE, temp3);
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 }
 
 void Renderer::CreateParticle()
@@ -1746,39 +1748,39 @@ float gTime1 = 0.f;
 
 void Renderer::TextureApp()
 {
-	idd++;
+	//idd++;
 
-	GLuint shader = m_Shader_TextureApp;
+	//GLuint shader = m_Shader_TextureApp;
 
-	glUseProgram(shader);
+	//glUseProgram(shader);
 
-	int uniformSampler = glGetUniformLocation(shader, "u_TextureSlot");
-	glUniform1i(uniformSampler, 0);
-	int uniformSampler1 = glGetUniformLocation(shader, "u_TextureSlot1");
-	glUniform1i(uniformSampler1, 1);
+	//int uniformSampler = glGetUniformLocation(shader, "u_TextureSlot");
+	//glUniform1i(uniformSampler, 0);
+	//int uniformSampler1 = glGetUniformLocation(shader, "u_TextureSlot1");
+	//glUniform1i(uniformSampler1, 1);
 
-	int uniformTime = glGetUniformLocation(shader, "u_Time");
-	glUniform1f(uniformTime, gTime1);
-	gTime1 += 0.1;
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, m_Tex_Brick);
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, m_Tex_BTS);
+	//int uniformTime = glGetUniformLocation(shader, "u_Time");
+	//glUniform1f(uniformTime, gTime1);
+	//gTime1 += 0.1;
+	//glActiveTexture(GL_TEXTURE0);
+	//glBindTexture(GL_TEXTURE_2D, m_Tex_Brick);
+	//glActiveTexture(GL_TEXTURE1);
+	//glBindTexture(GL_TEXTURE_2D, m_Tex_BTS);
 
-	int attribPosition = glGetAttribLocation(shader, "a_Position");
-	int attribTexPos = glGetAttribLocation(shader, "a_TexPos");
+	//int attribPosition = glGetAttribLocation(shader, "a_Position");
+	//int attribTexPos = glGetAttribLocation(shader, "a_TexPos");
 
-	glEnableVertexAttribArray(attribPosition);
-	glEnableVertexAttribArray(attribTexPos);
+	//glEnableVertexAttribArray(attribPosition);
+	//glEnableVertexAttribArray(attribTexPos);
 
-	glBindBuffer(GL_ARRAY_BUFFER, m_VBO_TextureApp);
-	glVertexAttribPointer(attribPosition, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 5, 0);
-	glVertexAttribPointer(attribTexPos, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 5, (GLvoid*)(3 * sizeof(float)));
+	//glBindBuffer(GL_ARRAY_BUFFER, m_VBO_TextureApp);
+	//glVertexAttribPointer(attribPosition, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 5, 0);
+	//glVertexAttribPointer(attribTexPos, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 5, (GLvoid*)(3 * sizeof(float)));
 
-	glDrawArrays(GL_TRIANGLES, 0, 6);
+	//glDrawArrays(GL_TRIANGLES, 0, 6);
 
-	glDisableVertexAttribArray(attribPosition);
-	glDisableVertexAttribArray(attribTexPos);
+	//glDisableVertexAttribArray(attribPosition);
+	//glDisableVertexAttribArray(attribTexPos);
 }
 
 void Renderer::TextureAnim()
@@ -1819,32 +1821,32 @@ void Renderer::TextureAnim()
 
 void Renderer::ProxyGeo()
 {
-	GLuint shader = m_Shader_ProxyGeo;
+	//GLuint shader = m_Shader_ProxyGeo;
 
-	glUseProgram(shader);
+	//glUseProgram(shader);
 
-	GLuint projView = glGetUniformLocation(shader, "u_ProjView");
-	glUniformMatrix4fv(projView, 1, GL_FALSE, &m_m4ProjView[0][0]);
+	//GLuint projView = glGetUniformLocation(shader, "u_ProjView");
+	//glUniformMatrix4fv(projView, 1, GL_FALSE, &m_m4ProjView[0][0]);
 
-	GLuint samplerTex = glGetUniformLocation(shader, "u_Tex");
-	glUniform1i(samplerTex, 0);
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, m_Tex_Twice);
+	//GLuint samplerTex = glGetUniformLocation(shader, "u_Tex");
+	//glUniform1i(samplerTex, 0);
+	//glActiveTexture(GL_TEXTURE0);
+	//glBindTexture(GL_TEXTURE_2D, m_Tex_Twice);
 
-	GLuint uniformTime = glGetUniformLocation(shader, "u_Time");
-	glUniform1f(uniformTime, g_time);
-	g_time += 0.1;
+	//GLuint uniformTime = glGetUniformLocation(shader, "u_Time");
+	//glUniform1f(uniformTime, g_time);
+	//g_time += 0.1;
 
-	GLuint attribPos = glGetAttribLocation(shader, "a_Position");
-	glEnableVertexAttribArray(attribPos);
+	//GLuint attribPos = glGetAttribLocation(shader, "a_Position");
+	//glEnableVertexAttribArray(attribPos);
 
-	glBindBuffer(GL_ARRAY_BUFFER, m_VBO_ProxyGeo);
+	//glBindBuffer(GL_ARRAY_BUFFER, m_VBO_ProxyGeo);
 
-	glVertexAttribPointer(attribPos, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	//glVertexAttribPointer(attribPos, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
-	glDrawArrays(GL_LINE_STRIP, 0, m_Count_ProxyGeo);
+	//glDrawArrays(GL_LINE_STRIP, 0, m_Count_ProxyGeo);
 
-	glDisableVertexAttribArray(attribPos);
+	//glDisableVertexAttribArray(attribPos);
 }
 void Renderer::InitializeParticle()
 {
@@ -2293,11 +2295,19 @@ void Renderer::DrawCube(int iTextureID, float x, float y, float z, float fScaleX
 		break;
 	case 8:
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, m_Tex_Tree);
+		glBindTexture(GL_TEXTURE_2D, m_Tex_Wood);
 		break;
 	case 9:
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, m_Tex_Rock);
+		glBindTexture(GL_TEXTURE_2D, m_Tex_Leaf);
+		break;
+	case 10:
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, m_Tex_DarkWood);
+		break;
+	case 11:
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, m_Tex_DarkLeaf);
 		break;
 	}
 
@@ -2517,9 +2527,9 @@ void Renderer::DrawUITexture(int i_iTextureId, float i_fStartPosX, float i_fStar
 	case 15:
 		glBindTexture(GL_TEXTURE_2D, m_Tex_Scope);
 		break;
-	case 16:
-		glBindTexture(GL_TEXTURE_2D, m_Tex_CrossHair);
-		break;
+	//case 16:
+	//	glBindTexture(GL_TEXTURE_2D, m_Tex_CrossHair);
+	//	break;
 	case 17:
 		glBindTexture(GL_TEXTURE_2D, m_Tex_HpBackground);
 		break;
@@ -2601,43 +2611,43 @@ void Renderer::DrawUITexture(int i_iTextureId, float i_fStartPosX, float i_fStar
 
 void Renderer::DrawUITexture()
 {
-	GLuint shader = m_Shader_Test1;
+	//GLuint shader = m_Shader_Test1;
 
-	glUseProgram(shader);
+	//glUseProgram(shader);
 
-	GLuint tex = glGetUniformLocation(shader, "u_Texture");
-	glUniform1i(tex, 0);
+	//GLuint tex = glGetUniformLocation(shader, "u_Texture");
+	//glUniform1i(tex, 0);
 
-	float pixelSizeInGLX = 1.f / (SCREEN_WIDTH / 2);
-	float pixelSizeInGLY = 1.f / (SCREEN_HEIGHT / 2);
+	//float pixelSizeInGLX = 1.f / (SCREEN_WIDTH / 2);
+	//float pixelSizeInGLY = 1.f / (SCREEN_HEIGHT / 2);
 
-	// UI 이동
-	GLuint trans = glGetUniformLocation(shader, "u_Trans");
-	glUniform2f(trans, 0.f, 1.f);
+	//// UI 이동
+	//GLuint trans = glGetUniformLocation(shader, "u_Trans");
+	//glUniform2f(trans, 0.f, 1.f);
 
-	// UI 스케일
-	GLuint scale = glGetUniformLocation(shader, "u_Scale");
-	//glUniform2f(scale, 10.f*pixelSizeInGLX, 10.f*pixelSizeInGLY);
-	glUniform2f(scale, (SCREEN_WIDTH / 2) * pixelSizeInGLX, (SCREEN_HEIGHT / 2) * pixelSizeInGLY);
+	//// UI 스케일
+	//GLuint scale = glGetUniformLocation(shader, "u_Scale");
+	////glUniform2f(scale, 10.f*pixelSizeInGLX, 10.f*pixelSizeInGLY);
+	//glUniform2f(scale, (SCREEN_WIDTH / 2) * pixelSizeInGLX, (SCREEN_HEIGHT / 2) * pixelSizeInGLY);
 
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, m_Tex_Twice);
+	//glActiveTexture(GL_TEXTURE0);
+	//glBindTexture(GL_TEXTURE_2D, m_Tex_Twice);
 
-	GLuint pos = glGetAttribLocation(shader, "a_Position");
-	GLuint texPos = glGetAttribLocation(shader, "a_TexPos");
-	
-	glEnableVertexAttribArray(pos);
-	glEnableVertexAttribArray(texPos);
+	//GLuint pos = glGetAttribLocation(shader, "a_Position");
+	//GLuint texPos = glGetAttribLocation(shader, "a_TexPos");
+	//
+	//glEnableVertexAttribArray(pos);
+	//glEnableVertexAttribArray(texPos);
 
-	glBindBuffer(GL_ARRAY_BUFFER, m_VBO_Test1);
+	//glBindBuffer(GL_ARRAY_BUFFER, m_VBO_Test1);
 
-	glVertexAttribPointer(pos, 3, GL_FLOAT,
-		GL_FALSE, sizeof(float) * 5, 0);
-	glVertexAttribPointer(texPos, 2, GL_FLOAT,
-		GL_FALSE, sizeof(float) * 5, 
-		(GLvoid*)(sizeof(float)*3));
+	//glVertexAttribPointer(pos, 3, GL_FLOAT,
+	//	GL_FALSE, sizeof(float) * 5, 0);
+	//glVertexAttribPointer(texPos, 2, GL_FLOAT,
+	//	GL_FALSE, sizeof(float) * 5, 
+	//	(GLvoid*)(sizeof(float)*3));
 
-	glDrawArrays(GL_TRIANGLES, 0, 6);
+	//glDrawArrays(GL_TRIANGLES, 0, 6);
 }
 
 void Renderer::GenFBOs()
