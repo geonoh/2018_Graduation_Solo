@@ -26,13 +26,13 @@ ServerFramework::~ServerFramework()
 
 void ServerFramework::InitServer() {
 #ifdef _Dev
-	printf("---------------------------------\n");
-	printf("- 개발모드\n");
-	printf("---------------------------------\n");
-	m_bIsBoatGen = true;
-	m_bGameStart = true;
-	m_bIsAmmoGen = true;
-	m_fBoatGenTime = 0.f;
+	//printf("---------------------------------\n");
+	//printf("- 개발모드\n");
+	//printf("---------------------------------\n");
+	//m_bIsBoatGen = true;
+	//m_bGameStart = true;
+	//m_bIsAmmoGen = true;
+	//m_fBoatGenTime = 0.f;
 #endif
 	wcout.imbue(locale("korean"));
 
@@ -379,10 +379,10 @@ void ServerFramework::ProcessPacket(int cl_id, char* packet) {
 		}
 
 		break;
-	case CS_LEFT_BUTTON_UP:
+	case CS_LEFT_BUTTON_UP: {
 		m_Clients[cl_id].is_left_click = false;
 		break;
-
+	}
 	case CS_MOUSE_MOVE: {
 		m_Clients[cl_id].look_vec.x = packet_buffer->look_vec.x;
 		m_Clients[cl_id].look_vec.y = packet_buffer->look_vec.y;
@@ -455,7 +455,7 @@ void ServerFramework::ProcessPacket(int cl_id, char* packet) {
 
 		break;
 	}
-	case CS_TEAM_RED:
+	case CS_TEAM_RED:{
 		m_Clients[cl_id].team = e_TeamRed;
 		printf("%d 플레이어는 Team : %d \n", cl_id, m_Clients[cl_id].team);
 		CS_PACKET_TEAM_SELECT packets;
@@ -467,6 +467,7 @@ void ServerFramework::ProcessPacket(int cl_id, char* packet) {
 				SendPacket(i, &packets);
 		}
 		break;
+	}
 	case CS_TEAM_BLUE: {
 		m_Clients[cl_id].team = e_TeamBlue;
 		printf("%d 플레이어는 Team : %d \n", cl_id, m_Clients[cl_id].team);
@@ -478,8 +479,8 @@ void ServerFramework::ProcessPacket(int cl_id, char* packet) {
 			if (m_Clients[i].in_use)
 				SendPacket(i, &packets);
 		}
+		break;
 	}
-					   break;
 	case CS_MODE_TEAM: {
 		printf("팀 패킷 도착\n");
 		SC_PACKET_GAMEMODE packets;
@@ -506,6 +507,35 @@ void ServerFramework::ProcessPacket(int cl_id, char* packet) {
 		}
 		break;
 	}
+	case CS_ENTER_LOBBY: {
+		SC_PACKET_ENTER_LOBBY packets;
+		packets.size = sizeof(SC_PACKET_ENTER_LOBBY);
+		packets.type = SC_ENTER_LOBBY;
+		SendPacket(cl_id, &packets);
+		break;
+	}
+	case CS_RESTART_GAME: {
+		printf("게임 재시작\n");
+		for (int i = 0; i < MAX_PLAYER; ++i) {
+			m_Clients[i].x = 0.f;
+			m_Clients[i].z = 0.f;
+			m_Clients[i].y = height_map->GetHeight(m_Clients[i].x + DX12_TO_OPGL, m_Clients[i].z + DX12_TO_OPGL) + PLAYER_HEIGHT;
+			m_Clients[i].hp = 100.f;
+			m_Clients[i].m_CurrentAmmo = 30;
+			m_Clients[i].m_TotalAmmo = 90;
+			m_Clients[i].is_ready = false;
+			m_Clients[i].team = e_NoTeam;
+			for (int j = 0; j < 4; ++j) {
+				m_Clients[i].m_bPlayerBoatParts[j] = false;
+			}
+		}
+		m_bIsBoatGen = false;
+		m_bGameStart = false;
+		m_bIsAmmoGen = false;
+		m_fBoatGenTime = 0.f;
+
+		break;
+	}
 	case CS_ASSENBLE_PARTS: {
 		// 게임 Status Update
 		// 이걸 F키 눌렀을때 해야함 특정지역에서 
@@ -529,6 +559,7 @@ void ServerFramework::ProcessPacket(int cl_id, char* packet) {
 					}
 				}
 			}
+			// 보트 부품 다 모은경우
 			// Red 승리
 			if (iTeamRed == 4) {
 				printf("레드 승리 \n");
@@ -675,7 +706,7 @@ void ServerFramework::WorkerThread() {
 					if (m_bGameMode) {
 						iAliveCounter--;
 						if (iAliveCounter == 1) {
-							m_bGameStart = false;
+							//m_bGameStart = false;
 							for (int j = 0; j < MAX_PLAYER; ++j) {
 								// 체력이 양수인 플레이어가 최종 생존자라는 뜻
 								if (m_Clients[j].hp > 0.f) {
@@ -696,7 +727,7 @@ void ServerFramework::WorkerThread() {
 						if (m_Clients[i].team == e_TeamRed) {
 							iAliveCounterRed--;
 							if (iAliveCounterRed == 0) {
-								m_bGameStart = false;
+								//m_bGameStart = false;
 								printf("Blue Team Win\n");
 								SC_PACKET_RESULT packets;
 								packets.size = sizeof(SC_PACKET_RESULT);
@@ -711,7 +742,7 @@ void ServerFramework::WorkerThread() {
 						if (m_Clients[i].team == e_TeamBlue) {
 							iAliveCounterBlue--;
 							if (iAliveCounterBlue == 0) {
-								m_bGameStart = false;
+								//m_bGameStart = false;
 								printf("Red Team Win\n");
 								SC_PACKET_RESULT packets;
 								packets.size = sizeof(SC_PACKET_RESULT);

@@ -260,6 +260,7 @@ void ServerMgr::ProcessPacket(char* ptr) {
 			printf("%dPlayer Team : %d\n", i, m_TeamPlayer[i]);
 		}
 		m_bGameStart = true;
+		m_cResult = 0;
 		break;
 	}
 	case SC_BOAT_ITEM_GEN: {
@@ -309,6 +310,30 @@ void ServerMgr::ProcessPacket(char* ptr) {
 	case SC_RESULT: {
 		SC_PACKET_RESULT * packets = reinterpret_cast<SC_PACKET_RESULT*>(ptr);
 		m_cResult = packets->m_cVictoryTeam;
+		m_bGameStart = false;
+		break;
+	}
+	case SC_ENTER_LOBBY: {
+		m_cResult = 0;
+		m_bWeather = false;
+		m_bGameStart = false;
+		m_bGameMode = 0;
+		m_TotalAmmo = 90;
+		m_CurrentAmmo = 30;
+		for (int i = 0; i < MAX_PLAYER; ++i) {
+			m_bPlayerReady[i] = false;
+			m_TeamPlayer[i] = e_NoTeam;
+			m_bPlayerDie[i] = false;
+			client_hp[i] = 100.f;
+			for (int j = 1; j < MAX_AMMO + 1; ++j) {
+				m_Bullets[i][j].in_use = false;
+			}
+		}
+		// ¾ÆÀÌÅÛ
+		for (int i = 0; i < 4; ++i) {
+			m_itemBoat[i].m_bUse = false;
+			m_bPlayerBoatParts[i] = false;
+		}
 		break;
 	}
 	}
@@ -531,6 +556,14 @@ void ServerMgr::SendPacket(int type) {
 		break;
 	case CS_ASSENBLE_PARTS:
 		packet_buffer->type = CS_ASSENBLE_PARTS;
+		retval = WSASend(sock, &send_wsabuf, 1, &iobytes, 0, NULL, NULL);
+		break;
+	case CS_RESTART_GAME:
+		packet_buffer->type = CS_RESTART_GAME;
+		retval = WSASend(sock, &send_wsabuf, 1, &iobytes, 0, NULL, NULL);
+		break;
+	case CS_ENTER_LOBBY:
+		packet_buffer->type = CS_ENTER_LOBBY;
 		retval = WSASend(sock, &send_wsabuf, 1, &iobytes, 0, NULL, NULL);
 		break;
 	}

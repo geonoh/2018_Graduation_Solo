@@ -63,7 +63,6 @@ class ServerMgr
 
 	Item m_itemBoat[4];
 	float client_hp[MAX_PLAYER] = { 0.f };
-	float m_fPlayerHP[MAX_PLAYER];
 
 	bool m_bPlayerBoatParts[4] = { false };
 	// ³· -> false(ºñ)

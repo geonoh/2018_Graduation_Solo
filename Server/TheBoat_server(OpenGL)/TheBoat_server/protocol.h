@@ -81,6 +81,7 @@
 #define SC_HIT					37
 #define SC_PLAYER_DIE			38
 #define SC_RESULT				39
+#define SC_ENTER_LOBBY			40
 ///////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////
@@ -132,6 +133,8 @@
 #define CS_MODE_MELEE				29
 #define CS_DEBUG_TIME				30
 #define CS_ASSENBLE_PARTS			31
+#define CS_RESTART_GAME				32
+#define CS_ENTER_LOBBY				33
 ///////////////////////////////////////////////////
 
 
@@ -195,6 +198,13 @@ enum SubWeapons {
 };
 
 // 서버->클라
+struct SC_PACKET_ENTER_LOBBY {
+	BYTE size;
+	BYTE type;
+
+};
+
+
 struct SC_PACKET_RESULT {
 	BYTE size;
 	BYTE type;
