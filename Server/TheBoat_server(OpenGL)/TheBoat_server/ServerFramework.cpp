@@ -26,13 +26,13 @@ ServerFramework::~ServerFramework()
 
 void ServerFramework::InitServer() {
 #ifdef _Dev
-	//printf("---------------------------------\n");
-	//printf("- 개발모드\n");
-	//printf("---------------------------------\n");
-	//m_bIsBoatGen = true;
-	//m_bGameStart = true;
-	//m_bIsAmmoGen = true;
-	//m_fBoatGenTime = 0.f;
+	printf("---------------------------------\n");
+	printf("- 개발모드\n");
+	printf("---------------------------------\n");
+	m_bIsBoatGen = true;
+	m_bGameStart = true;
+	m_bIsAmmoGen = true;
+	m_fBoatGenTime = 0.f;
 #endif
 	wcout.imbue(locale("korean"));
 

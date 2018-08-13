@@ -555,6 +555,8 @@ void Renderer::InitializeTextureImage() {
 	m_Tex_DarkLeaf = CreatePngTexture("./Textures/DarkLeaf.png");
 	m_Tex_Ammo = CreatePngTexture("./Textures/Ammo.png");
 	m_Tex_Ammo2 = CreatePngTexture("./Textures/Ammo2.png");
+
+	m_Tex_Water = CreatePngTexture("./Textures/WaterTexture.png");
 }
 
 bool Renderer::IsInitialized()
@@ -2314,6 +2316,10 @@ void Renderer::DrawCube(int iTextureID, float x, float y, float z, float fScaleX
 	case 12:
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, m_Tex_Ammo);
+		break;
+	case 13:
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, m_Tex_Water);
 		break;
 	}
 

@@ -102,6 +102,7 @@ private:
 	GLuint m_Tex_DarkWood = 0;
 	GLuint m_Tex_DarkLeaf = 0;
 	GLuint m_Tex_Ammo = 0;
+	GLuint m_Tex_Water = 0;
 public:
 	// Camera Setting 
 	void SetCameraLook(float x, float y, float z);
