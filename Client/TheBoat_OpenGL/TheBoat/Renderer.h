@@ -95,6 +95,7 @@ private:
 	GLuint m_Tex_WinRed = 0;
 	GLuint m_Tex_WinBlue = 0;
 	GLuint m_Tex_Cube_NightTime;
+	GLuint m_Tex_Ammo2 = 0;
 
 	GLuint m_Tex_Wood = 0;
 	GLuint m_Tex_Leaf = 0;

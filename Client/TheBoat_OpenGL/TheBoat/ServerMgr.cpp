@@ -319,7 +319,7 @@ void ServerMgr::ProcessPacket(char* ptr) {
 		SC_PACKET_HIT * packets = reinterpret_cast<SC_PACKET_HIT*>(ptr);
 		m_Bullets[packets->m_cShooterID][packets->m_cBulletNumber].in_use = false;
 		client_hp[packets->m_cHitID] = packets->m_fHp;
-		printf("SC_HIT : HP : %f \n", client_hp[packets->m_cHitID]);
+		printf("SC_HIT, 때린이 %d 맞은이 %d \n", packets->m_cShooterID, packets->m_cHitID);
 		break;
 	}
 	case SC_PLAYER_DIE: {

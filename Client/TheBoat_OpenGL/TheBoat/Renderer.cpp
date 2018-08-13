@@ -554,6 +554,7 @@ void Renderer::InitializeTextureImage() {
 	m_Tex_DarkWood = CreatePngTexture("./Textures/DarkWoodTexture.png");
 	m_Tex_DarkLeaf = CreatePngTexture("./Textures/DarkLeaf.png");
 	m_Tex_Ammo = CreatePngTexture("./Textures/Ammo.png");
+	m_Tex_Ammo2 = CreatePngTexture("./Textures/Ammo2.png");
 }
 
 bool Renderer::IsInitialized()
@@ -2591,6 +2592,9 @@ void Renderer::DrawUITexture(int i_iTextureId, float i_fStartPosX, float i_fStar
 		break;
 	case 34:
 		glBindTexture(GL_TEXTURE_2D, m_Tex_WinBlue);
+		break;
+	case 35:
+		glBindTexture(GL_TEXTURE_2D, m_Tex_Ammo2);
 		break;
 	}
 	GLuint pos = glGetAttribLocation(shader, "a_Position");

@@ -26,13 +26,13 @@ ServerFramework::~ServerFramework()
 
 void ServerFramework::InitServer() {
 #ifdef _Dev
-	printf("---------------------------------\n");
-	printf("- 개발모드\n");
-	printf("---------------------------------\n");
-	m_bIsBoatGen = true;
-	m_bGameStart = true;
-	m_bIsAmmoGen = true;
-	m_fBoatGenTime = 0.f;
+	//printf("---------------------------------\n");
+	//printf("- 개발모드\n");
+	//printf("---------------------------------\n");
+	//m_bIsBoatGen = true;
+	//m_bGameStart = true;
+	//m_bIsAmmoGen = true;
+	//m_fBoatGenTime = 0.f;
 #endif
 	wcout.imbue(locale("korean"));
 
@@ -1278,10 +1278,12 @@ void ServerFramework::WorkerThread() {
 									packets.m_cBulletNumber = j;
 									packets.m_cShooterID = i;
 									packets.m_cHitID = k;
+									bullets[i][j].in_use = false;
 									printf("%d플레이어와 %d플레이어의 총알 충돌\n", k, i);
 									printf("후 HP : %f\n", packets.m_fHp);
-									SendPacket(k, &packets);
-									bullets[i][j].in_use = false;
+									for (int l = 0; l < MAX_PLAYER; ++l) {
+										SendPacket(l, &packets);
+									}
 								}
 							}
 						}
@@ -1302,10 +1304,12 @@ void ServerFramework::WorkerThread() {
 									packets.m_cBulletNumber = j;
 									packets.m_cShooterID = i;
 									packets.m_cHitID = k;
+									bullets[i][j].in_use = false;
 									printf("%d플레이어와 %d플레이어의 총알 충돌\n", k, i);
 									printf("후 HP : %f\n", packets.m_fHp);
-									SendPacket(k, &packets);
-									bullets[i][j].in_use = false;
+									for (int l = 0; l < MAX_PLAYER; ++l) {
+										SendPacket(l, &packets);
+									}
 								}
 							}
 						}
