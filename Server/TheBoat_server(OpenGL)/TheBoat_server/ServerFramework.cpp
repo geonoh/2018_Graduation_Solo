@@ -455,7 +455,7 @@ void ServerFramework::ProcessPacket(int cl_id, char* packet) {
 
 		break;
 	}
-	case CS_TEAM_RED:{
+	case CS_TEAM_RED: {
 		m_Clients[cl_id].team = e_TeamRed;
 		printf("%d 플레이어는 Team : %d \n", cl_id, m_Clients[cl_id].team);
 		CS_PACKET_TEAM_SELECT packets;
@@ -692,6 +692,72 @@ void ServerFramework::WorkerThread() {
 
 		}
 		else if (overlapped_buffer->evt_type == EVT_PLAYER_HP_UPDATE) {
+			// Melee Mode
+			int iAliveCounter = MAX_PLAYER;
+			if (m_bGameMode) {
+				for (int i = 0; i < MAX_PLAYER; ++i) {
+					if (m_Clients[i].hp <= 0.f) {
+						iAliveCounter--;
+					}
+				}
+				
+				if (iAliveCounter == 1) {
+					//m_bGameStart = false;
+					for (int j = 0; j < MAX_PLAYER; ++j) {
+						// 체력이 양수인 플레이어가 최종 생존자라는 뜻
+						if (m_Clients[j].hp > 0.f) {
+							printf("%d Player Win\n", j);
+							SC_PACKET_RESULT packets;
+							packets.size = sizeof(SC_PACKET_RESULT);
+							packets.type = SC_RESULT;
+							packets.m_cVictoryTeam = j + 1;
+							for (int k = 0; k < MAX_PLAYER; ++k) {
+								SendPacket(k, &packets);
+							}
+						}
+					}
+				}
+			}
+			// Team Mode
+			else {
+				int iDeathCountRed = 0;
+				int iDeathCountBlue = 0;
+				for (int j = 0; j < MAX_PLAYER; ++j) {
+					if (m_Clients[j].hp <= 0.f && m_Clients[j].team == e_TeamRed) {
+						iDeathCountRed++;
+					}
+					if (m_Clients[j].hp <= 0.f && m_Clients[j].team == e_TeamBlue) {
+						iDeathCountBlue++;
+					}
+				}
+				//iAliveCounterRed--;
+				if (iDeathCountRed == MAX_PLAYER / 2) {
+					//m_bGameStart = false;
+					//왜?
+					printf("Blue Team Win\n");
+					SC_PACKET_RESULT packets;
+					packets.size = sizeof(SC_PACKET_RESULT);
+					packets.type = SC_RESULT;
+					packets.m_cVictoryTeam = 6;
+					for (int k = 0; k < MAX_PLAYER; ++k) {
+						SendPacket(k, &packets);
+					}
+				}
+				if (iDeathCountBlue == MAX_PLAYER / 2) {
+					//m_bGameStart = false;
+					//왜?
+					printf("Red Team Win\n");
+					SC_PACKET_RESULT packets;
+					packets.size = sizeof(SC_PACKET_RESULT);
+					packets.type = SC_RESULT;
+					packets.m_cVictoryTeam = 5;
+					for (int k = 0; k < MAX_PLAYER; ++k) {
+						SendPacket(k, &packets);
+					}
+				}
+
+			}
+
 			for (int i = 0; i < MAX_PLAYER; ++i) {
 				if (m_Clients[i].hp <= 0.f) {
 					printf("%d 플레이어 Die\n");
@@ -701,59 +767,6 @@ void ServerFramework::WorkerThread() {
 					packets.m_cDiePlayer = i;
 					for (int j = 0; j < MAX_PLAYER; ++j) {
 						SendPacket(j, &packets);
-					}
-					// Melee Mode
-					if (m_bGameMode) {
-						iAliveCounter--;
-						if (iAliveCounter == 1) {
-							//m_bGameStart = false;
-							for (int j = 0; j < MAX_PLAYER; ++j) {
-								// 체력이 양수인 플레이어가 최종 생존자라는 뜻
-								if (m_Clients[j].hp > 0.f) {
-									printf("%d Player Win\n", j);
-									SC_PACKET_RESULT packets;
-									packets.size = sizeof(SC_PACKET_RESULT);
-									packets.type = SC_RESULT;
-									packets.m_cVictoryTeam = j + 1;
-									for (int k = 0; k < MAX_PLAYER; ++k) {
-										SendPacket(k, &packets);
-									}
-								}
-							}
-						}
-					}
-					// Team Mode
-					else {
-						if (m_Clients[i].team == e_TeamRed) {
-							iAliveCounterRed--;
-							if (iAliveCounterRed == 0) {
-								//m_bGameStart = false;
-								printf("Blue Team Win\n");
-								SC_PACKET_RESULT packets;
-								packets.size = sizeof(SC_PACKET_RESULT);
-								packets.type = SC_RESULT;
-								packets.m_cVictoryTeam = 5;
-								for (int k = 0; k < MAX_PLAYER; ++k) {
-									SendPacket(k, &packets);
-								}
-
-							}
-						}
-						if (m_Clients[i].team == e_TeamBlue) {
-							iAliveCounterBlue--;
-							if (iAliveCounterBlue == 0) {
-								//m_bGameStart = false;
-								printf("Red Team Win\n");
-								SC_PACKET_RESULT packets;
-								packets.size = sizeof(SC_PACKET_RESULT);
-								packets.type = SC_RESULT;
-								packets.m_cVictoryTeam = 6;
-								for (int k = 0; k < MAX_PLAYER; ++k) {
-									SendPacket(k, &packets);
-								}
-
-							}
-						}
 					}
 
 				}
@@ -876,7 +889,7 @@ void ServerFramework::WorkerThread() {
 				m_itemAmmo[7].z = -183.f;
 				break;
 			}
-			printf("Ammo : No.%d 생성 [%f, %f, %f]\n",iDice,
+			printf("Ammo : No.%d 생성 [%f, %f, %f]\n", iDice,
 				m_itemAmmo[iDice].x,
 				m_itemAmmo[iDice].y,
 				m_itemAmmo[iDice].z);
@@ -921,7 +934,7 @@ void ServerFramework::WorkerThread() {
 					m_itemBoat[iDice].z = -120.f;
 					break;
 				case 1:
-					m_itemBoat[iDice].x = -130;
+					m_itemBoat[iDice].x = -110.f;
 					m_itemBoat[iDice].y = 71.f;
 					m_itemBoat[iDice].z = 138.f;
 					break;
@@ -1187,7 +1200,7 @@ void ServerFramework::WorkerThread() {
 		}
 		else if (overlapped_buffer->evt_type == EVT_COLLISION) {
 			// 보트아이템과 플레이어
-			m_mutexBoatItem.lock();
+			//m_mutexBoatItem.lock();
 			for (int i = 0; i < MAX_PLAYER; ++i) {
 				if (m_Clients[i].in_use) {
 					for (int j = 0; j < 4; ++j) {
@@ -1215,7 +1228,7 @@ void ServerFramework::WorkerThread() {
 					}
 				}
 			}
-			m_mutexBoatItem.unlock();
+			//m_mutexBoatItem.unlock();
 
 			// Ammo 아이템과 플레이어
 			for (int i = 0; i < MAX_PLAYER; ++i) {
@@ -1248,7 +1261,7 @@ void ServerFramework::WorkerThread() {
 					}
 				}
 			}
-			
+
 			// 총알과 플레이어
 			for (int i = 0; i < MAX_PLAYER; ++i) {
 				m_mutexBulletLock[i].lock();

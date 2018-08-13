@@ -78,10 +78,9 @@ class ServerFramework
 	// False = Team
 	// True = Melee
 	bool m_bGameMode = false;
-	int iAliveCounter = MAX_PLAYER;
-	int iAliveCounterRed = MAX_PLAYER / 2;
-	int iAliveCounterBlue = MAX_PLAYER / 2;
-
+	//int iAliveCounterRed = MAX_PLAYER / 2;
+	//int iAliveCounterBlue = MAX_PLAYER / 2;
+	bool m_bWhoDie[MAX_PLAYER] = { false };
 public:
 	void InitServer();
 	void AcceptPlayer();
