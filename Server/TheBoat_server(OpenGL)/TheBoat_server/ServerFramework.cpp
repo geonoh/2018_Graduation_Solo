@@ -185,7 +185,7 @@ void ServerFramework::AcceptPlayer() {
 				packet.y = m_Clients[i].y;
 				packet.z = m_Clients[i].z;
 				SendPacket(client_id, &packet);
-				printf("%d에게 %d의 정보를 보낸다\n", client_id, i);
+				//printf("%d에게 %d의 정보를 보낸다\n", client_id, i);
 			}
 		}
 	}
@@ -226,11 +226,9 @@ void ServerFramework::ProcessPacket(int cl_id, char* packet) {
 
 		break;
 	case CS_KEY_PRESS_1:
-		printf("[ProcessPacket] :: AR 무기 선택\n");
 		m_Clients[cl_id].equipted_weapon = 0;
 		break;
 	case CS_KEY_PRESS_2:
-		printf("[ProcessPacket] :: 권총 무기 선택\n");
 		m_Clients[cl_id].equipted_weapon = 1;
 		break;
 
@@ -346,7 +344,6 @@ void ServerFramework::ProcessPacket(int cl_id, char* packet) {
 		m_Clients[cl_id].look_vec.z = packet_buffer->look_vec.z;
 		if (m_Clients[cl_id].equipted_weapon == 0) {
 			if (m_Clients[cl_id].m_CurrentAmmo == 0) {
-				printf("총알 장전 필요\n");
 				SC_PACKET_AMMO_O packets;
 				packets.size = sizeof(SC_PACKET_AMMO_O);
 				packets.type = SC_OUT_OF_AMMO;
@@ -414,7 +411,6 @@ void ServerFramework::ProcessPacket(int cl_id, char* packet) {
 	}
 	case CS_PLAYER_READY: {
 		int ready_count = 0;
-		printf("%d 플레이어 레디\n", cl_id);
 		m_Clients[cl_id].is_ready = true;
 		//if (m_Clients[0].is_ready && m_Clients[1].is_ready && m_Clients[2].is_ready && m_Clients[3].is_ready) {
 		//	GameStart();
@@ -441,7 +437,6 @@ void ServerFramework::ProcessPacket(int cl_id, char* packet) {
 		break;
 	}
 	case CS_PLAYER_READY_CANCLE: {
-		printf("%d 플레이어 레디취소\n", cl_id);
 		m_Clients[cl_id].is_ready = false;
 		SC_PACKET_READY packets;
 		packets.size = sizeof(SC_PACKET_READY);
@@ -457,7 +452,6 @@ void ServerFramework::ProcessPacket(int cl_id, char* packet) {
 	}
 	case CS_TEAM_RED: {
 		m_Clients[cl_id].team = e_TeamRed;
-		printf("%d 플레이어는 Team : %d \n", cl_id, m_Clients[cl_id].team);
 		CS_PACKET_TEAM_SELECT packets;
 		packets.size = sizeof(CS_PACKET_TEAM_SELECT);
 		packets.type = SC_TEAM_RED;
@@ -470,7 +464,6 @@ void ServerFramework::ProcessPacket(int cl_id, char* packet) {
 	}
 	case CS_TEAM_BLUE: {
 		m_Clients[cl_id].team = e_TeamBlue;
-		printf("%d 플레이어는 Team : %d \n", cl_id, m_Clients[cl_id].team);
 		CS_PACKET_TEAM_SELECT packets;
 		packets.size = sizeof(CS_PACKET_TEAM_SELECT);
 		packets.type = SC_TEAM_BLUE;
@@ -482,7 +475,6 @@ void ServerFramework::ProcessPacket(int cl_id, char* packet) {
 		break;
 	}
 	case CS_MODE_TEAM: {
-		printf("팀 패킷 도착\n");
 		SC_PACKET_GAMEMODE packets;
 		packets.size = sizeof(SC_PACKET_GAMEMODE);
 		packets.type = SC_MODE_TEAM;
@@ -495,7 +487,6 @@ void ServerFramework::ProcessPacket(int cl_id, char* packet) {
 		break;
 	}
 	case CS_MODE_MELEE: {
-		printf("Melee 패킷 도착\n");
 		SC_PACKET_GAMEMODE packets;
 		packets.size = sizeof(SC_PACKET_GAMEMODE);
 		packets.type = SC_MODE_MELEE;
@@ -515,7 +506,6 @@ void ServerFramework::ProcessPacket(int cl_id, char* packet) {
 		break;
 	}
 	case CS_RESTART_GAME: {
-		printf("게임 재시작\n");
 		for (int i = 0; i < MAX_PLAYER; ++i) {
 			m_Clients[i].x = 0.f;
 			m_Clients[i].z = 0.f;
@@ -539,7 +529,6 @@ void ServerFramework::ProcessPacket(int cl_id, char* packet) {
 	case CS_ASSENBLE_PARTS: {
 		// 게임 Status Update
 		// 이걸 F키 눌렀을때 해야함 특정지역에서 
-		printf("파트 조립\n");
 		if (m_bGameMode == false) {
 			int iTeamRed = 0;
 			int iTeamBlue = 0;
@@ -1411,7 +1400,6 @@ void ServerFramework::WorkerThread() {
 		else if (overlapped_buffer->evt_type == EVT_BULLET_GENERATE) {
 			int shooter_id = overlapped_buffer->shooter_player_id;
 			if (m_Clients[shooter_id].equipted_weapon == 0 && m_Clients[shooter_id].in_use && m_Clients[shooter_id].hp > 0.f) {
-				printf("%d가 발사한 총알 : %d\n", shooter_id, m_Clients[shooter_id].m_CurrentAmmo);
 				m_mutexBulletLock[shooter_id].lock();
 				if (m_Clients[shooter_id].m_CurrentAmmo == 1) {
 					for (int d = 1; d <= MAX_AMMO; ++d) {
@@ -1424,8 +1412,15 @@ void ServerFramework::WorkerThread() {
 				bullets[shooter_id][m_Clients[shooter_id].m_CurrentAmmo].look_vec.x = m_Clients[shooter_id].look_vec.x;
 				bullets[shooter_id][m_Clients[shooter_id].m_CurrentAmmo].look_vec.y = m_Clients[shooter_id].look_vec.y;
 				bullets[shooter_id][m_Clients[shooter_id].m_CurrentAmmo].look_vec.z = m_Clients[shooter_id].look_vec.z;
+				bullets[shooter_id][m_Clients[shooter_id].m_CurrentAmmo].m_fBallisticsTime = 0.f;
 				bullets[shooter_id][m_Clients[shooter_id].m_CurrentAmmo].in_use = true;
 				m_mutexBulletLock[shooter_id].unlock();
+				//printf("%d가 발사한 총알 : %d [X : %f, Y : %f, Z : %f, InUse : %d ]\n", shooter_id, m_Clients[shooter_id].m_CurrentAmmo,
+				//	bullets[shooter_id][m_Clients[shooter_id].m_CurrentAmmo].x,
+				//	bullets[shooter_id][m_Clients[shooter_id].m_CurrentAmmo].y,
+				//	bullets[shooter_id][m_Clients[shooter_id].m_CurrentAmmo].z,
+				//	bullets[shooter_id][m_Clients[shooter_id].m_CurrentAmmo].in_use);
+				//printf("실제 클라이언트 위치 [%f, %f, %f] \n", m_Clients[shooter_id].x, m_Clients[shooter_id].y, m_Clients[shooter_id].z);
 				m_Clients[shooter_id].m_CurrentAmmo--;
 				// 남은 탄창 보내주기 
 				SC_PACKET_AMMO packets;
@@ -1436,9 +1431,6 @@ void ServerFramework::WorkerThread() {
 				packets.m_TotalAmmo = m_Clients[shooter_id].m_TotalAmmo;
 				m_mutexAmmoLock[shooter_id].unlock();
 				SendPacket(shooter_id, &packets);
-			}
-			else {
-				printf("총알이 없거나 죽었거나 하나\n");
 			}
 		}
 		else if (overlapped_buffer->evt_type == EVT_SEND_TIME) {
@@ -1461,16 +1453,22 @@ void ServerFramework::WorkerThread() {
 					if (m_Clients[i].in_use) {
 						m_mutexBulletLock[i].lock();
 						if (bullets[i][j].in_use) {
+							bullets[i][j].m_fBallisticsTime += overlapped_buffer->elapsed_time;
 							bullets[i][j].x += (-1) * METER_PER_PIXEL * bullets[i][j].look_vec.x * (AR_SPEED * overlapped_buffer->elapsed_time);
 							bullets[i][j].y += (-1) * METER_PER_PIXEL * bullets[i][j].look_vec.y * (AR_SPEED * overlapped_buffer->elapsed_time);
+							bullets[i][j].y -= (9.8 / 2.f) * bullets[i][j].m_fBallisticsTime * bullets[i][j].m_fBallisticsTime / AR_SPEED;
 							bullets[i][j].z += (-1) * METER_PER_PIXEL * bullets[i][j].look_vec.z * (AR_SPEED * overlapped_buffer->elapsed_time);
 
-							if (bullets[i][j].x >= 265.f || bullets[i][j].x <= -265.f) {
+							if (bullets[i][j].y <= 0.f) {
 								bullets[i][j].in_use = false;
 							}
-							if (bullets[i][j].z >= 265.f || bullets[i][j].z <= -265.f) {
+							else if (bullets[i][j].x >= 265.f || bullets[i][j].x <= -265.f) {
 								bullets[i][j].in_use = false;
 							}
+							else if (bullets[i][j].z >= 265.f || bullets[i][j].z <= -265.f) {
+								bullets[i][j].in_use = false;
+							}
+							
 							SC_PACKET_BULLET packets;
 							packets.id = i;
 							packets.size = sizeof(SC_PACKET_BULLET);

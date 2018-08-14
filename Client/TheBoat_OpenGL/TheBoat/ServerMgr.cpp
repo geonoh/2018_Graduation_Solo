@@ -180,8 +180,6 @@ void ServerMgr::ProcessPacket(char* ptr) {
 		m_Bullets[clients_id][packets->bullet_id].y = packets->y;
 		m_Bullets[clients_id][packets->bullet_id].z = packets->z;
 		m_Bullets[clients_id][packets->bullet_id].in_use = packets->m_bInUse;
-		//printf("%d Bullet ID %d Pos [%f, %f, %f]\n", packets->id, packets->bullet_id,
-		//	packets->x, packets->y, packets->z);
 		break;
 	}
 	case SC_COLLSION_TB: {
