@@ -73,7 +73,9 @@ class ServerMgr
 	bool m_bPlayerDie[MAX_PLAYER] = { false };
 	char m_cResult = 0;
 	float m_fStamina[MAX_PLAYER];
+	bool m_bToxic[4] = { false };
 public:
+	bool GetToxic(int iMapNum);
 	float GetStamina(int iPlayerID);
 	char GetResult();
 	bool GetPlayerDie(int iPlayerID);

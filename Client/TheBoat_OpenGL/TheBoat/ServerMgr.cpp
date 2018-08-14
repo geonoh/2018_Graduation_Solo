@@ -286,6 +286,7 @@ void ServerMgr::ProcessPacket(char* ptr) {
 			m_itemBoat[iItemType].x,
 			m_itemBoat[iItemType].y,
 			m_itemBoat[iItemType].z);
+		m_bToxic[iItemType] = true;
 		break;
 	}
 	case SC_PLAYER_HP_UPDATE: {
@@ -306,13 +307,13 @@ void ServerMgr::ProcessPacket(char* ptr) {
 	case SC_PLAYER_GET_ITEM: {
 		SC_PACKET_GET_ITEM * packets = reinterpret_cast<SC_PACKET_GET_ITEM*>(ptr);
 		if (packets->m_cItemType < 4) {
-			if (packets->m_cGetterID == clients_id) {
+			if (packets->m_cGetterID == camera_id) {
 				m_bPlayerBoatParts[packets->m_cItemType] = true;
 			}
 			m_itemBoat[packets->m_cItemType].m_bUse = false;
 		}
 		else if (packets->m_cItemType == 4) {
-			if (packets->m_cGetterID == clients_id) {
+			if (packets->m_cGetterID == camera_id) {
 				m_TotalAmmo = 90;
 			}
 			m_itemAmmo[packets->m_cAmmoItemID].m_bUse = false;
@@ -339,7 +340,7 @@ void ServerMgr::ProcessPacket(char* ptr) {
 	}
 	case SC_RESULT: {
 		SC_PACKET_RESULT * packets = reinterpret_cast<SC_PACKET_RESULT*>(ptr);
-		m_cResult = packets->m_cVictoryTeam;
+		m_cResult = packets->m_cVictoryTeam + 1;
 		m_bGameStart = false;
 		break;
 	}
@@ -370,6 +371,10 @@ void ServerMgr::ProcessPacket(char* ptr) {
 		break;
 	}
 	}
+}
+
+bool ServerMgr::GetToxic(int iMapNum) {
+	return m_bToxic[iMapNum];
 }
 
 Item ServerMgr::GetAmmoItem(int iItemNumber) {

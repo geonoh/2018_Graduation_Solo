@@ -533,6 +533,7 @@ void ServerFramework::ProcessPacket(int cl_id, char* packet) {
 		break;
 	}
 	case CS_ASSENBLE_PARTS: {
+		printf("조립 가즈아\n");
 		// 게임 Status Update
 		// 이걸 F키 눌렀을때 해야함 특정지역에서 
 		if (m_bGameMode == false) {
@@ -558,12 +559,28 @@ void ServerFramework::ProcessPacket(int cl_id, char* packet) {
 			// Red 승리
 			if (iTeamRed == 4) {
 				printf("레드 승리 \n");
-				m_bGameStart = false;
+				//m_bGameStart = false;
+				SC_PACKET_RESULT packets;
+				packets.size = sizeof(SC_PACKET_RESULT);
+				packets.type = SC_RESULT;
+				packets.m_cVictoryTeam = 4;
+				for (int k = 0; k < MAX_PLAYER; ++k) {
+					SendPacket(k, &packets);
+				}
+
 			}
 			// Blue 승리
 			else if (iTeamBlue == 4) {
 				printf("블루 승리 \n");
-				m_bGameStart = false;
+				//m_bGameStart = false;
+				SC_PACKET_RESULT packets;
+				packets.size = sizeof(SC_PACKET_RESULT);
+				packets.type = SC_RESULT;
+				packets.m_cVictoryTeam = 5;
+				for (int k = 0; k < MAX_PLAYER; ++k) {
+					SendPacket(k, &packets);
+				}
+
 			}
 		}
 		else {
@@ -578,7 +595,15 @@ void ServerFramework::ProcessPacket(int cl_id, char* packet) {
 
 				if (iPlayerCounter[i] == 4) {
 					printf("%d 플레이어 승리\n", i);
-					m_bGameStart = false;
+					//m_bGameStart = false;
+					SC_PACKET_RESULT packets;
+					packets.size = sizeof(SC_PACKET_RESULT);
+					packets.type = SC_RESULT;
+					packets.m_cVictoryTeam = i;
+					for (int k = 0; k < MAX_PLAYER; ++k) {
+						SendPacket(k, &packets);
+					}
+
 				}
 			}
 
@@ -624,7 +649,11 @@ void ServerFramework::GameStart() {
 		ol_ex[i].evt_type = EVT_PLAYER_POS_SEND;
 		PostQueuedCompletionStatus(iocp_handle, 0, i, reinterpret_cast<WSAOVERLAPPED*>(&ol_ex[i]));
 	}
-
+	for (int i = 0; i < MAX_PLAYER; ++i) {
+		for (int j = 1; j <= MAX_AMMO; ++j) {
+			bullets[i][j].in_use = false;
+		}
+	}
 
 	m_bIsBoatGen = true;
 	m_bGameStart = true;
@@ -756,7 +785,7 @@ void ServerFramework::WorkerThread() {
 
 			for (int i = 0; i < MAX_PLAYER; ++i) {
 				if (m_Clients[i].hp <= 0.f) {
-					printf("%d 플레이어 Die\n");
+					//printf("%d 플레이어 Die\n",i);
 					SC_PACKET_DIE packets;
 					packets.size = sizeof(SC_PACKET_DIE);
 					packets.type = SC_PLAYER_DIE;
@@ -942,9 +971,9 @@ void ServerFramework::WorkerThread() {
 				}
 				switch (iDice) {
 				case 0:
-					m_itemBoat[iDice].x = -195.f;
-					m_itemBoat[iDice].y = 56.f;
-					m_itemBoat[iDice].z = -120.f;
+					m_itemBoat[iDice].x = -185.f;
+					m_itemBoat[iDice].y = 93.f;
+					m_itemBoat[iDice].z = -208.f;
 					break;
 				case 1:
 					m_itemBoat[iDice].x = -110.f;
@@ -952,14 +981,14 @@ void ServerFramework::WorkerThread() {
 					m_itemBoat[iDice].z = 138.f;
 					break;
 				case 2:
-					m_itemBoat[iDice].x = 128.f;
-					m_itemBoat[iDice].y = 75.f;
-					m_itemBoat[iDice].z = 128.f;
+					m_itemBoat[iDice].x = 113.f;
+					m_itemBoat[iDice].y = 89.f;
+					m_itemBoat[iDice].z = 160.f;
 					break;
 				case 3:
-					m_itemBoat[iDice].x = 117.f;
-					m_itemBoat[iDice].y = 48.f;
-					m_itemBoat[iDice].z = -136.f;
+					m_itemBoat[iDice].x = 81;
+					m_itemBoat[iDice].y = 79.f;
+					m_itemBoat[iDice].z = -129.f;
 					break;
 				}
 

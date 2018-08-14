@@ -57,7 +57,7 @@ class ServerFramework
 	// 10은 아이템 생성 - Ammo
 	OverlappedExtensionSet ol_ex[20];
 
-	Bullet bullets[4][MAX_AMMO] = { 0 };
+	Bullet bullets[4][MAX_AMMO + 1] = { 0 };
 	//mutex bullet_lock;
 
 	mutex m_mutexBoatItem;
