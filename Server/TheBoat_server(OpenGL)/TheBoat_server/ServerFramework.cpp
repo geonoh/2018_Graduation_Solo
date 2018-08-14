@@ -25,18 +25,6 @@ ServerFramework::~ServerFramework()
 }
 
 void ServerFramework::InitServer() {
-#ifdef _Dev
-	printf("---------------------------------\n");
-	printf("- °³¹ß¸ðµå\n");
-	printf("---------------------------------\n");
-	m_bIsBoatGen = true;
-	m_bGameStart = true;
-	m_bIsAmmoGen = true;
-	m_fBoatGenTime = 0.f;
-	for (int i = 0; i < MAX_PLAYER; ++i) {
-		m_Clients[i].m_fStamina = 100.f;
-	}
-#endif
 	wcout.imbue(locale("korean"));
 
 	srand(unsigned(time(NULL)));
@@ -84,6 +72,22 @@ void ServerFramework::InitServer() {
 			m_Clients[i].m_bPlayerBoatParts[j] = false;
 		}
 	}
+#ifdef _Dev
+	printf("---------------------------------\n");
+	printf("- °³¹ß¸ðµå\n");
+	printf("---------------------------------\n");
+	m_bIsBoatGen = true;
+	m_bGameStart = true;
+	m_bIsAmmoGen = true;
+	m_fBoatGenTime = 0.f;
+	for (int i = 0; i < MAX_PLAYER; ++i) {
+		m_Clients[i].x = 158.f;
+		m_Clients[i].y = 45.f;
+		m_Clients[i].z = -183.f;
+		m_Clients[i].m_fStamina = 100.f;
+	}
+#endif
+
 
 }
 
@@ -1100,6 +1104,7 @@ void ServerFramework::WorkerThread() {
 							m_Clients[i].x += (-1) * METER_PER_PIXEL * m_Clients[i].look_vec.x * (RUN_SPEED * overlapped_buffer->elapsed_time);
 						}
 					}
+					// °È±â 
 					else {
 						if (31.f <= m_Clients[i].x &&m_Clients[i].x < 34.f && -92.f <= m_Clients[i].z && m_Clients[i].z <= 28) {
 							//printf("1¹ø º® ºÎ´èÄ§\n");
@@ -1187,33 +1192,517 @@ void ServerFramework::WorkerThread() {
 						m_Clients[i].z += METER_PER_PIXEL * m_Clients[i].look_vec.z * (RUN_SPEED * overlapped_buffer->elapsed_time);
 						m_Clients[i].x += METER_PER_PIXEL * m_Clients[i].look_vec.x * (RUN_SPEED * overlapped_buffer->elapsed_time);
 						m_Clients[i].m_fStamina -= 0.1f;
+
+						//if (31.f <= m_Clients[i].x &&m_Clients[i].x < 34.f && -92.f <= m_Clients[i].z && m_Clients[i].z <= 28) {
+						//	//printf("1¹ø º® ºÎ´èÄ§\n");
+						//	glm::vec3 v3Normal = { 1.f,0.f,0.f };
+						//	glm::vec3 v3Sliding = m_Clients[i].look_vec - v3Normal * (glm::dot(m_Clients[i].look_vec, v3Normal));
+						//	m_Clients[i].z -= -METER_PER_PIXEL * v3Sliding.z * (RUN_SPEED * overlapped_buffer->elapsed_time);
+						//	m_Clients[i].x -= -METER_PER_PIXEL * v3Sliding.x * (RUN_SPEED * overlapped_buffer->elapsed_time);
+						//}
+						//else if (-156.f <= m_Clients[i].x && m_Clients[i].x <= 33.f && 26.f <= m_Clients[i].z && m_Clients[i].z <= 28.f) {
+						//	//printf("2¹ø º® ºÎ´èÄ§\n");
+						//	glm::vec3 v3Normal = { 0.f,0.f,1.f };
+						//	glm::vec3 v3Sliding = m_Clients[i].look_vec - v3Normal * (glm::dot(m_Clients[i].look_vec, v3Normal));
+						//	m_Clients[i].z -= -METER_PER_PIXEL * v3Sliding.z * (RUN_SPEED * overlapped_buffer->elapsed_time);
+						//	m_Clients[i].x -= -METER_PER_PIXEL * v3Sliding.x * (RUN_SPEED * overlapped_buffer->elapsed_time);
+						//}
+						//else if (-156.f <= m_Clients[i].x && m_Clients[i].x <= -153.f && -92.f <= m_Clients[i].z && m_Clients[i].z <= 28.f) {
+						//	//printf("3¹ø º® ºÎ´èÄ§\n");
+						//	glm::vec3 v3Normal = { -1.f,0.f,0.f };
+						//	glm::vec3 v3Sliding = m_Clients[i].look_vec - v3Normal * (glm::dot(m_Clients[i].look_vec, v3Normal));
+						//	m_Clients[i].z -= -METER_PER_PIXEL * v3Sliding.z * (RUN_SPEED * overlapped_buffer->elapsed_time);
+						//	m_Clients[i].x -= -METER_PER_PIXEL * v3Sliding.x * (RUN_SPEED * overlapped_buffer->elapsed_time);
+						//}
+						//else if (-156.f <= m_Clients[i].x && m_Clients[i].x <= 33.f && -92.f <= m_Clients[i].z && m_Clients[i].z <= -89.f) {
+						//	//printf("4¹ø º® ºÎ´èÄ§\n");
+						//	glm::vec3 v3Normal = { 0.f,0.f, -1.f };
+						//	glm::vec3 v3Sliding = m_Clients[i].look_vec - v3Normal * (glm::dot(m_Clients[i].look_vec, v3Normal));
+						//	m_Clients[i].z -= -METER_PER_PIXEL * v3Sliding.z * (RUN_SPEED * overlapped_buffer->elapsed_time);
+						//	m_Clients[i].x -= -METER_PER_PIXEL * v3Sliding.x * (RUN_SPEED * overlapped_buffer->elapsed_time);
+						//}
+						//else if (30.f <= m_Clients[i].x && m_Clients[i].x <= 33.f && -256.f <= m_Clients[i].z && m_Clients[i].z <= -178.f) {
+						//	//printf("5¹ø º® ºÎ´èÄ§\n");
+						//	glm::vec3 v3Normal = { 1.f, 0.f, 0.f };
+						//	glm::vec3 v3Sliding = m_Clients[i].look_vec - v3Normal * (glm::dot(m_Clients[i].look_vec, v3Normal));
+						//	m_Clients[i].z -= -METER_PER_PIXEL * v3Sliding.z * (RUN_SPEED * overlapped_buffer->elapsed_time);
+						//	m_Clients[i].x -= -METER_PER_PIXEL * v3Sliding.x * (RUN_SPEED * overlapped_buffer->elapsed_time);
+						//}
+						//else if (-156.f <= m_Clients[i].x && m_Clients[i].x <= 33.f && -180.f <= m_Clients[i].z && m_Clients[i].z <= -178.f) {
+						//	//printf("6¹ø º® ºÎ´èÄ§\n");
+						//	glm::vec3 v3Normal = { 0.f, 0.f, 1.f };
+						//	glm::vec3 v3Sliding = m_Clients[i].look_vec - v3Normal * (glm::dot(m_Clients[i].look_vec, v3Normal));
+						//	m_Clients[i].z -= -METER_PER_PIXEL * v3Sliding.z * (RUN_SPEED * overlapped_buffer->elapsed_time);
+						//	m_Clients[i].x -= -METER_PER_PIXEL * v3Sliding.x * (RUN_SPEED * overlapped_buffer->elapsed_time);
+						//}
+						//else if (-156.f <= m_Clients[i].x && m_Clients[i].x <= -154.f && -256.f <= m_Clients[i].z && m_Clients[i].z <= -178.f) {
+						//	//printf("7¹ø º® ºÎ´èÄ§\n");
+						//	glm::vec3 v3Normal = { -1.f, 0.f, 0.f };
+						//	glm::vec3 v3Sliding = m_Clients[i].look_vec - v3Normal * (glm::dot(m_Clients[i].look_vec, v3Normal));
+						//	m_Clients[i].z -= -METER_PER_PIXEL * v3Sliding.z * (RUN_SPEED * overlapped_buffer->elapsed_time);
+						//	m_Clients[i].x -= -METER_PER_PIXEL * v3Sliding.x * (RUN_SPEED * overlapped_buffer->elapsed_time);
+						//}
+						//else if (m_Clients[i].x > 255.f) {
+						//	printf("ºü²ÙÄ¡´Ù°¡ ³Ñ¾ú´Ù\n");
+						//	glm::vec3 v3Normal = { -1.f,0.f,0.f };
+						//	glm::vec3 v3Sliding = m_Clients[i].look_vec - v3Normal * (glm::dot(m_Clients[i].look_vec, v3Normal));
+						//	m_Clients[i].z -= -METER_PER_PIXEL * v3Sliding.z * (RUN_SPEED * overlapped_buffer->elapsed_time);
+						//	m_Clients[i].x -= -METER_PER_PIXEL * v3Sliding.x * (RUN_SPEED * overlapped_buffer->elapsed_time);
+						//}
+						//else if (-255.f > m_Clients[i].x) {
+						//	glm::vec3 v3Normal = { 1.f,0.f,0.f };
+						//	glm::vec3 v3Sliding = m_Clients[i].look_vec - v3Normal * (glm::dot(m_Clients[i].look_vec, v3Normal));
+						//	m_Clients[i].z -= -METER_PER_PIXEL * v3Sliding.z * (RUN_SPEED * overlapped_buffer->elapsed_time);
+						//	m_Clients[i].x -= -METER_PER_PIXEL * v3Sliding.x * (RUN_SPEED * overlapped_buffer->elapsed_time);
+						//}
+						//else if (-255.f > m_Clients[i].z) {
+						//	glm::vec3 v3Normal = { 0.f,0.f,1.f };
+						//	glm::vec3 v3Sliding = m_Clients[i].look_vec - v3Normal * (glm::dot(m_Clients[i].look_vec, v3Normal));
+						//	m_Clients[i].z -= -METER_PER_PIXEL * v3Sliding.z * (RUN_SPEED * overlapped_buffer->elapsed_time);
+						//	m_Clients[i].x -= -METER_PER_PIXEL * v3Sliding.x * (RUN_SPEED * overlapped_buffer->elapsed_time);
+						//}
+						//else if (255.f < m_Clients[i].z) {
+						//	glm::vec3 v3Normal = { 0.f,0.f,-1.f };
+						//	glm::vec3 v3Sliding = m_Clients[i].look_vec - v3Normal * (glm::dot(m_Clients[i].look_vec, v3Normal));
+						//	m_Clients[i].z -= -METER_PER_PIXEL * v3Sliding.z * (RUN_SPEED * overlapped_buffer->elapsed_time);
+						//	m_Clients[i].x -= -METER_PER_PIXEL * v3Sliding.x * (RUN_SPEED * overlapped_buffer->elapsed_time);
+						//}
+						//else {
+						//	m_Clients[i].z -= (-1) * METER_PER_PIXEL * m_Clients[i].look_vec.z * (RUN_SPEED * overlapped_buffer->elapsed_time);
+						//	m_Clients[i].x -= (-1) * METER_PER_PIXEL * m_Clients[i].look_vec.x * (RUN_SPEED * overlapped_buffer->elapsed_time);
+						//}
+
 					}
+					// °È±â
 					else {
 						m_Clients[i].z += METER_PER_PIXEL * m_Clients[i].look_vec.z * (WALK_SPEED * overlapped_buffer->elapsed_time);
 						m_Clients[i].x += METER_PER_PIXEL * m_Clients[i].look_vec.x * (WALK_SPEED * overlapped_buffer->elapsed_time);
+						//if (31.f <= m_Clients[i].x &&m_Clients[i].x < 34.f && -92.f <= m_Clients[i].z && m_Clients[i].z <= 28) {
+						//	//printf("1¹ø º® ºÎ´èÄ§\n");
+						//	glm::vec3 v3Normal = { 1.f,0.f,0.f };
+						//	glm::vec3 v3Sliding = m_Clients[i].look_vec - v3Normal * (glm::dot(m_Clients[i].look_vec, v3Normal));
+						//	m_Clients[i].z -= -METER_PER_PIXEL * v3Sliding.z * (WALK_SPEED * overlapped_buffer->elapsed_time);
+						//	m_Clients[i].x -= -METER_PER_PIXEL * v3Sliding.x * (WALK_SPEED * overlapped_buffer->elapsed_time);
+						//}
+						//else if (-156.f <= m_Clients[i].x && m_Clients[i].x <= 33.f && 26.f <= m_Clients[i].z && m_Clients[i].z <= 28.f) {
+						//	//printf("2¹ø º® ºÎ´èÄ§\n");
+						//	glm::vec3 v3Normal = { 0.f,0.f,1.f };
+						//	glm::vec3 v3Sliding = m_Clients[i].look_vec - v3Normal * (glm::dot(m_Clients[i].look_vec, v3Normal));
+						//	m_Clients[i].z -= -METER_PER_PIXEL * v3Sliding.z * (WALK_SPEED * overlapped_buffer->elapsed_time);
+						//	m_Clients[i].x -= -METER_PER_PIXEL * v3Sliding.x * (WALK_SPEED * overlapped_buffer->elapsed_time);
+						//}
+						//else if (-156.f <= m_Clients[i].x && m_Clients[i].x <= -153.f && -92.f <= m_Clients[i].z && m_Clients[i].z <= 28.f) {
+						//	//printf("3¹ø º® ºÎ´èÄ§\n");
+						//	glm::vec3 v3Normal = { -1.f,0.f,0.f };
+						//	glm::vec3 v3Sliding = m_Clients[i].look_vec - v3Normal * (glm::dot(m_Clients[i].look_vec, v3Normal));
+						//	m_Clients[i].z -= -METER_PER_PIXEL * v3Sliding.z * (WALK_SPEED * overlapped_buffer->elapsed_time);
+						//	m_Clients[i].x -= -METER_PER_PIXEL * v3Sliding.x * (WALK_SPEED * overlapped_buffer->elapsed_time);
+						//}
+						//else if (-156.f <= m_Clients[i].x && m_Clients[i].x <= 33.f && -92.f <= m_Clients[i].z && m_Clients[i].z <= -89.f) {
+						//	//printf("4¹ø º® ºÎ´èÄ§\n");
+						//	glm::vec3 v3Normal = { 0.f,0.f, -1.f };
+						//	glm::vec3 v3Sliding = m_Clients[i].look_vec - v3Normal * (glm::dot(m_Clients[i].look_vec, v3Normal));
+						//	m_Clients[i].z -= -METER_PER_PIXEL * v3Sliding.z * (WALK_SPEED * overlapped_buffer->elapsed_time);
+						//	m_Clients[i].x -= -METER_PER_PIXEL * v3Sliding.x * (WALK_SPEED * overlapped_buffer->elapsed_time);
+						//}
+						//else if (30.f <= m_Clients[i].x && m_Clients[i].x <= 33.f && -256.f <= m_Clients[i].z && m_Clients[i].z <= -178.f) {
+						//	//printf("5¹ø º® ºÎ´èÄ§\n");
+						//	glm::vec3 v3Normal = { 1.f, 0.f, 0.f };
+						//	glm::vec3 v3Sliding = m_Clients[i].look_vec - v3Normal * (glm::dot(m_Clients[i].look_vec, v3Normal));
+						//	m_Clients[i].z -= -METER_PER_PIXEL * v3Sliding.z * (WALK_SPEED * overlapped_buffer->elapsed_time);
+						//	m_Clients[i].x -= -METER_PER_PIXEL * v3Sliding.x * (WALK_SPEED * overlapped_buffer->elapsed_time);
+						//}
+						//else if (-156.f <= m_Clients[i].x && m_Clients[i].x <= 33.f && -180.f <= m_Clients[i].z && m_Clients[i].z <= -178.f) {
+						//	//printf("6¹ø º® ºÎ´èÄ§\n");
+						//	glm::vec3 v3Normal = { 0.f, 0.f, 1.f };
+						//	glm::vec3 v3Sliding = m_Clients[i].look_vec - v3Normal * (glm::dot(m_Clients[i].look_vec, v3Normal));
+						//	m_Clients[i].z -= -METER_PER_PIXEL * v3Sliding.z * (WALK_SPEED * overlapped_buffer->elapsed_time);
+						//	m_Clients[i].x -= -METER_PER_PIXEL * v3Sliding.x * (WALK_SPEED * overlapped_buffer->elapsed_time);
+						//}
+						//else if (-156.f <= m_Clients[i].x && m_Clients[i].x <= -154.f && -256.f <= m_Clients[i].z && m_Clients[i].z <= -178.f) {
+						//	//printf("7¹ø º® ºÎ´èÄ§\n");
+						//	glm::vec3 v3Normal = { -1.f, 0.f, 0.f };
+						//	glm::vec3 v3Sliding = m_Clients[i].look_vec - v3Normal * (glm::dot(m_Clients[i].look_vec, v3Normal));
+						//	m_Clients[i].z -= -METER_PER_PIXEL * v3Sliding.z * (WALK_SPEED * overlapped_buffer->elapsed_time);
+						//	m_Clients[i].x -= -METER_PER_PIXEL * v3Sliding.x * (WALK_SPEED * overlapped_buffer->elapsed_time);
+						//}
+						//else if (m_Clients[i].x > 255.f) {
+						//	glm::vec3 v3Normal = { -1.f,0.f,0.f };
+						//	glm::vec3 v3Sliding = m_Clients[i].look_vec - v3Normal * (glm::dot(m_Clients[i].look_vec, v3Normal));
+						//	m_Clients[i].z -= -METER_PER_PIXEL * v3Sliding.z * (WALK_SPEED * overlapped_buffer->elapsed_time);
+						//	m_Clients[i].x -= -METER_PER_PIXEL * v3Sliding.x * (WALK_SPEED * overlapped_buffer->elapsed_time);
+						//}
+						//else if (-255.f > m_Clients[i].x) {
+						//	glm::vec3 v3Normal = { 1.f,0.f,0.f };
+						//	glm::vec3 v3Sliding = m_Clients[i].look_vec - v3Normal * (glm::dot(m_Clients[i].look_vec, v3Normal));
+						//	m_Clients[i].z -= -METER_PER_PIXEL * v3Sliding.z * (WALK_SPEED * overlapped_buffer->elapsed_time);
+						//	m_Clients[i].x -= -METER_PER_PIXEL * v3Sliding.x * (WALK_SPEED * overlapped_buffer->elapsed_time);
+						//}
+						//else if (-255.f > m_Clients[i].z) {
+						//	glm::vec3 v3Normal = { 0.f,0.f,1.f };
+						//	glm::vec3 v3Sliding = m_Clients[i].look_vec - v3Normal * (glm::dot(m_Clients[i].look_vec, v3Normal));
+						//	m_Clients[i].z -= -METER_PER_PIXEL * v3Sliding.z * (WALK_SPEED * overlapped_buffer->elapsed_time);
+						//	m_Clients[i].x -= -METER_PER_PIXEL * v3Sliding.x * (WALK_SPEED * overlapped_buffer->elapsed_time);
+						//}
+						//else if (255.f < m_Clients[i].z) {
+						//	glm::vec3 v3Normal = { 0.f,0.f,-1.f };
+						//	glm::vec3 v3Sliding = m_Clients[i].look_vec - v3Normal * (glm::dot(m_Clients[i].look_vec, v3Normal));
+						//	m_Clients[i].z -= -METER_PER_PIXEL * v3Sliding.z * (WALK_SPEED * overlapped_buffer->elapsed_time);
+						//	m_Clients[i].x -= -METER_PER_PIXEL * v3Sliding.x * (WALK_SPEED * overlapped_buffer->elapsed_time);
+						//}
+						//else {
+						//	m_Clients[i].z -= (-1) * METER_PER_PIXEL * m_Clients[i].look_vec.z * (WALK_SPEED * overlapped_buffer->elapsed_time);
+						//	m_Clients[i].x -= (-1) * METER_PER_PIXEL * m_Clients[i].look_vec.x * (WALK_SPEED * overlapped_buffer->elapsed_time);
+						//}
+
 					}
 
 				}
 				if (m_Clients[i].is_move_left) {
 					if (m_Clients[i].is_running && m_Clients[i].m_fStamina > 0.f) {
-						m_Clients[i].z += METER_PER_PIXEL * m_Clients[i].look_vec.x * (RUN_SPEED * overlapped_buffer->elapsed_time);
-						m_Clients[i].x += (-1) * METER_PER_PIXEL * m_Clients[i].look_vec.z * (RUN_SPEED * overlapped_buffer->elapsed_time);
+						//m_Clients[i].z += METER_PER_PIXEL * m_Clients[i].look_vec.x * (RUN_SPEED * overlapped_buffer->elapsed_time);
+						//m_Clients[i].x += (-1) * METER_PER_PIXEL * m_Clients[i].look_vec.z * (RUN_SPEED * overlapped_buffer->elapsed_time);
 						m_Clients[i].m_fStamina -= 0.1f;
+
+						if (31.f <= m_Clients[i].x &&m_Clients[i].x < 34.f && -92.f <= m_Clients[i].z && m_Clients[i].z <= 28) {
+							//printf("1¹ø º® ºÎ´èÄ§\n");
+							glm::vec3 v3Normal = { 1.f,0.f,0.f };
+							glm::vec3 v3Sliding = m_Clients[i].look_vec - v3Normal * (glm::dot(m_Clients[i].look_vec, v3Normal));
+							m_Clients[i].z += METER_PER_PIXEL * v3Sliding.z * (RUN_SPEED * overlapped_buffer->elapsed_time);
+							m_Clients[i].x += -METER_PER_PIXEL * v3Sliding.x * (RUN_SPEED * overlapped_buffer->elapsed_time);
+						}
+						else if (-156.f <= m_Clients[i].x && m_Clients[i].x <= 33.f && 26.f <= m_Clients[i].z && m_Clients[i].z <= 28.f) {
+							//printf("2¹ø º® ºÎ´èÄ§\n");
+							glm::vec3 v3Normal = { 0.f,0.f,1.f };
+							glm::vec3 v3Sliding = m_Clients[i].look_vec - v3Normal * (glm::dot(m_Clients[i].look_vec, v3Normal));
+							m_Clients[i].z += METER_PER_PIXEL * v3Sliding.z * (RUN_SPEED * overlapped_buffer->elapsed_time);
+							m_Clients[i].x += -METER_PER_PIXEL * v3Sliding.x * (RUN_SPEED * overlapped_buffer->elapsed_time);
+						}
+						else if (-156.f <= m_Clients[i].x && m_Clients[i].x <= -153.f && -92.f <= m_Clients[i].z && m_Clients[i].z <= 28.f) {
+							//printf("3¹ø º® ºÎ´èÄ§\n");
+							glm::vec3 v3Normal = { -1.f,0.f,0.f };
+							glm::vec3 v3Sliding = m_Clients[i].look_vec - v3Normal * (glm::dot(m_Clients[i].look_vec, v3Normal));
+							m_Clients[i].z += METER_PER_PIXEL * v3Sliding.z * (RUN_SPEED * overlapped_buffer->elapsed_time);
+							m_Clients[i].x += -METER_PER_PIXEL * v3Sliding.x * (RUN_SPEED * overlapped_buffer->elapsed_time);
+						}
+						else if (-156.f <= m_Clients[i].x && m_Clients[i].x <= 33.f && -92.f <= m_Clients[i].z && m_Clients[i].z <= -89.f) {
+							//printf("4¹ø º® ºÎ´èÄ§\n");
+							glm::vec3 v3Normal = { 0.f,0.f, -1.f };
+							glm::vec3 v3Sliding = m_Clients[i].look_vec - v3Normal * (glm::dot(m_Clients[i].look_vec, v3Normal));
+							m_Clients[i].z += METER_PER_PIXEL * v3Sliding.z * (RUN_SPEED * overlapped_buffer->elapsed_time);
+							m_Clients[i].x += -METER_PER_PIXEL * v3Sliding.x * (RUN_SPEED * overlapped_buffer->elapsed_time);
+						}
+						else if (30.f <= m_Clients[i].x && m_Clients[i].x <= 33.f && -256.f <= m_Clients[i].z && m_Clients[i].z <= -178.f) {
+							//printf("5¹ø º® ºÎ´èÄ§\n");
+							glm::vec3 v3Normal = { 1.f, 0.f, 0.f };
+							glm::vec3 v3Sliding = m_Clients[i].look_vec - v3Normal * (glm::dot(m_Clients[i].look_vec, v3Normal));
+							m_Clients[i].z += METER_PER_PIXEL * v3Sliding.z * (RUN_SPEED * overlapped_buffer->elapsed_time);
+							m_Clients[i].x += -METER_PER_PIXEL * v3Sliding.x * (RUN_SPEED * overlapped_buffer->elapsed_time);
+						}
+						else if (-156.f <= m_Clients[i].x && m_Clients[i].x <= 33.f && -180.f <= m_Clients[i].z && m_Clients[i].z <= -178.f) {
+							//printf("6¹ø º® ºÎ´èÄ§\n");
+							glm::vec3 v3Normal = { 0.f, 0.f, 1.f };
+							glm::vec3 v3Sliding = m_Clients[i].look_vec - v3Normal * (glm::dot(m_Clients[i].look_vec, v3Normal));
+							m_Clients[i].z += METER_PER_PIXEL * v3Sliding.z * (RUN_SPEED * overlapped_buffer->elapsed_time);
+							m_Clients[i].x += -METER_PER_PIXEL * v3Sliding.x * (RUN_SPEED * overlapped_buffer->elapsed_time);
+						}
+						else if (-156.f <= m_Clients[i].x && m_Clients[i].x <= -154.f && -256.f <= m_Clients[i].z && m_Clients[i].z <= -178.f) {
+							//printf("7¹ø º® ºÎ´èÄ§\n");
+							glm::vec3 v3Normal = { -1.f, 0.f, 0.f };
+							glm::vec3 v3Sliding = m_Clients[i].look_vec - v3Normal * (glm::dot(m_Clients[i].look_vec, v3Normal));
+							m_Clients[i].z += METER_PER_PIXEL * v3Sliding.z * (RUN_SPEED * overlapped_buffer->elapsed_time);
+							m_Clients[i].x += -METER_PER_PIXEL * v3Sliding.x * (RUN_SPEED * overlapped_buffer->elapsed_time);
+						}
+						else if (m_Clients[i].x > 255.f) {
+							glm::vec3 v3Normal = { -1.f,0.f,0.f };
+							glm::vec3 v3Sliding = m_Clients[i].look_vec - v3Normal * (glm::dot(m_Clients[i].look_vec, v3Normal));
+							m_Clients[i].z += METER_PER_PIXEL * v3Sliding.z * (RUN_SPEED * overlapped_buffer->elapsed_time);
+							m_Clients[i].x += -METER_PER_PIXEL * v3Sliding.x * (RUN_SPEED * overlapped_buffer->elapsed_time);
+						}
+						else if (-255.f > m_Clients[i].x) {
+							glm::vec3 v3Normal = { 1.f,0.f,0.f };
+							glm::vec3 v3Sliding = m_Clients[i].look_vec - v3Normal * (glm::dot(m_Clients[i].look_vec, v3Normal));
+							m_Clients[i].z += METER_PER_PIXEL * v3Sliding.z * (RUN_SPEED * overlapped_buffer->elapsed_time);
+							m_Clients[i].x += -METER_PER_PIXEL * v3Sliding.x * (RUN_SPEED * overlapped_buffer->elapsed_time);
+						}
+						else if (-255.f > m_Clients[i].z) {
+							glm::vec3 v3Normal = { 0.f,0.f,1.f };
+							glm::vec3 v3Sliding = m_Clients[i].look_vec - v3Normal * (glm::dot(m_Clients[i].look_vec, v3Normal));
+							m_Clients[i].z += METER_PER_PIXEL * v3Sliding.z * (RUN_SPEED * overlapped_buffer->elapsed_time);
+							m_Clients[i].x += -METER_PER_PIXEL * v3Sliding.x * (RUN_SPEED * overlapped_buffer->elapsed_time);
+						}
+						else if (255.f < m_Clients[i].z) {
+							glm::vec3 v3Normal = { 0.f,0.f,-1.f };
+							glm::vec3 v3Sliding = m_Clients[i].look_vec - v3Normal * (glm::dot(m_Clients[i].look_vec, v3Normal));
+							m_Clients[i].z += METER_PER_PIXEL * v3Sliding.z * (RUN_SPEED * overlapped_buffer->elapsed_time);
+							m_Clients[i].x += -METER_PER_PIXEL * v3Sliding.x * (RUN_SPEED * overlapped_buffer->elapsed_time);
+						}
+						else {
+							m_Clients[i].z += METER_PER_PIXEL * m_Clients[i].look_vec.x * (RUN_SPEED * overlapped_buffer->elapsed_time);
+							m_Clients[i].x += (-1) * METER_PER_PIXEL * m_Clients[i].look_vec.z * (RUN_SPEED * overlapped_buffer->elapsed_time);
+						}
+
 					}
 					else {
-						m_Clients[i].z += METER_PER_PIXEL * m_Clients[i].look_vec.x * (WALK_SPEED * overlapped_buffer->elapsed_time);
-						m_Clients[i].x += (-1) * METER_PER_PIXEL * m_Clients[i].look_vec.z * (WALK_SPEED * overlapped_buffer->elapsed_time);
+						//m_Clients[i].z += METER_PER_PIXEL * m_Clients[i].look_vec.x * (WALK_SPEED * overlapped_buffer->elapsed_time);
+						//m_Clients[i].x += (-1) * METER_PER_PIXEL * m_Clients[i].look_vec.z * (WALK_SPEED * overlapped_buffer->elapsed_time);
+
+						if (31.f <= m_Clients[i].x &&m_Clients[i].x < 34.f && -92.f <= m_Clients[i].z && m_Clients[i].z <= 28) {
+							//printf("1¹ø º® ºÎ´èÄ§\n");
+							glm::vec3 v3Normal = { 1.f,0.f,0.f };
+							glm::vec3 v3Sliding = m_Clients[i].look_vec - v3Normal * (glm::dot(m_Clients[i].look_vec, v3Normal));
+							m_Clients[i].z += METER_PER_PIXEL * v3Sliding.z * (WALK_SPEED * overlapped_buffer->elapsed_time);
+							m_Clients[i].x += -METER_PER_PIXEL * v3Sliding.x * (WALK_SPEED * overlapped_buffer->elapsed_time);
+						}
+						else if (-156.f <= m_Clients[i].x && m_Clients[i].x <= 33.f && 26.f <= m_Clients[i].z && m_Clients[i].z <= 28.f) {
+							//printf("2¹ø º® ºÎ´èÄ§\n");
+							glm::vec3 v3Normal = { 0.f,0.f,1.f };
+							glm::vec3 v3Sliding = m_Clients[i].look_vec - v3Normal * (glm::dot(m_Clients[i].look_vec, v3Normal));
+							m_Clients[i].z += METER_PER_PIXEL * v3Sliding.z * (WALK_SPEED * overlapped_buffer->elapsed_time);
+							m_Clients[i].x += -METER_PER_PIXEL * v3Sliding.x * (WALK_SPEED * overlapped_buffer->elapsed_time);
+						}
+						else if (-156.f <= m_Clients[i].x && m_Clients[i].x <= -153.f && -92.f <= m_Clients[i].z && m_Clients[i].z <= 28.f) {
+							//printf("3¹ø º® ºÎ´èÄ§\n");
+							glm::vec3 v3Normal = { -1.f,0.f,0.f };
+							glm::vec3 v3Sliding = m_Clients[i].look_vec - v3Normal * (glm::dot(m_Clients[i].look_vec, v3Normal));
+							m_Clients[i].z += METER_PER_PIXEL * v3Sliding.z * (WALK_SPEED * overlapped_buffer->elapsed_time);
+							m_Clients[i].x += -METER_PER_PIXEL * v3Sliding.x * (WALK_SPEED * overlapped_buffer->elapsed_time);
+						}
+						else if (-156.f <= m_Clients[i].x && m_Clients[i].x <= 33.f && -92.f <= m_Clients[i].z && m_Clients[i].z <= -89.f) {
+							//printf("4¹ø º® ºÎ´èÄ§\n");
+							glm::vec3 v3Normal = { 0.f,0.f, -1.f };
+							glm::vec3 v3Sliding = m_Clients[i].look_vec - v3Normal * (glm::dot(m_Clients[i].look_vec, v3Normal));
+							m_Clients[i].z += METER_PER_PIXEL * v3Sliding.z * (WALK_SPEED * overlapped_buffer->elapsed_time);
+							m_Clients[i].x += -METER_PER_PIXEL * v3Sliding.x * (WALK_SPEED * overlapped_buffer->elapsed_time);
+						}
+						else if (30.f <= m_Clients[i].x && m_Clients[i].x <= 33.f && -256.f <= m_Clients[i].z && m_Clients[i].z <= -178.f) {
+							//printf("5¹ø º® ºÎ´èÄ§\n");
+							glm::vec3 v3Normal = { 1.f, 0.f, 0.f };
+							glm::vec3 v3Sliding = m_Clients[i].look_vec - v3Normal * (glm::dot(m_Clients[i].look_vec, v3Normal));
+							m_Clients[i].z += METER_PER_PIXEL * v3Sliding.z * (WALK_SPEED * overlapped_buffer->elapsed_time);
+							m_Clients[i].x += -METER_PER_PIXEL * v3Sliding.x * (WALK_SPEED * overlapped_buffer->elapsed_time);
+						}
+						else if (-156.f <= m_Clients[i].x && m_Clients[i].x <= 33.f && -180.f <= m_Clients[i].z && m_Clients[i].z <= -178.f) {
+							//printf("6¹ø º® ºÎ´èÄ§\n");
+							glm::vec3 v3Normal = { 0.f, 0.f, 1.f };
+							glm::vec3 v3Sliding = m_Clients[i].look_vec - v3Normal * (glm::dot(m_Clients[i].look_vec, v3Normal));
+							m_Clients[i].z += METER_PER_PIXEL * v3Sliding.z * (WALK_SPEED * overlapped_buffer->elapsed_time);
+							m_Clients[i].x += -METER_PER_PIXEL * v3Sliding.x * (WALK_SPEED * overlapped_buffer->elapsed_time);
+						}
+						else if (-156.f <= m_Clients[i].x && m_Clients[i].x <= -154.f && -256.f <= m_Clients[i].z && m_Clients[i].z <= -178.f) {
+							//printf("7¹ø º® ºÎ´èÄ§\n");
+							glm::vec3 v3Normal = { -1.f, 0.f, 0.f };
+							glm::vec3 v3Sliding = m_Clients[i].look_vec - v3Normal * (glm::dot(m_Clients[i].look_vec, v3Normal));
+							m_Clients[i].z += METER_PER_PIXEL * v3Sliding.z * (WALK_SPEED * overlapped_buffer->elapsed_time);
+							m_Clients[i].x += -METER_PER_PIXEL * v3Sliding.x * (WALK_SPEED * overlapped_buffer->elapsed_time);
+						}
+						else if (m_Clients[i].x > 255.f) {
+							printf("ºü²ÙÄ¡´Ù°¡ ³Ñ¾ú´Ù\n");
+							glm::vec3 v3Normal = { -1.f,0.f,0.f };
+							glm::vec3 v3Sliding = m_Clients[i].look_vec - v3Normal * (glm::dot(m_Clients[i].look_vec, v3Normal));
+							m_Clients[i].z += METER_PER_PIXEL * v3Sliding.z * (WALK_SPEED * overlapped_buffer->elapsed_time);
+							m_Clients[i].x += -METER_PER_PIXEL * v3Sliding.x * (WALK_SPEED * overlapped_buffer->elapsed_time);
+						}
+						else if (-255.f > m_Clients[i].x) {
+							glm::vec3 v3Normal = { 1.f,0.f,0.f };
+							glm::vec3 v3Sliding = m_Clients[i].look_vec - v3Normal * (glm::dot(m_Clients[i].look_vec, v3Normal));
+							m_Clients[i].z += METER_PER_PIXEL * v3Sliding.z * (WALK_SPEED * overlapped_buffer->elapsed_time);
+							m_Clients[i].x += -METER_PER_PIXEL * v3Sliding.x * (WALK_SPEED * overlapped_buffer->elapsed_time);
+						}
+						else if (-255.f > m_Clients[i].z) {
+							glm::vec3 v3Normal = { 0.f,0.f,1.f };
+							glm::vec3 v3Sliding = m_Clients[i].look_vec - v3Normal * (glm::dot(m_Clients[i].look_vec, v3Normal));
+							m_Clients[i].z += METER_PER_PIXEL * v3Sliding.z * (WALK_SPEED * overlapped_buffer->elapsed_time);
+							m_Clients[i].x += -METER_PER_PIXEL * v3Sliding.x * (WALK_SPEED * overlapped_buffer->elapsed_time);
+						}
+						else if (255.f < m_Clients[i].z) {
+							glm::vec3 v3Normal = { 0.f,0.f,-1.f };
+							glm::vec3 v3Sliding = m_Clients[i].look_vec - v3Normal * (glm::dot(m_Clients[i].look_vec, v3Normal));
+							m_Clients[i].z += METER_PER_PIXEL * v3Sliding.z * (WALK_SPEED * overlapped_buffer->elapsed_time);
+							m_Clients[i].x += -METER_PER_PIXEL * v3Sliding.x * (WALK_SPEED * overlapped_buffer->elapsed_time);
+						}
+						else {
+							m_Clients[i].z += METER_PER_PIXEL * m_Clients[i].look_vec.x * (WALK_SPEED * overlapped_buffer->elapsed_time);
+							m_Clients[i].x += (-1) * METER_PER_PIXEL * m_Clients[i].look_vec.z * (WALK_SPEED * overlapped_buffer->elapsed_time);
+						}
+
 					}
 				}
 				if (m_Clients[i].is_move_right) {
 					if (m_Clients[i].is_running && m_Clients[i].m_fStamina > 0.f) {
-						m_Clients[i].z += (-1) * METER_PER_PIXEL * m_Clients[i].look_vec.x * (RUN_SPEED * overlapped_buffer->elapsed_time);
-						m_Clients[i].x += METER_PER_PIXEL * m_Clients[i].look_vec.z * (RUN_SPEED * overlapped_buffer->elapsed_time);
+						//m_Clients[i].z += (-1) * METER_PER_PIXEL * m_Clients[i].look_vec.x * (RUN_SPEED * overlapped_buffer->elapsed_time);
+						//m_Clients[i].x += METER_PER_PIXEL * m_Clients[i].look_vec.z * (RUN_SPEED * overlapped_buffer->elapsed_time);
 						m_Clients[i].m_fStamina -= 0.1f;
+
+						if (31.f <= m_Clients[i].x &&m_Clients[i].x < 34.f && -92.f <= m_Clients[i].z && m_Clients[i].z <= 28) {
+							//printf("1¹ø º® ºÎ´èÄ§\n");
+							glm::vec3 v3Normal = { 1.f,0.f,0.f };
+							glm::vec3 v3Sliding = m_Clients[i].look_vec - v3Normal * (glm::dot(m_Clients[i].look_vec, v3Normal));
+							m_Clients[i].z += -METER_PER_PIXEL * v3Sliding.z * (RUN_SPEED * overlapped_buffer->elapsed_time);
+							m_Clients[i].x += METER_PER_PIXEL * v3Sliding.x * (RUN_SPEED * overlapped_buffer->elapsed_time);
+						}
+						else if (-156.f <= m_Clients[i].x && m_Clients[i].x <= 33.f && 26.f <= m_Clients[i].z && m_Clients[i].z <= 28.f) {
+							//printf("2¹ø º® ºÎ´èÄ§\n");
+							glm::vec3 v3Normal = { 0.f,0.f,1.f };
+							glm::vec3 v3Sliding = m_Clients[i].look_vec - v3Normal * (glm::dot(m_Clients[i].look_vec, v3Normal));
+							m_Clients[i].z += -METER_PER_PIXEL * v3Sliding.z * (RUN_SPEED * overlapped_buffer->elapsed_time);
+							m_Clients[i].x += METER_PER_PIXEL * v3Sliding.x * (RUN_SPEED * overlapped_buffer->elapsed_time);
+						}
+						else if (-156.f <= m_Clients[i].x && m_Clients[i].x <= -153.f && -92.f <= m_Clients[i].z && m_Clients[i].z <= 28.f) {
+							//printf("3¹ø º® ºÎ´èÄ§\n");
+							glm::vec3 v3Normal = { -1.f,0.f,0.f };
+							glm::vec3 v3Sliding = m_Clients[i].look_vec - v3Normal * (glm::dot(m_Clients[i].look_vec, v3Normal));
+							m_Clients[i].z += -METER_PER_PIXEL * v3Sliding.z * (RUN_SPEED * overlapped_buffer->elapsed_time);
+							m_Clients[i].x += METER_PER_PIXEL * v3Sliding.x * (RUN_SPEED * overlapped_buffer->elapsed_time);
+						}
+						else if (-156.f <= m_Clients[i].x && m_Clients[i].x <= 33.f && -92.f <= m_Clients[i].z && m_Clients[i].z <= -89.f) {
+							//printf("4¹ø º® ºÎ´èÄ§\n");
+							glm::vec3 v3Normal = { 0.f,0.f, -1.f };
+							glm::vec3 v3Sliding = m_Clients[i].look_vec - v3Normal * (glm::dot(m_Clients[i].look_vec, v3Normal));
+							m_Clients[i].z += -METER_PER_PIXEL * v3Sliding.z * (RUN_SPEED * overlapped_buffer->elapsed_time);
+							m_Clients[i].x += METER_PER_PIXEL * v3Sliding.x * (RUN_SPEED * overlapped_buffer->elapsed_time);
+						}
+						else if (30.f <= m_Clients[i].x && m_Clients[i].x <= 33.f && -256.f <= m_Clients[i].z && m_Clients[i].z <= -178.f) {
+							//printf("5¹ø º® ºÎ´èÄ§\n");
+							glm::vec3 v3Normal = { 1.f, 0.f, 0.f };
+							glm::vec3 v3Sliding = m_Clients[i].look_vec - v3Normal * (glm::dot(m_Clients[i].look_vec, v3Normal));
+							m_Clients[i].z += -METER_PER_PIXEL * v3Sliding.z * (RUN_SPEED * overlapped_buffer->elapsed_time);
+							m_Clients[i].x += METER_PER_PIXEL * v3Sliding.x * (RUN_SPEED * overlapped_buffer->elapsed_time);
+						}
+						else if (-156.f <= m_Clients[i].x && m_Clients[i].x <= 33.f && -180.f <= m_Clients[i].z && m_Clients[i].z <= -178.f) {
+							//printf("6¹ø º® ºÎ´èÄ§\n");
+							glm::vec3 v3Normal = { 0.f, 0.f, 1.f };
+							glm::vec3 v3Sliding = m_Clients[i].look_vec - v3Normal * (glm::dot(m_Clients[i].look_vec, v3Normal));
+							m_Clients[i].z += -METER_PER_PIXEL * v3Sliding.z * (RUN_SPEED * overlapped_buffer->elapsed_time);
+							m_Clients[i].x += METER_PER_PIXEL * v3Sliding.x * (RUN_SPEED * overlapped_buffer->elapsed_time);
+						}
+						else if (-156.f <= m_Clients[i].x && m_Clients[i].x <= -154.f && -256.f <= m_Clients[i].z && m_Clients[i].z <= -178.f) {
+							//printf("7¹ø º® ºÎ´èÄ§\n");
+							glm::vec3 v3Normal = { -1.f, 0.f, 0.f };
+							glm::vec3 v3Sliding = m_Clients[i].look_vec - v3Normal * (glm::dot(m_Clients[i].look_vec, v3Normal));
+							m_Clients[i].z += -METER_PER_PIXEL * v3Sliding.z * (RUN_SPEED * overlapped_buffer->elapsed_time);
+							m_Clients[i].x += METER_PER_PIXEL * v3Sliding.x * (RUN_SPEED * overlapped_buffer->elapsed_time);
+						}
+						else if (m_Clients[i].x > 255.f) {
+							glm::vec3 v3Normal = { -1.f,0.f,0.f };
+							glm::vec3 v3Sliding = m_Clients[i].look_vec - v3Normal * (glm::dot(m_Clients[i].look_vec, v3Normal));
+							m_Clients[i].z += -METER_PER_PIXEL * v3Sliding.z * (RUN_SPEED * overlapped_buffer->elapsed_time);
+							m_Clients[i].x += METER_PER_PIXEL * v3Sliding.x * (RUN_SPEED * overlapped_buffer->elapsed_time);
+						}
+						else if (-255.f > m_Clients[i].x) {
+							glm::vec3 v3Normal = { 1.f,0.f,0.f };
+							glm::vec3 v3Sliding = m_Clients[i].look_vec - v3Normal * (glm::dot(m_Clients[i].look_vec, v3Normal));
+							m_Clients[i].z += -METER_PER_PIXEL * v3Sliding.z * (RUN_SPEED * overlapped_buffer->elapsed_time);
+							m_Clients[i].x += METER_PER_PIXEL * v3Sliding.x * (RUN_SPEED * overlapped_buffer->elapsed_time);
+						}
+						else if (-255.f > m_Clients[i].z) {
+							glm::vec3 v3Normal = { 0.f,0.f,1.f };
+							glm::vec3 v3Sliding = m_Clients[i].look_vec - v3Normal * (glm::dot(m_Clients[i].look_vec, v3Normal));
+							m_Clients[i].z += -METER_PER_PIXEL * v3Sliding.z * (RUN_SPEED * overlapped_buffer->elapsed_time);
+							m_Clients[i].x += METER_PER_PIXEL * v3Sliding.x * (RUN_SPEED * overlapped_buffer->elapsed_time);
+						}
+						else if (255.f < m_Clients[i].z) {
+							glm::vec3 v3Normal = { 0.f,0.f,-1.f };
+							glm::vec3 v3Sliding = m_Clients[i].look_vec - v3Normal * (glm::dot(m_Clients[i].look_vec, v3Normal));
+							m_Clients[i].z += -METER_PER_PIXEL * v3Sliding.z * (RUN_SPEED * overlapped_buffer->elapsed_time);
+							m_Clients[i].x += METER_PER_PIXEL * v3Sliding.x * (RUN_SPEED * overlapped_buffer->elapsed_time);
+						}
+						else {
+							//m_Clients[i].z += -METER_PER_PIXEL * m_Clients[i].look_vec.z * (RUN_SPEED * overlapped_buffer->elapsed_time);
+							//m_Clients[i].x += METER_PER_PIXEL * m_Clients[i].look_vec.x * (RUN_SPEED * overlapped_buffer->elapsed_time);
+
+							m_Clients[i].z += (-1) * METER_PER_PIXEL * m_Clients[i].look_vec.x * (RUN_SPEED * overlapped_buffer->elapsed_time);
+							m_Clients[i].x += METER_PER_PIXEL * m_Clients[i].look_vec.z * (RUN_SPEED * overlapped_buffer->elapsed_time);
+
+						}
+
 					}
 					else {
-						m_Clients[i].z += (-1) * METER_PER_PIXEL * m_Clients[i].look_vec.x * (WALK_SPEED * overlapped_buffer->elapsed_time);
-						m_Clients[i].x += METER_PER_PIXEL * m_Clients[i].look_vec.z * (WALK_SPEED * overlapped_buffer->elapsed_time);
+						//m_Clients[i].z += (-1) * METER_PER_PIXEL * m_Clients[i].look_vec.x * (WALK_SPEED * overlapped_buffer->elapsed_time);
+						//m_Clients[i].x += METER_PER_PIXEL * m_Clients[i].look_vec.z * (WALK_SPEED * overlapped_buffer->elapsed_time);
+
+						if (31.f <= m_Clients[i].x &&m_Clients[i].x < 34.f && -92.f <= m_Clients[i].z && m_Clients[i].z <= 28) {
+							//printf("1¹ø º® ºÎ´èÄ§\n");
+							glm::vec3 v3Normal = { 1.f,0.f,0.f };
+							glm::vec3 v3Sliding = m_Clients[i].look_vec - v3Normal * (glm::dot(m_Clients[i].look_vec, v3Normal));
+							m_Clients[i].z += -METER_PER_PIXEL * v3Sliding.z * (WALK_SPEED * overlapped_buffer->elapsed_time);
+							m_Clients[i].x += METER_PER_PIXEL * v3Sliding.x * (WALK_SPEED * overlapped_buffer->elapsed_time);
+						}
+						else if (-156.f <= m_Clients[i].x && m_Clients[i].x <= 33.f && 26.f <= m_Clients[i].z && m_Clients[i].z <= 28.f) {
+							//printf("2¹ø º® ºÎ´èÄ§\n");
+							glm::vec3 v3Normal = { 0.f,0.f,1.f };
+							glm::vec3 v3Sliding = m_Clients[i].look_vec - v3Normal * (glm::dot(m_Clients[i].look_vec, v3Normal));
+							m_Clients[i].z += -METER_PER_PIXEL * v3Sliding.z * (WALK_SPEED * overlapped_buffer->elapsed_time);
+							m_Clients[i].x += METER_PER_PIXEL * v3Sliding.x * (WALK_SPEED * overlapped_buffer->elapsed_time);
+						}
+						else if (-156.f <= m_Clients[i].x && m_Clients[i].x <= -153.f && -92.f <= m_Clients[i].z && m_Clients[i].z <= 28.f) {
+							//printf("3¹ø º® ºÎ´èÄ§\n");
+							glm::vec3 v3Normal = { -1.f,0.f,0.f };
+							glm::vec3 v3Sliding = m_Clients[i].look_vec - v3Normal * (glm::dot(m_Clients[i].look_vec, v3Normal));
+							m_Clients[i].z += -METER_PER_PIXEL * v3Sliding.z * (WALK_SPEED * overlapped_buffer->elapsed_time);
+							m_Clients[i].x += METER_PER_PIXEL * v3Sliding.x * (WALK_SPEED * overlapped_buffer->elapsed_time);
+						}
+						else if (-156.f <= m_Clients[i].x && m_Clients[i].x <= 33.f && -92.f <= m_Clients[i].z && m_Clients[i].z <= -89.f) {
+							//printf("4¹ø º® ºÎ´èÄ§\n");
+							glm::vec3 v3Normal = { 0.f,0.f, -1.f };
+							glm::vec3 v3Sliding = m_Clients[i].look_vec - v3Normal * (glm::dot(m_Clients[i].look_vec, v3Normal));
+							m_Clients[i].z += -METER_PER_PIXEL * v3Sliding.z * (WALK_SPEED * overlapped_buffer->elapsed_time);
+							m_Clients[i].x += METER_PER_PIXEL * v3Sliding.x * (WALK_SPEED * overlapped_buffer->elapsed_time);
+						}
+						else if (30.f <= m_Clients[i].x && m_Clients[i].x <= 33.f && -256.f <= m_Clients[i].z && m_Clients[i].z <= -178.f) {
+							//printf("5¹ø º® ºÎ´èÄ§\n");
+							glm::vec3 v3Normal = { 1.f, 0.f, 0.f };
+							glm::vec3 v3Sliding = m_Clients[i].look_vec - v3Normal * (glm::dot(m_Clients[i].look_vec, v3Normal));
+							m_Clients[i].z += -METER_PER_PIXEL * v3Sliding.z * (WALK_SPEED * overlapped_buffer->elapsed_time);
+							m_Clients[i].x += METER_PER_PIXEL * v3Sliding.x * (WALK_SPEED * overlapped_buffer->elapsed_time);
+						}
+						else if (-156.f <= m_Clients[i].x && m_Clients[i].x <= 33.f && -180.f <= m_Clients[i].z && m_Clients[i].z <= -178.f) {
+							//printf("6¹ø º® ºÎ´èÄ§\n");
+							glm::vec3 v3Normal = { 0.f, 0.f, 1.f };
+							glm::vec3 v3Sliding = m_Clients[i].look_vec - v3Normal * (glm::dot(m_Clients[i].look_vec, v3Normal));
+							m_Clients[i].z += -METER_PER_PIXEL * v3Sliding.z * (WALK_SPEED * overlapped_buffer->elapsed_time);
+							m_Clients[i].x += METER_PER_PIXEL * v3Sliding.x * (WALK_SPEED * overlapped_buffer->elapsed_time);
+						}
+						else if (-156.f <= m_Clients[i].x && m_Clients[i].x <= -154.f && -256.f <= m_Clients[i].z && m_Clients[i].z <= -178.f) {
+							//printf("7¹ø º® ºÎ´èÄ§\n");
+							glm::vec3 v3Normal = { -1.f, 0.f, 0.f };
+							glm::vec3 v3Sliding = m_Clients[i].look_vec - v3Normal * (glm::dot(m_Clients[i].look_vec, v3Normal));
+							m_Clients[i].z += -METER_PER_PIXEL * v3Sliding.z * (WALK_SPEED * overlapped_buffer->elapsed_time);
+							m_Clients[i].x += METER_PER_PIXEL * v3Sliding.x * (WALK_SPEED * overlapped_buffer->elapsed_time);
+						}
+						else if (m_Clients[i].x > 255.f) {
+							printf("ºü²ÙÄ¡´Ù°¡ ³Ñ¾ú´Ù\n");
+							glm::vec3 v3Normal = { -1.f,0.f,0.f };
+							glm::vec3 v3Sliding = m_Clients[i].look_vec - v3Normal * (glm::dot(m_Clients[i].look_vec, v3Normal));
+							m_Clients[i].z += -METER_PER_PIXEL * v3Sliding.z * (WALK_SPEED * overlapped_buffer->elapsed_time);
+							m_Clients[i].x += METER_PER_PIXEL * v3Sliding.x * (WALK_SPEED * overlapped_buffer->elapsed_time);
+						}
+						else if (-255.f > m_Clients[i].x) {
+							glm::vec3 v3Normal = { 1.f,0.f,0.f };
+							glm::vec3 v3Sliding = m_Clients[i].look_vec - v3Normal * (glm::dot(m_Clients[i].look_vec, v3Normal));
+							m_Clients[i].z += -METER_PER_PIXEL * v3Sliding.z * (WALK_SPEED * overlapped_buffer->elapsed_time);
+							m_Clients[i].x += METER_PER_PIXEL * v3Sliding.x * (WALK_SPEED * overlapped_buffer->elapsed_time);
+						}
+						else if (-255.f > m_Clients[i].z) {
+							glm::vec3 v3Normal = { 0.f,0.f,1.f };
+							glm::vec3 v3Sliding = m_Clients[i].look_vec - v3Normal * (glm::dot(m_Clients[i].look_vec, v3Normal));
+							m_Clients[i].z += -METER_PER_PIXEL * v3Sliding.z * (WALK_SPEED * overlapped_buffer->elapsed_time);
+							m_Clients[i].x += METER_PER_PIXEL * v3Sliding.x * (WALK_SPEED * overlapped_buffer->elapsed_time);
+						}
+						else if (255.f < m_Clients[i].z) {
+							glm::vec3 v3Normal = { 0.f,0.f,-1.f };
+							glm::vec3 v3Sliding = m_Clients[i].look_vec - v3Normal * (glm::dot(m_Clients[i].look_vec, v3Normal));
+							m_Clients[i].z += -METER_PER_PIXEL * v3Sliding.z * (WALK_SPEED * overlapped_buffer->elapsed_time);
+							m_Clients[i].x += METER_PER_PIXEL * v3Sliding.x * (WALK_SPEED * overlapped_buffer->elapsed_time);
+						}
+						else {
+							//m_Clients[i].z += -METER_PER_PIXEL * m_Clients[i].look_vec.z * (WALK_SPEED * overlapped_buffer->elapsed_time);
+							//m_Clients[i].x += METER_PER_PIXEL * m_Clients[i].look_vec.x * (WALK_SPEED * overlapped_buffer->elapsed_time);
+							m_Clients[i].z += (-1) * METER_PER_PIXEL * m_Clients[i].look_vec.x * (WALK_SPEED * overlapped_buffer->elapsed_time);
+							m_Clients[i].x += METER_PER_PIXEL * m_Clients[i].look_vec.z * (WALK_SPEED * overlapped_buffer->elapsed_time);
+
+						}
+
 					}
 				}
 
