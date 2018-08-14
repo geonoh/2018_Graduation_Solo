@@ -33,6 +33,9 @@ void ServerFramework::InitServer() {
 	m_bGameStart = true;
 	m_bIsAmmoGen = true;
 	m_fBoatGenTime = 0.f;
+	for (int i = 0; i < MAX_PLAYER; ++i) {
+		m_Clients[i].m_fStamina = 100.f;
+	}
 #endif
 	wcout.imbue(locale("korean"));
 
@@ -74,6 +77,7 @@ void ServerFramework::InitServer() {
 		m_Clients[i].z = 0.f;
 		m_Clients[i].y = height_map->GetHeight(m_Clients[i].x + DX12_TO_OPGL, m_Clients[i].z + DX12_TO_OPGL) + PLAYER_HEIGHT;
 		m_Clients[i].hp = 100.f;
+		m_Clients[i].m_fStamina = 100.f;
 		m_Clients[i].m_CurrentAmmo = 30;
 		m_Clients[i].m_TotalAmmo = 90;
 		for (int j = 0; j < 4; ++j) {
@@ -152,6 +156,7 @@ void ServerFramework::AcceptPlayer() {
 	packet.size = sizeof(SC_PACKET_ENTER_PLAYER);
 	packet.type = SC_ENTER_PLAYER;
 	packet.hp = m_Clients[client_id].hp;
+	packet.m_fStamina = m_Clients[client_id].m_fStamina;
 	packet.x = m_Clients[client_id].x;
 	packet.y = m_Clients[client_id].y;
 	packet.z = m_Clients[client_id].z;
@@ -511,6 +516,7 @@ void ServerFramework::ProcessPacket(int cl_id, char* packet) {
 			m_Clients[i].z = 0.f;
 			m_Clients[i].y = height_map->GetHeight(m_Clients[i].x + DX12_TO_OPGL, m_Clients[i].z + DX12_TO_OPGL) + PLAYER_HEIGHT;
 			m_Clients[i].hp = 100.f;
+			m_Clients[i].m_fStamina = 100.f;
 			m_Clients[i].m_CurrentAmmo = 30;
 			m_Clients[i].m_TotalAmmo = 90;
 			m_Clients[i].is_ready = false;
@@ -614,6 +620,7 @@ void ServerFramework::GameStart() {
 	m_Clients[3].y = height_map->GetHeight(m_Clients[3].x + DX12_TO_OPGL, m_Clients[3].z + DX12_TO_OPGL) + PLAYER_HEIGHT;
 
 	for (int i = 0; i < MAX_PLAYER; ++i) {
+		m_Clients[i].m_fStamina = 100.f;
 		ol_ex[i].evt_type = EVT_PLAYER_POS_SEND;
 		PostQueuedCompletionStatus(iocp_handle, 0, i, reinterpret_cast<WSAOVERLAPPED*>(&ol_ex[i]));
 	}
@@ -756,6 +763,23 @@ void ServerFramework::WorkerThread() {
 					packets.m_cDiePlayer = i;
 					for (int j = 0; j < MAX_PLAYER; ++j) {
 						SendPacket(j, &packets);
+					}
+
+				}
+				else {
+					// 플레이어가 살아있으면 Stamina 회복해줌.
+					if (m_Clients[i].is_move_backward == false &&
+						m_Clients[i].is_move_foward == false &&
+						m_Clients[i].is_move_left == false &&
+						m_Clients[i].is_move_right == false &&
+						m_Clients[i].m_fStamina < 95.f) {
+						m_Clients[i].m_fStamina += 5.f;
+						SC_PACKET_STAMINA packets;
+						packets.size = sizeof(SC_PACKET_STAMINA);
+						packets.type = SC_STAMINA;
+						packets.m_fStamina = m_Clients[i].m_fStamina;
+						packets.m_cID = i;
+						SendPacket(i, &packets);
 					}
 
 				}
@@ -967,7 +991,8 @@ void ServerFramework::WorkerThread() {
 			for (int i = 0; i < MAX_PLAYER; ++i) {
 				m_Clients[i].m_mutexServerLock.lock();
 				if (m_Clients[i].is_move_foward) {
-					if (m_Clients[i].is_running) {
+					if (m_Clients[i].is_running && m_Clients[i].m_fStamina > 0.f) {
+						m_Clients[i].m_fStamina -= 0.1f;
 						if (31.f <= m_Clients[i].x &&m_Clients[i].x < 34.f && -92.f <= m_Clients[i].z && m_Clients[i].z <= 28) {
 							//printf("1번 벽 부닺침\n");
 							glm::vec3 v3Normal = { 1.f,0.f,0.f };
@@ -1129,9 +1154,10 @@ void ServerFramework::WorkerThread() {
 				}
 				if (m_Clients[i].is_move_backward) {
 
-					if (m_Clients[i].is_running) {
+					if (m_Clients[i].is_running && m_Clients[i].m_fStamina > 0.f) {
 						m_Clients[i].z += METER_PER_PIXEL * m_Clients[i].look_vec.z * (RUN_SPEED * overlapped_buffer->elapsed_time);
 						m_Clients[i].x += METER_PER_PIXEL * m_Clients[i].look_vec.x * (RUN_SPEED * overlapped_buffer->elapsed_time);
+						m_Clients[i].m_fStamina -= 0.1f;
 					}
 					else {
 						m_Clients[i].z += METER_PER_PIXEL * m_Clients[i].look_vec.z * (WALK_SPEED * overlapped_buffer->elapsed_time);
@@ -1140,9 +1166,10 @@ void ServerFramework::WorkerThread() {
 
 				}
 				if (m_Clients[i].is_move_left) {
-					if (m_Clients[i].is_running) {
+					if (m_Clients[i].is_running && m_Clients[i].m_fStamina > 0.f) {
 						m_Clients[i].z += METER_PER_PIXEL * m_Clients[i].look_vec.x * (RUN_SPEED * overlapped_buffer->elapsed_time);
 						m_Clients[i].x += (-1) * METER_PER_PIXEL * m_Clients[i].look_vec.z * (RUN_SPEED * overlapped_buffer->elapsed_time);
+						m_Clients[i].m_fStamina -= 0.1f;
 					}
 					else {
 						m_Clients[i].z += METER_PER_PIXEL * m_Clients[i].look_vec.x * (WALK_SPEED * overlapped_buffer->elapsed_time);
@@ -1150,9 +1177,10 @@ void ServerFramework::WorkerThread() {
 					}
 				}
 				if (m_Clients[i].is_move_right) {
-					if (m_Clients[i].is_running) {
+					if (m_Clients[i].is_running && m_Clients[i].m_fStamina > 0.f) {
 						m_Clients[i].z += (-1) * METER_PER_PIXEL * m_Clients[i].look_vec.x * (RUN_SPEED * overlapped_buffer->elapsed_time);
 						m_Clients[i].x += METER_PER_PIXEL * m_Clients[i].look_vec.z * (RUN_SPEED * overlapped_buffer->elapsed_time);
+						m_Clients[i].m_fStamina -= 0.1f;
 					}
 					else {
 						m_Clients[i].z += (-1) * METER_PER_PIXEL * m_Clients[i].look_vec.x * (WALK_SPEED * overlapped_buffer->elapsed_time);
@@ -1160,12 +1188,6 @@ void ServerFramework::WorkerThread() {
 					}
 				}
 
-				////}
-				//// Sliding Vector 
-				//else {
-				//	if (m_Clients[i].is_move_foward) {
-				//	}
-				//}
 				m_Clients[i].m_mutexServerLock.unlock();
 			}
 
@@ -1178,7 +1200,7 @@ void ServerFramework::WorkerThread() {
 				packets.x = m_Clients[client_id].x;
 				packets.y = m_Clients[client_id].y;
 				packets.z = m_Clients[client_id].z;
-
+				packets.m_fStamina = m_Clients[client_id].m_fStamina;
 				for (int i = 0; i < MAX_PLAYER; ++i) {
 					if (m_Clients[i].in_use == true) {
 						SendPacket(i, &packets);
@@ -1456,7 +1478,7 @@ void ServerFramework::WorkerThread() {
 							bullets[i][j].m_fBallisticsTime += overlapped_buffer->elapsed_time;
 							bullets[i][j].x += (-1) * METER_PER_PIXEL * bullets[i][j].look_vec.x * (AR_SPEED * overlapped_buffer->elapsed_time);
 							bullets[i][j].y += (-1) * METER_PER_PIXEL * bullets[i][j].look_vec.y * (AR_SPEED * overlapped_buffer->elapsed_time);
-							bullets[i][j].y -= (9.8 / 2.f) * bullets[i][j].m_fBallisticsTime * bullets[i][j].m_fBallisticsTime / AR_SPEED;
+							bullets[i][j].y -= (9.8 / 2.f) * bullets[i][j].m_fBallisticsTime * bullets[i][j].m_fBallisticsTime / (AR_SPEED * 2);
 							bullets[i][j].z += (-1) * METER_PER_PIXEL * bullets[i][j].look_vec.z * (AR_SPEED * overlapped_buffer->elapsed_time);
 
 							if (bullets[i][j].y <= 0.f) {

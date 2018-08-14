@@ -17,9 +17,9 @@
 // 본인 클라이언트 및 서버에서 사용
 //#define RUN_SPEED				2.78f
 // 위치 테스트용
-#define RUN_SPEED				20.78f
+#define RUN_SPEED				1.6f
 #define METER_PER_PIXEL			20
-#define WALK_SPEED				1.67f
+#define WALK_SPEED				0.8f
 
 // Object 갯수 정리 
 #define OBJECT_BUILDING			10
@@ -39,7 +39,7 @@
 
 // Boat 아이템 생성 시간.
 #define ITEM_BOAT_GEN_TIME			120.f
-#define ITEM_AMMO_GEN_TIME			15.f
+#define ITEM_AMMO_GEN_TIME			30.f
 #define PLAYER_HP_UPDATE_TIME		1.f
 
 // 거리 
@@ -84,6 +84,7 @@
 #define SC_RESULT				39
 #define SC_ENTER_LOBBY			40
 #define SC_AMMO_ITEM_GEN		41
+#define SC_STAMINA				42
 ///////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////
@@ -200,6 +201,14 @@ enum SubWeapons {
 };
 
 // 서버->클라
+struct SC_PACKET_STAMINA {
+	BYTE size;
+	BYTE type;
+	float m_fStamina;
+	char m_cID;
+};
+
+
 struct SC_PACKET_ENTER_LOBBY {
 	BYTE size;
 	BYTE type;
@@ -254,6 +263,7 @@ struct SC_PACKET_ENTER_PLAYER {
 	float size_x, size_y, size_z;
 	int m_CurrentAmmo;
 	int m_TotalAmmo;
+	float m_fStamina;
 };
 
 struct SC_PACKET_LOOCVEC {
@@ -268,6 +278,7 @@ struct SC_PACKET_POS {
 	BYTE type;
 	WORD id;
 	float x, y, z;
+	float m_fStamina;
 };
 
 struct SC_PACKET_COLLSION_TB {

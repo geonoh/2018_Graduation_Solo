@@ -500,7 +500,7 @@ void Renderer::InitializeTextureImage() {
 	m_Tex_Pin = CreatePngTexture("./Textures/Pin.png");
 	m_Tex_Scope = CreatePngTexture("./Textures/Scope.png");
 	//m_Tex_CrossHair = CreatePngTexture("./Textures/Crosshair.png");
-	m_Tex_HpBackground = CreatePngTexture("./Textures/Hp.png");
+	m_Tex_HpBackground = CreatePngTexture("./Textures/HpStamina.png");
 	m_Tex_HpBar = CreatePngTexture("./Textures/HpBar.png");
 	m_Tex_TimerComment = CreatePngTexture("./Textures/TimerComment.png");
 	m_Tex_Boat0 = CreatePngTexture("./Textures/Item/Oil.png");
@@ -557,6 +557,7 @@ void Renderer::InitializeTextureImage() {
 	m_Tex_Ammo2 = CreatePngTexture("./Textures/Ammo2.png");
 
 	m_Tex_Water = CreatePngTexture("./Textures/WaterTexture.png");
+	m_Tex_Stamina = CreatePngTexture("./Textures/StaminaBar.png");
 }
 
 bool Renderer::IsInitialized()
@@ -2601,6 +2602,9 @@ void Renderer::DrawUITexture(int i_iTextureId, float i_fStartPosX, float i_fStar
 		break;
 	case 35:
 		glBindTexture(GL_TEXTURE_2D, m_Tex_Ammo2);
+		break;
+	case 36:
+		glBindTexture(GL_TEXTURE_2D, m_Tex_Stamina);
 		break;
 	}
 	GLuint pos = glGetAttribLocation(shader, "a_Position");

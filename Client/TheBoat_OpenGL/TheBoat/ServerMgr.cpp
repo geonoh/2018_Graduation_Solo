@@ -119,6 +119,10 @@ int ServerMgr::GetClientID() {
 	return clients_id;
 }
 
+float ServerMgr::GetStamina(int iPlayerID) {
+	return m_fStamina[iPlayerID];
+}
+
 void ServerMgr::ProcessPacket(char* ptr) {
 	static bool first_time = true;
 	switch (ptr[1]) {
@@ -129,12 +133,14 @@ void ServerMgr::ProcessPacket(char* ptr) {
 			camera_id = packets->id;
 			m_CurrentAmmo = packets->m_CurrentAmmo;
 			m_TotalAmmo = packets->m_TotalAmmo;
+			m_fStamina[clients_id] = packets->m_fStamina;
 			first_set_id = false;
 		}
 		sc_vec_buff[packets->id].pos.x = packets->x;
 		sc_vec_buff[packets->id].pos.y = packets->y;
 		sc_vec_buff[packets->id].pos.z = packets->z;
 		client_hp[packets->id] = packets->hp;
+		m_fStamina[clients_id] = packets->m_fStamina;
 		printf("[SC_ENTER_PLAYER] : %d 플레이어 입장\n", packets->id);
 
 		break;
@@ -164,6 +170,12 @@ void ServerMgr::ProcessPacket(char* ptr) {
 		sc_vec_buff[packets->id].pos.x = packets->x;
 		sc_vec_buff[packets->id].pos.y = packets->y;
 		sc_vec_buff[packets->id].pos.z = packets->z;
+		m_fStamina[clients_id] = packets->m_fStamina;
+		break;
+	}
+	case SC_STAMINA: {
+		SC_PACKET_STAMINA* packets = reinterpret_cast<SC_PACKET_STAMINA*>(ptr);
+		m_fStamina[packets->m_cID] = packets->m_fStamina;
 		break;
 	}
 	case SC_PLAYER_LOOKVEC: {

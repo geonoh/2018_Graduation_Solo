@@ -72,7 +72,9 @@ class ServerMgr
 	Team m_TeamPlayer[MAX_PLAYER];
 	bool m_bPlayerDie[MAX_PLAYER] = { false };
 	char m_cResult = 0;
+	float m_fStamina[MAX_PLAYER];
 public:
+	float GetStamina(int iPlayerID);
 	char GetResult();
 	bool GetPlayerDie(int iPlayerID);
 	Team GetTeam(int iPlayerID);
