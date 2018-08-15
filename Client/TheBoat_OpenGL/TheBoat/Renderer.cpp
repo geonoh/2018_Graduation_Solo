@@ -2242,7 +2242,7 @@ void Renderer::DrawBullet(float x, float y, float z) {
 
 }
 
-void Renderer::DrawCube(int iTextureID, float x, float y, float z, float fScaleX, float fScaleY, float fScaleZ)
+void Renderer::DrawCube (int iTextureID, float x, float y, float z, float fScaleX, float fScaleY, float fScaleZ)
 {
 	GLuint shader = m_Shader_Proj;
 
@@ -2272,7 +2272,7 @@ void Renderer::DrawCube(int iTextureID, float x, float y, float z, float fScaleX
 		break;
 	case 1:
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, m_Tex_Boat1);
+		glBindTexture(GL_TEXTURE_2D, m_Tex_OffBoat1);
 		break;
 	case 2:
 		glActiveTexture(GL_TEXTURE0);
