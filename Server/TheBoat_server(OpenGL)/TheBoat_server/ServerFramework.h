@@ -2,13 +2,13 @@
 
 class CHeightMapImage;
 
-struct Event {
-	int id;
-	int type;
-	float time;
-	int target;
-};
-
+//struct Event {
+//	int id;
+//	int type;
+//	float time;
+//	int target;
+//};
+//
 //class Comp {
 //public:
 //	bool operator() (const Event& left, const Event& right) {
@@ -81,6 +81,8 @@ class ServerFramework
 	//int iAliveCounterRed = MAX_PLAYER / 2;
 	//int iAliveCounterBlue = MAX_PLAYER / 2;
 	bool m_bWhoDie[MAX_PLAYER] = { false };
+	bool m_bDieSender[MAX_PLAYER] = { false };
+
 public:
 	void InitServer();
 	void AcceptPlayer();

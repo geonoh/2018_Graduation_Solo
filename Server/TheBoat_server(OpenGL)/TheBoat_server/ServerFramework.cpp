@@ -788,16 +788,35 @@ void ServerFramework::WorkerThread() {
 			}
 
 			for (int i = 0; i < MAX_PLAYER; ++i) {
-				if (m_Clients[i].hp <= 0.f) {
+				if (m_Clients[i].hp <= 0.f && m_bDieSender[i] == false) {
 					//printf("%d 플레이어 Die\n",i);
 					SC_PACKET_DIE packets;
 					packets.size = sizeof(SC_PACKET_DIE);
 					packets.type = SC_PLAYER_DIE;
 					packets.m_cDiePlayer = i;
+
+					// 죽은 플레이어가 아이템을 가지고 있으면 해당위치에 Drop
+					for (int j = 0; j < 4; ++j) {
+						// 만약 가지고 있다면 
+						if (m_Clients[i].m_bPlayerBoatParts[j] == true) {
+							m_itemBoat[j].m_bUse = true;
+							m_itemBoat[j].x = m_Clients[i].x;
+							m_itemBoat[j].y = m_Clients[i].y;
+							m_itemBoat[j].z = m_Clients[i].z;
+							m_Clients[i].m_bPlayerBoatParts[j] = false;
+							packets.m_bBoatItem[j] = true;
+							printf("죽고 %d 아이템 드랍\n", j);
+						}
+						//
+					}
+
+					packets.m_fDiePosX = m_Clients[i].x;
+					packets.m_fDiePosY = m_Clients[i].y;
+					packets.m_fDiePosZ = m_Clients[i].z;
 					for (int j = 0; j < MAX_PLAYER; ++j) {
 						SendPacket(j, &packets);
 					}
-
+					m_bDieSender[i] = true;
 				}
 				else {
 					// 플레이어가 살아있으면 Stamina 회복해줌.
@@ -1733,7 +1752,7 @@ void ServerFramework::WorkerThread() {
 			for (int i = 0; i < MAX_PLAYER; ++i) {
 				if (m_Clients[i].in_use) {
 					for (int j = 0; j < 4; ++j) {
-						if (m_itemBoat[j].m_bUse) {
+						if (m_itemBoat[j].m_bUse && m_Clients[i].hp > 0.f) {
 							float fDist =
 								(m_itemBoat[j].x - m_Clients[i].x)*(m_itemBoat[j].x - m_Clients[i].x) +
 								(m_itemBoat[j].y - m_Clients[i].y)*(m_itemBoat[j].y - m_Clients[i].y) +
@@ -1862,59 +1881,6 @@ void ServerFramework::WorkerThread() {
 
 
 
-			//for (int i = 0; i < MAX_PLAYER - 1; ++i) {
-			//	m_mutexBulletLock[i].lock();
-			//	m_mutexBulletLock[i + 1].lock();
-			//	for (int j = 1; j <= MAX_AMMO; ++j) {
-			//		if (m_Clients[i].in_use && bullets[i + 1][j].in_use) {
-			//			float fDist =
-			//				(bullets[i + 1][j].x - m_Clients[i].x)*(bullets[i + 1][j].x - m_Clients[i].x) +
-			//				(bullets[i + 1][j].y - m_Clients[i].y)*(bullets[i + 1][j].y - m_Clients[i].y) +
-			//				(bullets[i + 1][j].z - m_Clients[i].z)*(bullets[i + 1][j].z - m_Clients[i].z);
-			//			float fDistOrigin = (RAD_PLAYER + RAD_BULLET) * (RAD_PLAYER + RAD_BULLET);
-			//			// 충돌
-			//			if (fDist < fDistOrigin) {
-			//				SC_PACKET_HIT packets;
-			//				packets.size = sizeof(SC_PACKET_HIT);
-			//				packets.type = SC_HIT;
-			//				m_Clients[i].hp -= 10.f;
-			//				packets.m_fHp = m_Clients[i].hp;
-			//				packets.m_cBulletNumber = j;
-			//				packets.m_cShooterID = i + 1;
-			//				packets.m_cHitID = i;
-			//				printf("%d플레이어와 %d플레이어의 총알 충돌\n", i, i + 1);
-			//				printf("후 HP : %f\n", packets.m_fHp);
-			//				SendPacket(i, &packets);
-			//				bullets[i + 1][j].in_use = false;
-			//			}
-			//		}
-			//		if (m_Clients[i + 1].in_use && bullets[i][j].in_use) {
-			//			float fDist =
-			//				(bullets[i][j].x - m_Clients[i + 1].x)*(bullets[i][j].x - m_Clients[i + 1].x) +
-			//				(bullets[i][j].y - m_Clients[i + 1].y)*(bullets[i][j].y - m_Clients[i + 1].y) +
-			//				(bullets[i][j].z - m_Clients[i + 1].z)*(bullets[i][j].z - m_Clients[i + 1].z);
-			//			float fDistOrigin = (RAD_PLAYER + RAD_ITEM) * (RAD_PLAYER + RAD_ITEM);
-			//			// 충돌
-			//			if (fDist < fDistOrigin) {
-			//				SC_PACKET_HIT packets;
-			//				packets.size = sizeof(SC_PACKET_HIT);
-			//				packets.type = SC_HIT;
-			//				m_Clients[i + 1].hp -= 10.f;
-			//				packets.m_fHp = m_Clients[i + 1].hp;
-			//				packets.m_cBulletNumber = j;
-			//				packets.m_cShooterID = i;
-			//				packets.m_cHitID = i + 1;
-			//				printf("%d플레이어와 %d플레이어의 총알 충돌\n", i + 1, i);
-			//				printf("후 HP : %f\n", packets.m_fHp);
-			//				SendPacket(i + 1, &packets);
-			//				bullets[i][j].in_use = false;
-			//			}
-			//		}
-			//	}
-			//	m_mutexBulletLock[i].unlock();
-			//	m_mutexBulletLock[i + 1].unlock();
-			//}
-
 			// 지면과 충돌
 			for (int i = 0; i < MAX_PLAYER; ++i) {
 				m_mutexBulletLock[i].lock();
@@ -1922,9 +1888,9 @@ void ServerFramework::WorkerThread() {
 					if (bullets[i][j].in_use) {
 						if (bullets[i][j].y < height_map->GetHeight(bullets[i][j].x + DX12_TO_OPGL, bullets[i][j].z + DX12_TO_OPGL)) {
 							if (m_Clients[i].in_use) {
-								SC_PACKET_COLLSION_TB packets;
-								packets.size = sizeof(SC_PACKET_COLLSION_TB);
-								packets.type = SC_COLLSION_TB;
+								SC_PACKET_COLLISION_TB packets;
+								packets.size = sizeof(SC_PACKET_COLLISION_TB);
+								packets.type = SC_COLLISION_TB;
 								packets.m_cBulletID = j;
 								packets.m_cPlayerID = i;
 								bullets[i][j].in_use = false;

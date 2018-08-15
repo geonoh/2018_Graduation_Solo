@@ -194,8 +194,8 @@ void ServerMgr::ProcessPacket(char* ptr) {
 		m_Bullets[clients_id][packets->bullet_id].in_use = packets->m_bInUse;
 		break;
 	}
-	case SC_COLLSION_TB: {
-		SC_PACKET_COLLSION_TB* packets = reinterpret_cast<SC_PACKET_COLLSION_TB*>(ptr);
+	case SC_COLLISION_TB: {
+		SC_PACKET_COLLISION_TB* packets = reinterpret_cast<SC_PACKET_COLLISION_TB*>(ptr);
 		m_Bullets[packets->m_cPlayerID][packets->m_cBulletID].in_use = false;
 		break;
 	}
@@ -306,18 +306,41 @@ void ServerMgr::ProcessPacket(char* ptr) {
 	}
 	case SC_PLAYER_GET_ITEM: {
 		SC_PACKET_GET_ITEM * packets = reinterpret_cast<SC_PACKET_GET_ITEM*>(ptr);
+		// 보트 관련 부품 
 		if (packets->m_cItemType < 4) {
 			if (packets->m_cGetterID == camera_id) {
 				m_bPlayerBoatParts[packets->m_cItemType] = true;
 			}
 			m_itemBoat[packets->m_cItemType].m_bUse = false;
 		}
+		// Ammo 부품
 		else if (packets->m_cItemType == 4) {
 			if (packets->m_cGetterID == camera_id) {
 				m_TotalAmmo = 90;
 			}
 			m_itemAmmo[packets->m_cAmmoItemID].m_bUse = false;
 			printf("%d 아이템 use false로 바꿨다. 분명\n", packets->m_cAmmoItemID);
+		}
+		break;
+	} 
+	case SC_PLAYER_DIE: {
+		SC_PACKET_DIE * packets = reinterpret_cast<SC_PACKET_DIE*>(ptr);
+		m_bPlayerDie[packets->m_cDiePlayer] = true;
+		for (int i = 0; i < 4; ++i) {
+			if (packets->m_bBoatItem[i]) {
+				m_itemBoat[i].x = packets->m_fDiePosX;
+				m_itemBoat[i].y = packets->m_fDiePosY;
+				m_itemBoat[i].z = packets->m_fDiePosZ;
+				m_itemBoat[i].m_bUse = packets->m_bBoatItem[i];
+				printf("%d 아이템만 하라고 했다\n", i);
+			}
+		}
+		// 만약 죽은 플레이어가 실제 클라이언트의 플레이어와 동일하면
+		// 가지고 있는 아이템들을 모두 없다고 표시 해야한다. 
+		if (camera_id == packets->m_cDiePlayer) {
+			for (int i = 0; i < 4; ++i) {
+				m_bPlayerBoatParts[i] = false;
+			}
 		}
 		break;
 	}
@@ -331,11 +354,6 @@ void ServerMgr::ProcessPacket(char* ptr) {
 		m_Bullets[packets->m_cShooterID][packets->m_cBulletNumber].in_use = false;
 		client_hp[packets->m_cHitID] = packets->m_fHp;
 		printf("SC_HIT, 때린이 %d 맞은이 %d \n", packets->m_cShooterID, packets->m_cHitID);
-		break;
-	}
-	case SC_PLAYER_DIE: {
-		SC_PACKET_DIE * packets = reinterpret_cast<SC_PACKET_DIE*>(ptr);
-		m_bPlayerDie[packets->m_cDiePlayer] = true;
 		break;
 	}
 	case SC_RESULT: {

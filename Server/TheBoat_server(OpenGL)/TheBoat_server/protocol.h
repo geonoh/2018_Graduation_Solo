@@ -61,7 +61,7 @@
 #define SC_COLLSION_PB			6	// Collsion Player to Bullet
 #define SC_COLLSION_BDP			7	// Building to Player
 #define SC_COLLSION_BB			8	// Bullet Building
-#define SC_COLLSION_TB			9	// Terrain Bullet
+#define SC_COLLISION_TB			9	// Terrain Bullet
 #define SC_ITEM_GEN				10	// Actually Item gen packet
 #define SC_BUILDING_GEN			11
 #define SC_GAME_START			12
@@ -227,6 +227,10 @@ struct SC_PACKET_DIE {
 	BYTE size;
 	BYTE type;
 	char m_cDiePlayer;
+	float m_fDiePosX;
+	float m_fDiePosY;
+	float m_fDiePosZ;
+	bool m_bBoatItem[4] = { false };
 };
 
 
@@ -281,7 +285,7 @@ struct SC_PACKET_POS {
 	float m_fStamina;
 };
 
-struct SC_PACKET_COLLSION_TB {
+struct SC_PACKET_COLLISION_TB {
 	BYTE size;
 	BYTE type;
 	char m_cBulletID;
