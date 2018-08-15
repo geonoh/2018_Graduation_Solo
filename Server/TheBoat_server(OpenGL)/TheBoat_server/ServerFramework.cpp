@@ -525,6 +525,8 @@ void ServerFramework::ProcessPacket(int cl_id, char* packet) {
 			m_Clients[i].m_TotalAmmo = 90;
 			m_Clients[i].is_ready = false;
 			m_Clients[i].team = e_NoTeam;
+			m_bWhoDie[i] = false;
+			m_bDieSender[i] = false;
 			for (int j = 0; j < 4; ++j) {
 				m_Clients[i].m_bPlayerBoatParts[j] = false;
 			}
@@ -567,7 +569,7 @@ void ServerFramework::ProcessPacket(int cl_id, char* packet) {
 				SC_PACKET_RESULT packets;
 				packets.size = sizeof(SC_PACKET_RESULT);
 				packets.type = SC_RESULT;
-				packets.m_cVictoryTeam = 4;
+				packets.m_cVictoryTeam = 5;
 				for (int k = 0; k < MAX_PLAYER; ++k) {
 					SendPacket(k, &packets);
 				}
@@ -580,7 +582,7 @@ void ServerFramework::ProcessPacket(int cl_id, char* packet) {
 				SC_PACKET_RESULT packets;
 				packets.size = sizeof(SC_PACKET_RESULT);
 				packets.type = SC_RESULT;
-				packets.m_cVictoryTeam = 5;
+				packets.m_cVictoryTeam = 6;
 				for (int k = 0; k < MAX_PLAYER; ++k) {
 					SendPacket(k, &packets);
 				}
@@ -598,12 +600,12 @@ void ServerFramework::ProcessPacket(int cl_id, char* packet) {
 				}
 
 				if (iPlayerCounter[i] == 4) {
-					printf("%d 플레이어 승리\n", i);
+					printf("%d 플레이어 승리\n", i + 1);
 					//m_bGameStart = false;
 					SC_PACKET_RESULT packets;
 					packets.size = sizeof(SC_PACKET_RESULT);
 					packets.type = SC_RESULT;
-					packets.m_cVictoryTeam = i;
+					packets.m_cVictoryTeam = i + 1;
 					for (int k = 0; k < MAX_PLAYER; ++k) {
 						SendPacket(k, &packets);
 					}
@@ -735,7 +737,7 @@ void ServerFramework::WorkerThread() {
 					for (int j = 0; j < MAX_PLAYER; ++j) {
 						// 체력이 양수인 플레이어가 최종 생존자라는 뜻
 						if (m_Clients[j].hp > 0.f) {
-							printf("%d Player Win\n", j);
+							printf("%d Player Win\n", j + 1);
 							SC_PACKET_RESULT packets;
 							packets.size = sizeof(SC_PACKET_RESULT);
 							packets.type = SC_RESULT;
@@ -784,7 +786,6 @@ void ServerFramework::WorkerThread() {
 						SendPacket(k, &packets);
 					}
 				}
-
 			}
 
 			for (int i = 0; i < MAX_PLAYER; ++i) {

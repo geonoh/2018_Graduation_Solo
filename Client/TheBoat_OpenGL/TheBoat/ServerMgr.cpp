@@ -358,11 +358,12 @@ void ServerMgr::ProcessPacket(char* ptr) {
 	}
 	case SC_RESULT: {
 		SC_PACKET_RESULT * packets = reinterpret_cast<SC_PACKET_RESULT*>(ptr);
-		m_cResult = packets->m_cVictoryTeam + 1;
+		m_cResult = packets->m_cVictoryTeam;
 		m_bGameStart = false;
 		break;
 	}
 	case SC_ENTER_LOBBY: {
+		printf("로비 진입(재시작 확인용)\n");
 		m_cResult = 0;
 		m_bWeather = false;
 		m_bGameStart = false;
