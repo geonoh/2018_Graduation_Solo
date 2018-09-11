@@ -422,7 +422,7 @@ void Renderer::Initialize(int windowSizeX, int windowSizeY)
 	InitializeParticle();
 
 	m_Initialized = true;
-}
+} 
 
 void Renderer::DrawLobby(int i_iTextureId, float i_fStartPosx, float i_fStartPosY, float i_fScaleX, float i_fScaleY) {
 	GLuint shader = m_Shader_Test1;
@@ -2366,7 +2366,7 @@ void Renderer::DrawCube(int iTextureID, float x, float y, float z, float rot_x, 
 
 	glm::vec3 v3RotationX(rot_x, 0.f, 0.f);
 	glm::vec3 v3RotationZ(0.f, 0.f, rot_z);
-	float fCosBetweenXZ = glm::dot(v3RotationX, v3RotationZ) / (rot_x*rot_z);
+	//float fCosBetweenXZ = glm::dot(v3RotationX, v3RotationZ) / (rot_x*rot_z);
 	float fAngleY;
 
 	GLuint shader = m_Shader_Proj;
@@ -2427,15 +2427,23 @@ void Renderer::DrawCube(int iTextureID, float x, float y, float z, float rot_x, 
 	//glm::mat4 m4ModelPosition = glm::translate(glm::mat4(1.f), glm::vec3(x, y, z)) * glm::eulerAngleXYZ(rot_x, rot_y, rot_z) *
 	//	glm::scale(glm::mat4(1.f), glm::vec3(10.f, 16.f, 10.f));
 	//glm::mat4 m4Rot = glm::eulerAngleXYZ(rot_x, rot_y, rot_z);
-
-	glm::mat4 m4ModelPosition = glm::translate(glm::mat4(1.f), glm::vec3(x, y, z)) * glm::eulerAngleXYZ(0.f, rot_x, 0.f) *
+	glm::vec3 v3Standard{ 1.f,0.f,0.f };
+	glm::vec3 v3Calculate{ rot_x,0.f,rot_z };
+	float fCosValue = glm::dot(v3Standard, v3Calculate) / sqrt((rot_x * rot_x) + (rot_z * rot_z));
+	//float fFinalAngleY = (2 * acos(fCosValue) - 180.f) / (180.f * 3.141592);
+	//float fFinalAngleY = (acos(fCosValue) * 2) - 3.141592f;
+	if (fCosValue < 0.f) {
+		fCosValue += 1.f;
+	}
+	float fFinalAngleY = (acos(fCosValue) * 2);
+	glm::mat4 m4ModelPosition = glm::translate(glm::mat4(1.f), glm::vec3(x, y, z)) * glm::eulerAngleXYZ(0.f, fFinalAngleY, 0.f) *
 		glm::scale(glm::mat4(1.f), glm::vec3(10.f, 16.f, 10.f));
-	glm::mat4 m4Rot = glm::eulerAngleXYZ(0.f, rot_x, 0.f);
-
+	glm::mat4 m4Rot = glm::eulerAngleXYZ(0.f, fFinalAngleY, 0.f);
+	
 
 	m4ModelPosition *= m_m4Model;
 	//m_m4ModelTranslation
-	glUniformMatrix4fv(projView, 1, GL_FALSE, &m_m4ProjView[0][0]);
+	glUniformMatrix4fv(projView, 1, GL_FALSE, &m_m4ProjView[0][0]); 
 	glUniformMatrix4fv(model, 1, GL_FALSE, &m4ModelPosition[0][0]);
 	glUniformMatrix4fv(rotation, 1, GL_FALSE, &m4Rot[0][0]);
 	glUniform3f(light, 2, 0, 0);

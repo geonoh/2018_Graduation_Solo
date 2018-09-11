@@ -141,7 +141,7 @@ void ServerMgr::ProcessPacket(char* ptr) {
 		sc_vec_buff[packets->id].pos.z = packets->z;
 		client_hp[packets->id] = packets->hp;
 		m_fStamina[clients_id] = packets->m_fStamina;
-		printf("[SC_ENTER_PLAYER] : %d 플레이어 입장\n", packets->id);
+		//printf("[SC_ENTER_PLAYER] : %d 플레이어 입장\n", packets->id);
 
 		break;
 	}
@@ -205,17 +205,13 @@ void ServerMgr::ProcessPacket(char* ptr) {
 		item_pos.x = packets->x;
 		item_pos.y = packets->y;
 		item_pos.z = packets->z;
-		printf("아템 생성\n");
 		is_item_gen = true;
 		break;
 	}
 	case SC_FULLY_AMMO: {
-
 		SC_PACKET_AMMO_O* packets = reinterpret_cast<SC_PACKET_AMMO_O*>(ptr);
 		m_CurrentAmmo = packets->ammo;
 		m_TotalAmmo = packets->m_cTotalAmmo;
-
-		printf("재장전 완료\n");
 		break;
 	}
 	case SC_AMMO: {
@@ -225,14 +221,12 @@ void ServerMgr::ProcessPacket(char* ptr) {
 		break;
 	}
 	case SC_OUT_OF_AMMO: {
-		printf("총알 다씀\n");
 		m_bNeedReloading = true;
 		break;
 	}
 	case SC_WORLD_TIME: {
 		SC_PACKET_TIME* packets = reinterpret_cast<SC_PACKET_TIME*>(ptr);
 		m_fWorldTime = packets->world_time;
-		printf("시간은 : %f\n", m_fWorldTime);
 		break;
 	}
 	case SC_PLAYER_READY: {
@@ -267,7 +261,7 @@ void ServerMgr::ProcessPacket(char* ptr) {
 		SC_PACKET_START* packets = reinterpret_cast<SC_PACKET_START*>(ptr);
 		for (int i = 0; i < MAX_PLAYER; ++i) {
 			m_TeamPlayer[i] = packets->m_bPlayerTeam[i];
-			printf("%dPlayer Team : %d\n", i, m_TeamPlayer[i]);
+			//printf("%dPlayer Team : %d\n", i, m_TeamPlayer[i]);
 		}
 		m_bGameStart = true;
 		m_cResult = 0;
@@ -282,16 +276,16 @@ void ServerMgr::ProcessPacket(char* ptr) {
 		m_itemBoat[iItemType].y = packets->y;
 		m_itemBoat[iItemType].z = packets->z;
 
-		printf("아이템 도착 Type %d, [%f, %f, %f] \n", iItemType,
-			m_itemBoat[iItemType].x,
-			m_itemBoat[iItemType].y,
-			m_itemBoat[iItemType].z);
+		//printf("아이템 도착 Type %d, [%f, %f, %f] \n", iItemType,
+		//	m_itemBoat[iItemType].x,
+		//	m_itemBoat[iItemType].y,
+		//	m_itemBoat[iItemType].z);
 		m_bToxic[iItemType] = true;
 		break;
 	}
 	case SC_PLAYER_HP_UPDATE: {
 		SC_PACKET_PLAYER_HP_UPDATE * packets = reinterpret_cast<SC_PACKET_PLAYER_HP_UPDATE*>(ptr);
-		printf("%d Player HP : %d \n", packets->m_cPlayerID, packets->m_fHp);
+		//printf("%d Player HP : %d \n", packets->m_cPlayerID, packets->m_fHp);
 		client_hp[packets->m_cPlayerID] = packets->m_fHp;
 		break;
 	}
@@ -319,7 +313,7 @@ void ServerMgr::ProcessPacket(char* ptr) {
 				m_TotalAmmo = 90;
 			}
 			m_itemAmmo[packets->m_cAmmoItemID].m_bUse = false;
-			printf("%d 아이템 use false로 바꿨다. 분명\n", packets->m_cAmmoItemID);
+			//printf("%d 아이템 use false로 바꿨다. 분명\n", packets->m_cAmmoItemID);
 		}
 		break;
 	} 
@@ -332,7 +326,7 @@ void ServerMgr::ProcessPacket(char* ptr) {
 				m_itemBoat[i].y = packets->m_fDiePosY;
 				m_itemBoat[i].z = packets->m_fDiePosZ;
 				m_itemBoat[i].m_bUse = packets->m_bBoatItem[i];
-				printf("%d 아이템만 하라고 했다\n", i);
+				//printf("%d 아이템만 하라고 했다\n", i);
 			}
 		}
 		// 만약 죽은 플레이어가 실제 클라이언트의 플레이어와 동일하면
@@ -353,7 +347,7 @@ void ServerMgr::ProcessPacket(char* ptr) {
 		SC_PACKET_HIT * packets = reinterpret_cast<SC_PACKET_HIT*>(ptr);
 		m_Bullets[packets->m_cShooterID][packets->m_cBulletNumber].in_use = false;
 		client_hp[packets->m_cHitID] = packets->m_fHp;
-		printf("SC_HIT, 때린이 %d 맞은이 %d \n", packets->m_cShooterID, packets->m_cHitID);
+		//printf("SC_HIT, 때린이 %d 맞은이 %d \n", packets->m_cShooterID, packets->m_cHitID);
 		break;
 	}
 	case SC_RESULT: {
@@ -363,7 +357,7 @@ void ServerMgr::ProcessPacket(char* ptr) {
 		break;
 	}
 	case SC_ENTER_LOBBY: {
-		printf("로비 진입(재시작 확인용)\n");
+		//printf("로비 진입(재시작 확인용)\n");
 		m_cResult = 0;
 		m_bWeather = false;
 		m_bGameStart = false;

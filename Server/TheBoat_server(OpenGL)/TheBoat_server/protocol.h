@@ -193,12 +193,6 @@ enum GameMode {
 enum Team {
 	e_NoTeam, e_TeamRed, e_TeamBlue
 };
-enum ARWeapons {
-	NON_AR = 0
-};
-enum SubWeapons {
-	NON_SUB = 0
-};
 
 // 서버->클라
 struct SC_PACKET_STAMINA {
@@ -274,7 +268,7 @@ struct SC_PACKET_LOOCVEC {
 	BYTE size;
 	BYTE type;
 	WORD id;
-	glm::vec3 look_vec;
+	glm::vec3 m_v3LookVec;
 };
 
 struct SC_PACKET_POS {
@@ -382,9 +376,9 @@ struct CS_PACKET_BIGGEST {
 struct CS_PACKET_KEYUP {
 	BYTE size;
 	BYTE type;
-	//DirectX::XMFLOAT3 look_vec;
-	//glm::vec3 look_vec;
-	glm::vec3 look_vec;
+	//DirectX::XMFLOAT3 m_v3LookVec;
+	//glm::vec3 m_v3LookVec;
+	glm::vec3 m_v3LookVec;
 };
 struct CS_PACKET_g_bKeyDown {
 	BYTE size;

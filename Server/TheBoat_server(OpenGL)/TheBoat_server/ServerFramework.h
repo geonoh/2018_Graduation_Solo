@@ -2,20 +2,6 @@
 
 class CHeightMapImage;
 
-//struct Event {
-//	int id;
-//	int type;
-//	float time;
-//	int target;
-//};
-//
-//class Comp {
-//public:
-//	bool operator() (const Event& left, const Event& right) {
-//		return (left.time > right.time);
-//	}
-//};
-
 class ServerFramework
 {
 	WSADATA wsa;
@@ -61,14 +47,6 @@ class ServerFramework
 	//mutex bullet_lock;
 
 	mutex m_mutexBoatItem;
-	// 플레이어별 몇 번째 총알까지 발사했는지 저장하는 변수
-	//int bullet_counter[4] = { 0 };
-
-
-	// Building obejct는 총 10개
-	//Object* object_mother;
-	//Building* building[OBJECT_BUILDING];
-	//Item* items[12];
 	Item m_itemBoat[4];
 	Item m_itemAmmo[8];
 	bool m_BoatGenedMap[4]{ false };
@@ -78,8 +56,6 @@ class ServerFramework
 	// False = Team
 	// True = Melee
 	bool m_bGameMode = false;
-	//int iAliveCounterRed = MAX_PLAYER / 2;
-	//int iAliveCounterBlue = MAX_PLAYER / 2;
 	bool m_bWhoDie[MAX_PLAYER] = { false };
 	bool m_bDieSender[MAX_PLAYER] = { false };
 
