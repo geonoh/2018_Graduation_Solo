@@ -10,54 +10,43 @@ class ServerFramework
 	SOCKADDR_IN server_addr;
 
 
-	Client m_Clients[MAX_PLAYER];
+	Client clients[MAX_PLAYER];
 	CHeightMapImage* height_map;
 	time_point<system_clock> prev_time = system_clock::now();
 	float sender_time = 0;
 
-	float m_fBoatGenTime = 0.f;
-	float m_fAmmoGenTime = 0.f;
-	float m_fTimeSend = 0.f;
+	float time_boat = 0.f;
+	float time_ammo = 0.f;
+	float time_send = 0.f;
 
-	// 이거 False로 바꿔야함
-	bool m_bIsBoatGen = false;	//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-								//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+	bool is_boat_item_gen = false;	
 
-	bool m_bIsAmmoGen = false;
-	bool m_bGameStart = false;
+	bool ammo_gen = false;
+	bool game_start = false;
 
-	bool m_bShootStart = false;
+	bool is_shoot_start = false;
 
-	//float m_fStartGameTime = 0.f;
-	mutex m_mutexBulletLock[MAX_PLAYER];
-	mutex m_mutexAmmoLock[MAX_PLAYER];
-	mutex m_mutexServerLock;
+	mutex lock_bullet[MAX_PLAYER];
+	mutex lock_ammo[MAX_PLAYER];
+	mutex lock_server;
 
-	// Timer전용 OverlappedExtensionSetd
-	// 4는 플레이어 위치 업데이트 전용
-	// 5는 충돌체크전용
-	// 6은 플레이어 총알 생성
-	// 7은 총알 업데이트
-	// 8은 아이템 생성 - 보트 아이템 
-	// 9는 World_Time 전송
-	// 10은 아이템 생성 - Ammo
 	OverlappedExtensionSet ol_ex[20];
 
 	Bullet bullets[4][MAX_AMMO + 1] = { 0 };
-	//mutex bullet_lock;
 
-	mutex m_mutexBoatItem;
-	Item m_itemBoat[4];
-	Item m_itemAmmo[8];
-	bool m_BoatGenedMap[4]{ false };
-	int m_iDiceCounter = 0;
-	int m_iDiceMapCounter = 0;
-	float m_fPlayerHpUpdateTime = 0.f;
-	// False = Team
-	// True = Melee
-	bool m_bGameMode = false;
-	bool m_bWhoDie[MAX_PLAYER] = { false };
-	bool m_bDieSender[MAX_PLAYER] = { false };
+	mutex lock_boat_item;
+	Item item_boat[4];
+	Item item_ammo[8];
+	bool map_boat_gen[4]{ false };
+	int count_dice = 0;
+	int count_map_dice = 0;
+	float time_player_hp_update = 0.f;
+	/*
+	False = Team
+	True = Melee
+	*/
+	bool game_mode = false;
+	bool is_die_sended[MAX_PLAYER] = { false };
 
 public:
 	void InitServer();

@@ -38,7 +38,7 @@
 #define DX12_TO_OPGL			256.f
 
 // Boat 아이템 생성 시간.
-#define ITEM_BOAT_GEN_TIME			120.f
+#define ITEM_time_boat			120.f
 #define ITEM_AMMO_GEN_TIME			30.f
 #define PLAYER_HP_UPDATE_TIME		1.f
 
@@ -75,7 +75,7 @@
 #define SC_MODE_MELEE			20
 #define SC_TEAM_RED				21
 #define SC_TEAM_BLUE			22
-#define SC_BOAT_ITEM_GEN		23
+#define SC_is_boat_item_gen		23
 #define SC_PLAYER_HP_UPDATE		34
 #define SC_PLAYER_GET_ITEM		35
 #define SC_WEATHER_CHANGE		36
@@ -95,7 +95,7 @@
 #define EVT_PLAYER_POS_SEND		27	//
 #define EVT_BULLET_GENERATE		28	//
 #define EVT_BULLET_UPDATE		29	//
-#define EVT_BOAT_ITEM_GEN		30	//
+#define EVT_is_boat_item_gen		30	//
 #define EVT_SEND_TIME			31	//
 #define EVT_AMMO_ITEM_GEN		32	//
 #define EVT_PLAYER_HP_UPDATE	33
@@ -198,8 +198,8 @@ enum Team {
 struct SC_PACKET_STAMINA {
 	BYTE size;
 	BYTE type;
-	float m_fStamina;
-	char m_cID;
+	float stamina;
+	char id;
 };
 
 
@@ -220,10 +220,10 @@ struct SC_PACKET_RESULT {
 struct SC_PACKET_DIE {
 	BYTE size;
 	BYTE type;
-	char m_cDiePlayer;
-	float m_fDiePosX;
-	float m_fDiePosY;
-	float m_fDiePosZ;
+	char who_die;
+	float die_pos_x;
+	float die_pos_y;
+	float die_pos_z;
 	bool m_bBoatItem[4] = { false };
 };
 
@@ -231,7 +231,7 @@ struct SC_PACKET_DIE {
 struct SC_PACKET_HIT {
 	BYTE size;
 	BYTE type;
-	float m_fHp;
+	float hp;
 	char m_cShooterID;
 	char m_cBulletNumber;
 	char m_cHitID;
@@ -259,16 +259,16 @@ struct SC_PACKET_ENTER_PLAYER {
 	float x, y, z;
 	float hp;
 	float size_x, size_y, size_z;
-	int m_CurrentAmmo;
-	int m_TotalAmmo;
-	float m_fStamina;
+	int ammo_current;
+	int ammo_total;
+	float stamina;
 };
 
 struct SC_PACKET_LOOCVEC {
 	BYTE size;
 	BYTE type;
 	WORD id;
-	glm::vec3 m_v3LookVec;
+	glm::vec3 look_vector;
 };
 
 struct SC_PACKET_POS {
@@ -276,7 +276,7 @@ struct SC_PACKET_POS {
 	BYTE type;
 	WORD id;
 	float x, y, z;
-	float m_fStamina;
+	float stamina;
 };
 
 struct SC_PACKET_COLLISION_TB {
@@ -336,8 +336,8 @@ struct SC_PACKET_AMMO_O {
 struct SC_PACKET_AMMO {
 	BYTE size;
 	BYTE type;
-	char m_CurrentAmmo;
-	char m_TotalAmmo;
+	char ammo_current;
+	char ammo_total;
 };
 
 struct SC_PACKET_TIME {
@@ -357,7 +357,7 @@ struct SC_PACKET_PLAYER_HP_UPDATE {
 	BYTE size;
 	BYTE type;
 	char m_cPlayerID;
-	float m_fHp;
+	float hp;
 };
 
 // 클라->서버
@@ -376,9 +376,9 @@ struct CS_PACKET_BIGGEST {
 struct CS_PACKET_KEYUP {
 	BYTE size;
 	BYTE type;
-	//DirectX::XMFLOAT3 m_v3LookVec;
-	//glm::vec3 m_v3LookVec;
-	glm::vec3 m_v3LookVec;
+	//DirectX::XMFLOAT3 look_vector;
+	//glm::vec3 look_vector;
+	glm::vec3 look_vector;
 };
 struct CS_PACKET_g_bKeyDown {
 	BYTE size;
@@ -432,7 +432,7 @@ struct CS_PACKET_MODE_SELECT {
 struct CS_PACKET_TEAM_SELECT {
 	BYTE size;
 	BYTE type;
-	BYTE m_cID;
+	BYTE id;
 };
 
 struct CS_PACKET_LOOK_VECTOR {

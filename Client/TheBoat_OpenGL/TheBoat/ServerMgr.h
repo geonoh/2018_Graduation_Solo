@@ -28,12 +28,12 @@ class ServerMgr
 	DWORD saved_packet_size = 0;
 
 	SPlayer sc_vec_buff[4];
-	glm::vec3 m_v3PlayerLookVector[MAX_PLAYER];
+	
 
 	glm::vec3 collision_pos;
 	int camera_id = 0;
 	string server_ip;
-
+	glm::vec3 m_v3PlayerLookVector[MAX_PLAYER];
 	// 아이템 생성 부분
 	glm::vec3 item_pos;
 	bool is_item_gen;

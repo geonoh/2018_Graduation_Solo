@@ -181,7 +181,7 @@ void ServerMgr::ProcessPacket(char* ptr) {
 	case SC_PLAYER_LOOKVEC: {
 		SC_PACKET_LOOCVEC* packets = reinterpret_cast<SC_PACKET_LOOCVEC*>(ptr);
 		clients_id = packets->id;
-		m_v3PlayerLookVector[clients_id] = packets->look_vec;
+		m_v3PlayerLookVector[clients_id] = packets->m_v3LookVec;
 		break;
 	}
 	case SC_BULLET_POS: {
@@ -637,22 +637,22 @@ void ServerMgr::SendPacket(int type, glm::vec3 v3LookVec) {
 	switch (type) {
 	case CS_KEY_PRESS_UP:
 		packet_buffer->type = CS_KEY_PRESS_UP;
-		packet_buffer->look_vec = v3LookVec;
+		packet_buffer->m_v3LookVec = v3LookVec;
 		retval = WSASend(sock, &send_wsabuf, 1, &iobytes, 0, NULL, NULL);
 		break;
 	case CS_KEY_PRESS_DOWN:
 		packet_buffer->type = CS_KEY_PRESS_DOWN;
-		packet_buffer->look_vec = v3LookVec;
+		packet_buffer->m_v3LookVec = v3LookVec;
 		retval = WSASend(sock, &send_wsabuf, 1, &iobytes, 0, NULL, NULL);
 		break;
 	case CS_KEY_PRESS_RIGHT:
 		packet_buffer->type = CS_KEY_PRESS_RIGHT;
-		packet_buffer->look_vec = v3LookVec;
+		packet_buffer->m_v3LookVec = v3LookVec;
 		retval = WSASend(sock, &send_wsabuf, 1, &iobytes, 0, NULL, NULL);
 		break;
 	case CS_KEY_PRESS_LEFT:
 		packet_buffer->type = CS_KEY_PRESS_LEFT;
-		packet_buffer->look_vec = v3LookVec;
+		packet_buffer->m_v3LookVec = v3LookVec;
 		retval = WSASend(sock, &send_wsabuf, 1, &iobytes, 0, NULL, NULL);
 		break;
 
@@ -676,22 +676,22 @@ void ServerMgr::SendPacket(int type, glm::vec3 v3LookVec) {
 
 	case CS_KEY_RELEASE_UP:
 		packet_buffer->type = CS_KEY_RELEASE_UP;
-		packet_buffer->look_vec = v3LookVec;
+		packet_buffer->m_v3LookVec = v3LookVec;
 		retval = WSASend(sock, &send_wsabuf, 1, &iobytes, 0, NULL, NULL);
 		break;
 	case CS_KEY_RELEASE_DOWN:
 		packet_buffer->type = CS_KEY_RELEASE_DOWN;
-		packet_buffer->look_vec = v3LookVec;
+		packet_buffer->m_v3LookVec = v3LookVec;
 		retval = WSASend(sock, &send_wsabuf, 1, &iobytes, 0, NULL, NULL);
 		break;
 	case CS_KEY_RELEASE_RIGHT:
 		packet_buffer->type = CS_KEY_RELEASE_RIGHT;
-		packet_buffer->look_vec = v3LookVec;
+		packet_buffer->m_v3LookVec = v3LookVec;
 		retval = WSASend(sock, &send_wsabuf, 1, &iobytes, 0, NULL, NULL);
 		break;
 	case CS_KEY_RELEASE_LEFT:
 		packet_buffer->type = CS_KEY_RELEASE_LEFT;
-		packet_buffer->look_vec = v3LookVec;
+		packet_buffer->m_v3LookVec = v3LookVec;
 		retval = WSASend(sock, &send_wsabuf, 1, &iobytes, 0, NULL, NULL);
 		break;
 
@@ -715,7 +715,7 @@ void ServerMgr::SendPacket(int type, glm::vec3 v3LookVec) {
 
 	case CS_LEFT_BUTTON_DOWN:
 		packet_buffer->type = CS_LEFT_BUTTON_DOWN;
-		packet_buffer->look_vec = v3LookVec;
+		packet_buffer->m_v3LookVec = v3LookVec;
 		retval = WSASend(sock, &send_wsabuf, 1, &iobytes, 0, NULL, NULL);
 		break;
 	case CS_RIGHT_BUTTON_DOWN:
@@ -735,7 +735,7 @@ void ServerMgr::SendPacket(int type, glm::vec3 v3LookVec) {
 	case CS_MOUSE_MOVE:
 		packet_buffer->type = CS_MOUSE_MOVE;
 		// 여기에 추가적으로 player의 look 벡터를 같이 해서 보내줘야한다.
-		packet_buffer->look_vec = v3LookVec;
+		packet_buffer->m_v3LookVec = v3LookVec;
 		retval = WSASend(sock, &send_wsabuf, 1, &iobytes, 0, NULL, NULL);
 	}
 	if (retval == 1) {
